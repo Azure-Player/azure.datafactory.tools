@@ -21,6 +21,8 @@ function Import-AdfFromFolder {
     Write-Host ("DataSets: {0} object(s) loaded." -f $adf.DataSets.Count)
     Import-AdfObjects -Adf $adf -All $adf.DataFlows -RootFolder $RootFolder -SubFolder "dataflow" -AzureType "Microsoft.DataFactory/factories/dataflows" | Out-Null
     Write-Host ("DataFlows: {0} object(s) loaded." -f $adf.DataFlows.Count)
+    Import-AdfObjects -Adf $adf -All $adf.Triggers -RootFolder $RootFolder -SubFolder "trigger" -AzureType "Microsoft.DataFactory/factories/triggers" | Out-Null
+    Write-Host ("Triggers: {0} object(s) loaded." -f $adf.Triggers.Count)
 
     Write-Debug "END: Import-AdfFromFolder()"
     return $adf

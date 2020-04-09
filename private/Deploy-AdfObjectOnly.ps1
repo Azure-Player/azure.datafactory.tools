@@ -58,6 +58,15 @@ function Deploy-AdfObjectOnly {
             -DefinitionFile $obj.FileName `
             -Force | Out-Null
         }
+        'Microsoft.DataFactory/factories/triggers'
+        {
+            Set-AzDataFactoryV2Trigger `
+            -ResourceGroupName $ResourceGroupName `
+            -DataFactoryName $DataFactoryName `
+            -Name $obj.Name `
+            -DefinitionFile $obj.FileName `
+            -Force | Out-Null
+        }
         default
         {
             Write-Error "Type $($obj.Type) is not supported."

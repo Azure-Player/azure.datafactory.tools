@@ -5,11 +5,12 @@ class Adf {
     [System.Collections.ArrayList] $LinkedServices = @{}
     [System.Collections.ArrayList] $DataSets = @{}
     [System.Collections.ArrayList] $DataFlows = @{}
+    [System.Collections.ArrayList] $Triggers = @{}
     [string] $Location = ""
 
     [System.Collections.ArrayList] AllObjects()
     {
-        return $this.LinkedServices + $this.Pipelines + $this.DataSets + $this.DataFlows
+        return $this.LinkedServices + $this.Pipelines + $this.DataSets + $this.DataFlows + $this.Triggers
     }
 }
 
