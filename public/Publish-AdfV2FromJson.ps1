@@ -8,8 +8,10 @@ function Publish-AdfV2FromJson {
         [parameter(Mandatory = $false)] [String] $Stage = $null
     )
 
+    $m = Get-Module -Name "azure.datafactory.tools"
+    $verStr = $m.Version.ToString(2) + "." + $m.Version.Build.ToString("000");
     Write-Host "===================================================================================";
-    Write-Host "### azure.datafactory.tools                                Version 0.2.000 ###";
+    Write-Host "### azure.datafactory.tools                                     Version $verStr ###";
     Write-Host "===================================================================================";
     Write-Host "Invoking Publish-AdfV2FromJson (https://github.com/KamilNowinski/DeployAdfFromJson)";
     Write-Host "with the following parameters:";
@@ -19,6 +21,8 @@ function Publish-AdfV2FromJson {
     Write-Host "DataFactoryName:    $DataFactoryName";
     Write-Host "Stage:              $stage";
     Write-Host "===================================================================================";
+
+    $script:StartTime = Get-Date
 
     # STEP 1: Create ADF if not exists
     Write-Host "STEP 1: Verifying whether ADF exists..."
@@ -50,7 +54,9 @@ function Publish-AdfV2FromJson {
         Deploy-AdfObject -obj $_
     }
 
+    $elapsedTime = new-timespan $script:StartTime $(get-date)
     Write-Host "==============================================================================";
     Write-Host "       Azure Data Factory files have been deployed successfully.";
+    Write-Host ([string]::Format("             Elapsed time: {0:d1}:{1:d2}:{2:d2}.{3:d3}", $elapsedTime.Hours, $elapsedTime.Minutes, $elapsedTime.Seconds, $elapsedTime.Milliseconds))
     Write-Host "==============================================================================";
 }
