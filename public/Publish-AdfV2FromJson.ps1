@@ -10,17 +10,17 @@ function Publish-AdfV2FromJson {
 
     $m = Get-Module -Name "azure.datafactory.tools"
     $verStr = $m.Version.ToString(2) + "." + $m.Version.Build.ToString("000");
-    Write-Host "===================================================================================";
+    Write-Host "======================================================================================";
     Write-Host "### azure.datafactory.tools                                     Version $verStr ###";
-    Write-Host "===================================================================================";
-    Write-Host "Invoking Publish-AdfV2FromJson (https://github.com/KamilNowinski/DeployAdfFromJson)";
+    Write-Host "======================================================================================";
+    Write-Host "Invoking Publish-AdfV2FromJson (https://github.com/SQLPlayer/azure.datafactory.tools)";
     Write-Host "with the following parameters:";
-    Write-Host "===================================================================================";
+    Write-Host "======================================================================================";
     Write-Host "RootFolder:         $RootFolder";
     Write-Host "ResourceGroupName:  $ResourceGroupName";
     Write-Host "DataFactoryName:    $DataFactoryName";
     Write-Host "Stage:              $stage";
-    Write-Host "===================================================================================";
+    Write-Host "======================================================================================";
 
     $script:StartTime = Get-Date
 
