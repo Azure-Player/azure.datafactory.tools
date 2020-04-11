@@ -26,6 +26,7 @@ function Import-AdfObjects {
         $o.Name = $_.BaseName
         $o.Type = $AzureType   #$json.type
         $o.FileName = $_.FullName
+        $o.Body = $txt | ConvertFrom-Json
         $m = [regex]::matches($txt,'"referenceName": ?"(?<v>.+?)"')
         $m | ForEach-Object {
             $o.DependsOn.Add($_.Groups['v'].Value)

@@ -21,5 +21,5 @@ class AdfObject {
     [System.Collections.ArrayList] $DependsOn = @{}
     [Boolean] $Deployed = $false
     [Adf] $Adf
+    [PSCustomObject] $Body
 }
-
