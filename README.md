@@ -9,9 +9,9 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
 * Deployment of all type of objects: pipelines, datasets, linked services, data flows, triggers
 * Finding the **right order** for deploying objects (no more worrying about object names)
 * Build-in mechanism to replace the properties with the indicated values (CSV file)
+* Stop/start triggers
 
 The following features coming soon:
-* Stop/start triggers
 * Dropping objects when not exist in the source (code)
 * Filtering objects to be deployed by name and type
 * Build function to support validation of files, dependencies and config
