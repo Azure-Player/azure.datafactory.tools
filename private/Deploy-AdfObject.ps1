@@ -8,7 +8,7 @@ function Deploy-AdfObject {
         Write-Verbose ("Object [$($obj.Name)] is already deployed.")
         return; 
     }
-    Write-Host "Start deploying object: $($obj.Name) ($($obj.DependsOn.Count) dependency/ies)"
+    Write-Host "Start deploying object: [$($obj.Name)] ($($obj.DependsOn.Count) dependency/ies)"
     Write-Verbose "  Type: $($obj.Type)"
     Write-Debug ($obj | Format-List | Out-String)
 
