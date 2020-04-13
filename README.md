@@ -6,7 +6,7 @@
 PowerShell module to help simplify Azure Data Factory CI/CD processes. This module was created to meet the demand for a quick and trouble-free deployment of an Azure Data Factory instance to another environment.  
 The main advantage of the module is the ability to publish all the Azure Data Factory service code from JSON files by calling one method. The method supports now:  
 * Creation of Azure Data Factory, if not exist
-* Deployment of all type of objects: pipelines, datasets, linked services, data flows, triggers
+* Deployment of all type of objects: pipelines, datasets, linked services, data flows, triggers, integration runtimes
 * Finding the **right order** for deploying objects (no more worrying about object names)
 * Build-in mechanism to replace the properties with the indicated values (CSV file)
 * Stop/start triggers
