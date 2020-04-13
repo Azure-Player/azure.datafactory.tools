@@ -77,7 +77,8 @@ Publish-AdfV2FromJson
    -RootFolder            <String>
    -ResourceGroupName     <String>
    -DataFactoryName       <String>
-  [-Stage]                <String>
+   -Location              <String>
+[-Stage]                <String>
 ```
 
 Assuming your ADF names ```SQLPlayerDemo``` and code located in ```c:\GitHub\AdfName\```, replace the values for *SubscriptionName*, *ResourceGroupName*, *DataFactoryName* and run the following command using PowerShell CLI:
@@ -87,8 +88,9 @@ $SubscriptionName = 'Subscription'
 Set-AzContext -Subscription $SubscriptionName
 $ResourceGroupName = 'rg-devops-factory'
 $DataFactoryName = "SQLPlayerDemo"
+$Location = "NorthEurope"
 $RootFolder = "c:\GitHub\AdfName\"
-Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName"
+Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName" -Location "$Location"
 ```
 
 ### Other environments (stage)
@@ -169,7 +171,7 @@ Install-Module -Name "azure.datafactory.tools" -Force
 Import-Module -Name "azure.datafactory.tools" -Force
 
 # Step 2
-Publish-AdfV2FromJson -RootFolder "$(System.DefaultWorkingDirectory)/_ArtifactName/" -ResourceGroupName "$(ResourceGroupName)" -DataFactoryName "$(DataFactoryName)" -Stage "$(Release.EnvironmentName)"
+Publish-AdfV2FromJson -RootFolder "$(System.DefaultWorkingDirectory)/_ArtifactName/" -ResourceGroupName "$(ResourceGroupName)" -DataFactoryName "$(DataFactoryName)" -Location "$(Location)" -Stage "$(Release.EnvironmentName)"
 ```
 
 YAML:
@@ -190,7 +192,7 @@ steps:
     azureSubscription: 'Subscription'
     ScriptType: InlineScript
     Inline: |
-     Publish-AdfV2FromJson -RootFolder "$(System.DefaultWorkingDirectory)/_ArtifactName_/" -ResourceGroupName "$(ResourceGroupName)" -DataFactoryName "$(DataFactoryName)" -Stage "$(Release.EnvironmentName)"
+     Publish-AdfV2FromJson -RootFolder "$(System.DefaultWorkingDirectory)/_ArtifactName_/" -ResourceGroupName "$(ResourceGroupName)" -DataFactoryName "$(DataFactoryName)" -Location "$(Location)" -Stage "$(Release.EnvironmentName)"
      
     FailOnStandardError: true
     azurePowerShellVersion: LatestVersion```
