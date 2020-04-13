@@ -13,6 +13,8 @@ function Import-AdfFromFolder {
     Test-Path -Path $RootFolder | Out-Null 
     $adf.Location = $RootFolder
 
+    Import-AdfObjects -Adf $adf -All $adf.IntegrationRuntimes -RootFolder $RootFolder -SubFolder "integrationRuntime" -AzureType "Microsoft.DataFactory/factories/integrationRuntimes" | Out-Null
+    Write-Host ("IntegrationRuntimes: {0} object(s) loaded." -f $adf.IntegrationRuntimes.Count)
     Import-AdfObjects -Adf $adf -All $adf.LinkedServices -RootFolder $RootFolder -SubFolder "LinkedService" -AzureType "Microsoft.DataFactory/factories/linkedservices" | Out-Null
     Write-Host ("LinkedServices: {0} object(s) loaded." -f $adf.LinkedServices.Count)
     Import-AdfObjects -Adf $adf -All $adf.Pipelines -RootFolder $RootFolder -SubFolder "pipeline" -AzureType "Microsoft.DataFactory/factories/pipelines" | Out-Null

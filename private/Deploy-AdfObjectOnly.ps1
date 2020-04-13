@@ -10,8 +10,6 @@ function Deploy-AdfObjectOnly {
     }
     #Write-Host "Deploying object: $($obj.Name) ($($obj.DependsOn.Count) dependency/ies)"
     #Write-Verbose "  Type: $($obj.Type)"
-    # $obj
-    # $adf
     $adf = $obj.Adf
     $ResourceGroupName = $adf.ResourceGroupName
     $DataFactoryName = $adf.Name
@@ -22,6 +20,38 @@ function Deploy-AdfObjectOnly {
 
     switch -Exact ($obj.Type)
     {
+        'Microsoft.DataFactory/factories/integrationRuntimes'
+        {
+            $json = $body | ConvertFrom-Json
+            Set-StrictMode -Version 1.0
+            if ($json.properties.type -eq "SelfHosted") {
+                $desc = if ($null -eq $json.properties.description) { " " } else { $json.properties.description }
+                $linkedIR = $json.properties.typeProperties.linkedInfo
+
+                if ($null -eq $linkedIR) {
+                    Write-Verbose -Message "Integration Runtime type detected: Self-Hosted"
+                    Set-AzDataFactoryV2IntegrationRuntime `
+                    -ResourceGroupName $ResourceGroupName `
+                    -DataFactoryName $DataFactoryName `
+                    -Name $json.name `
+                    -Type $json.properties.type `
+                    -Description $desc `
+                    -Force | Out-Null
+                } 
+                else 
+                {
+                    Write-Verbose -Message "Integration Runtime type detected: Linked Self-Hosted"
+                    Set-AzDataFactoryV2IntegrationRuntime `
+                    -ResourceGroupName $ResourceGroupName `
+                    -DataFactoryName $DataFactoryName `
+                    -Name $json.name `
+                    -Type $json.properties.type `
+                    -Description $desc `
+                    -SharedIntegrationRuntimeResourceId $linkedIR.resourceId `
+                    -Force | Out-Null
+                }
+            }
+        }
         'Microsoft.DataFactory/factories/linkedservices'
         {
             Set-AzDataFactoryV2LinkedService `
