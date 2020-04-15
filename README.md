@@ -1,5 +1,6 @@
 [![Build status](https://dev.azure.com/sqlplayer/azure.datafactory.tools/_apis/build/status/azure.datafactory.tools-CI)](https://dev.azure.com/sqlplayer/azure.datafactory.tools/_build/latest?definitionId=26)
 ![PSGalleryStatus](https://vsrm.dev.azure.com/sqlplayer/_apis/public/Release/badge/ee3bd4b9-1ccf-4a86-89a0-a9d5dcd1918a/1/1)
+[![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/azure.datafactory.tools?label=PowerShell%20Gallery)](https://www.powershellgallery.com/packages/azure.datafactory.tools)
 
 # azure.datafactory.tools
 

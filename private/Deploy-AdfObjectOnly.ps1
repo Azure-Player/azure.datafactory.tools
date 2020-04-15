@@ -51,6 +51,21 @@ function Deploy-AdfObjectOnly {
                     -Force | Out-Null
                 }
             }
+            elseif ($json.properties.type -eq "Managed") {
+                Write-Verbose -Message "Integration Runtime type detected: Azure Managed"
+                $computeIR = $json.properties.typeProperties.computeProperties
+                $dfp = $computeIR.dataFlowProperties
+                # This is workaround: Deployment from ARM template as an exception.
+                # PowerShell's method is not ready to accept parameters for dataFlowProperties.
+                $deploymentName = "ADFToolsPS-{0:yyyyMMdd-HHmmss}-{1:x}" -f (Get-Date), (Get-Random);
+                $params = @{ name = $json.name; factoryName = "$DataFactoryName"; computeType = $dfp.computeType; coreCount = $dfp.coreCount; timeToLive = $dfp.timeToLive; location = $computeIR.location}
+                New-AzResourceGroupDeployment -Name "$deploymentName" -Mode 'Incremental' -ResourceGroupName "$ResourceGroupName" `
+                  -TemplateFile "$PSScriptRoot\azure-managed-ir-arm.json" `
+                  -TemplateParameterObject $params | Out-Null
+            }
+            else {
+                Write-Error "Deployment for this kind of Integration Runtime is not supported yet."
+            }
         }
         'Microsoft.DataFactory/factories/linkedservices'
         {
