@@ -1,0 +1,47 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "factoryName": {
+            "type": "string"
+        },
+        "name": {
+            "type": "string"
+        },
+        "computeType": {
+            "type": "string",
+            "defaultValue": "General"
+        },
+        "location": {
+            "type": "string"
+        },
+        "coreCount": {
+            "type": "int"
+        },
+        "timeToLive": {
+            "type": "int"
+        }
+    },
+    "variables": { },
+    "resources": [
+        {
+            "name": "[concat(parameters('factoryName'), '/', parameters('name'))]",
+            "type": "Microsoft.DataFactory/factories/integrationRuntimes",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "type": "Managed",
+                "typeProperties": {
+                    "computeProperties": {
+                        "location": "[parameters('location')]",
+                        "dataFlowProperties": {
+                            "computeType": "[parameters('computeType')]",
+                            "coreCount": "[parameters('coreCount')]",
+                            "timeToLive": "[parameters('timeToLive')]"
+                        }
+                    }
+                }
+            },
+            "dependsOn": []
+        }
+    	]
+}
