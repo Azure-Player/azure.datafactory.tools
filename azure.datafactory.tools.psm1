@@ -16,7 +16,7 @@ if ($true -and ($PSEdition -eq 'Desktop'))
 
 if (Test-Path -Path "$PSScriptRoot\private" -ErrorAction Ignore)
 {
-    Get-ChildItem "$PSScriptRoot\private" -ErrorAction Stop | ForEach-Object {
+    Get-ChildItem "$PSScriptRoot\private" -ErrorAction Stop | Where-Object { $_.Extension -eq '.ps1' } | ForEach-Object {
         Write-Verbose "Importing cmdlet '$($_.Name)'."
         . $_.FullName
     }
@@ -24,7 +24,7 @@ if (Test-Path -Path "$PSScriptRoot\private" -ErrorAction Ignore)
 
 if (Test-Path -Path "$PSScriptRoot\public" -ErrorAction Ignore)
 {
-    Get-ChildItem "$PSScriptRoot\public" -ErrorAction Stop | ForEach-Object {
+    Get-ChildItem "$PSScriptRoot\public" -ErrorAction Stop | Where-Object { $_.Extension -eq '.ps1' } | ForEach-Object {
         Write-Verbose "Importing cmdlet '$($_.Name)'."
         . $_.FullName
     }

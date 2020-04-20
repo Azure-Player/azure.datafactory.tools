@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.4.2] - 2020-04-20
+### Fixed
+* Stop-Triggers : The property 'Count' cannot be found on this object. Verify that the property exists. (#2)
+* PS module reads only ps1 files as cmdlets during its loading
+
 ## [0.4.1] - 2020-04-15
 ### Added
 * Support (deployment) of Azure Managed Integration Runtimes
