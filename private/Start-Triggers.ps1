@@ -6,11 +6,10 @@ function Start-Triggers {
     Write-Debug "BEGIN: Start-Triggers()"
 
     [AdfObject[]] $activeTrigger = $adf.Triggers `
-    | Where-Object { $_.Body.properties.runtimeState -eq "Started" -and ($_.Body.properties.pipelines.count -gt 0)} 
-    Write-Verbose ("Triggers to start: " + $activeTrigger.Count)
+    | Where-Object { $_.Body.properties.runtimeState -eq "Started" -and ($_.Body.properties.pipelines.count -gt 0)} | ToArray
+    Write-Host ("The number of triggers to start: " + $activeTrigger.Count)
 
     #Start active triggers - after cleanup efforts
-    Write-Verbose "Starting active triggers"
     $activeTrigger | ForEach-Object { 
         Write-host "- Enabling trigger: " $_
         Start-AzDataFactoryV2Trigger `
