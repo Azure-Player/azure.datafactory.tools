@@ -20,7 +20,7 @@ function Deploy-AdfObjectOnly {
 
     switch -Exact ($obj.Type)
     {
-        'Microsoft.DataFactory/factories/integrationRuntimes'
+        'integrationRuntime'
         {
             $json = $body | ConvertFrom-Json
             Set-StrictMode -Version 1.0
@@ -67,7 +67,7 @@ function Deploy-AdfObjectOnly {
                 Write-Error "Deployment for this kind of Integration Runtime is not supported yet."
             }
         }
-        'Microsoft.DataFactory/factories/linkedservices'
+        'linkedService'
         {
             Set-AzDataFactoryV2LinkedService `
             -ResourceGroupName $ResourceGroupName `
@@ -76,7 +76,7 @@ function Deploy-AdfObjectOnly {
             -DefinitionFile $obj.FileName `
             -Force | Out-Null
         }
-        'Microsoft.DataFactory/factories/pipelines'
+        'pipeline'
         {
             Set-AzDataFactoryV2Pipeline `
             -ResourceGroupName $ResourceGroupName `
@@ -85,7 +85,7 @@ function Deploy-AdfObjectOnly {
             -DefinitionFile $obj.FileName `
             -Force | Out-Null
         }
-        'Microsoft.DataFactory/factories/datasets'
+        'dataset'
         {
             Set-AzDataFactoryV2Dataset `
             -ResourceGroupName $ResourceGroupName `
@@ -94,7 +94,7 @@ function Deploy-AdfObjectOnly {
             -DefinitionFile $obj.FileName `
             -Force | Out-Null
         }
-        'Microsoft.DataFactory/factories/dataflows'
+        'dataflow'
         {
             Set-AzDataFactoryV2DataFlow `
             -ResourceGroupName $ResourceGroupName `
@@ -103,7 +103,7 @@ function Deploy-AdfObjectOnly {
             -DefinitionFile $obj.FileName `
             -Force | Out-Null
         }
-        'Microsoft.DataFactory/factories/triggers'
+        'trigger'
         {
             Set-AzDataFactoryV2Trigger `
             -ResourceGroupName $ResourceGroupName `

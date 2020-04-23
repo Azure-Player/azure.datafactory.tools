@@ -18,11 +18,11 @@ function Deploy-AdfObject {
     {
         Write-Verbose "Checking all dependencies of [$($obj.Name)]..."
         $i = 1
-        $obj.DependsOn | ForEach-Object {
-            $name = $_
-            Write-Verbose ("$i) Depends on: {0}" -f $name)
-            #$adf
-            $depobj = Get-AdfObjectByName -adf $adf -name $name
+        $obj.DependsOn.getEnumerator() | ForEach-Object {
+            $name = $_.key
+            $type = $_.value
+            Write-Verbose ("$i) Depends on: [$type].[$name]")
+            $depobj = Get-AdfObjectByName -adf $adf -name "$name" -type "$type"
             if ($null -eq $depobj) {
                 Write-Error "Referenced object [$name] was not found."
             } else {

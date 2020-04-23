@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.5.0-preview] - 2020-04-24
+### Added
+* Drop objects not in the source
+* New function: Get-AdfFromService
+### Fixed
+* Supports different objects with the same name
+
 ## [0.4.2] - 2020-04-20
 ### Fixed
 * Stop-Triggers : The property 'Count' cannot be found on this object. Verify that the property exists. (#2)

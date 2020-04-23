@@ -63,7 +63,15 @@ function Publish-AdfV2FromJson {
 
     # STEP 3c
     Write-Host "===================================================================================";
-    Write-Host "STEP 3c: Starting all triggers..."
+    Write-Host "STEP 3c: Deleting objects not in source ..."
+    $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
+    $adfIns.AllObjects() | ForEach-Object {
+        Remove-AdfObjectIfNotInSource -adfSource $adf -adfTargetObj $_ -adfInstance $adfIns
+    }
+    
+    # STEP 3d
+    Write-Host "===================================================================================";
+    Write-Host "STEP 3d: Starting all triggers..."
     Start-Triggers -adf $adf
     
     $elapsedTime = new-timespan $script:StartTime $(get-date)
