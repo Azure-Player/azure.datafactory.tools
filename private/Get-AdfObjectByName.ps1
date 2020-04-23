@@ -2,19 +2,47 @@ function Get-AdfObjectByName {
     [CmdletBinding()]
     param (
         [parameter(Mandatory = $true)] [Adf] $adf,
-        [parameter(Mandatory = $true)] [String] $name
+        [parameter(Mandatory = $true)] [String] $name,
+        [parameter(Mandatory = $true)] [String] $type
     )
     
-    Write-Debug "BEGIN: Get-AdfObjectByName(name=$name)"
-    # if ($null -eq $adf) { Write-Verbose "Variable [adf] is null." } else { Write-Verbose "[adf] is ok." }
-    # Write-Verbose "ADF:"
-    # Write-Verbose ($adf | Format-List | Out-String)
-    # Write-Verbose "-----"
+    Write-Debug "BEGIN: Get-AdfObjectByName(name=$name,type=$type)"
 
-    $r = $adf.AllObjects() | Where-Object { $_.Name -eq $name } | Select-Object -First 1
-    # Write-Verbose "---R:"
+    $simtype = Get-SimplifiedType -Type "$type"
+    switch -Exact ($simtype)
+    {
+        'IntegrationRuntime'
+        {
+            $r = $adf.IntegrationRuntimes | Where-Object { $_.Name -eq $name } | Select-Object -First 1
+        }
+        'LinkedService'
+        {
+            $r = $adf.LinkedServices | Where-Object { $_.Name -eq $name } | Select-Object -First 1
+        }
+        'Pipeline'
+        {
+            $r = $adf.Pipelines | Where-Object { $_.Name -eq $name } | Select-Object -First 1
+        }
+        'Dataset'
+        {
+            $r = $adf.DataSets | Where-Object { $_.Name -eq $name } | Select-Object -First 1
+        }
+        'DataFlow'
+        {
+            $r = $adf.DataFlows | Where-Object { $_.Name -eq $name } | Select-Object -First 1
+        }
+        'Trigger'
+        {
+            $r = $adf.Triggers | Where-Object { $_.Name -eq $name } | Select-Object -First 1
+        }
+        default
+        {
+            Write-Error "Type [$type] is not supported."
+        }
+    }
+
+    #$r = $adf.AllObjects() | Where-Object { $_.Name -eq $name } | Select-Object -First 1
     Write-Debug ($r | Format-List | Out-String)
-    # Write-Verbose "-----"
     Write-Debug "END: Get-AdfObjectByName()"
     return $r
 }

@@ -4,12 +4,11 @@ function Import-AdfObjects {
         [parameter(Mandatory = $true)] $Adf,
         [parameter(Mandatory = $true)] $All,
         [parameter(Mandatory = $true)] [String] $RootFolder,
-        [parameter(Mandatory = $true)] [String] $SubFolder,
-        [parameter(Mandatory = $false)] [String] $AzureType
+        [parameter(Mandatory = $true)] [String] $SubFolder
     )
 
-    Write-Verbose "Analyzing $AzureType dependencies..."
-    #$All = @{}
+    Write-Verbose "Analyzing $SubFolder dependencies..."
+
     $folder = Join-Path $RootFolder "$SubFolder"
     if (-Not (Test-Path -Path "$folder" -ErrorAction Ignore))
     {
@@ -24,12 +23,12 @@ function Import-AdfObjects {
         $txt = get-content $_.FullName
         $o = New-Object -TypeName AdfObject 
         $o.Name = $_.BaseName
-        $o.Type = $AzureType   #$json.type
+        $o.Type = $SubFolder
         $o.FileName = $_.FullName
         $o.Body = $txt | ConvertFrom-Json
-        $m = [regex]::matches($txt,'"referenceName": ?"(?<v>.+?)"')
+        $m = [regex]::matches($txt,'"referenceName": ?"(?<r>.+?)",[\n\r\s]+"type": ?"(?<t>.+?)"')
         $m | ForEach-Object {
-            $o.DependsOn.Add($_.Groups['v'].Value)
+            $o.AddDependant( $_.Groups['r'].Value, $_.Groups['t'].Value ) | Out-Null
         }
         $o.Adf = $Adf
         $All.Add($o)
