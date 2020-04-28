@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.5.0-preview] - 2020-04-24
+## [0.5.0] - 2020-04-24
 ### Added
 * Drop objects not in the source
 * New function: Get-AdfFromService
