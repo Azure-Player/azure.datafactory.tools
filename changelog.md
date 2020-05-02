@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.6.1] - 2020-05-02
+### Fixed
+* Restarting triggers fails for *Tumbling Window* type of Trigger [[#4](https://github.com/SQLPlayer/azure.datafactory.tools/issues/4)]
+
 ## [0.6.0] - 2020-05-02
 ### Added
 * Filtering (include or exclude) objects to be deployed by name and/or type
