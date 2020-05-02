@@ -12,10 +12,14 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
 * Build-in mechanism to replace the properties with the indicated values (CSV file)
 * Stop/start triggers
 * Dropping objects when not exist in the source (code)
+* Filtering (include or exclude) objects to be deployed by name and/or type
+* Publish options allow you to control:
+  * Whether stop and restarting triggers
+  * Whether delete or not objects not in the source
 
 The following features coming soon:
-* Filtering objects to be deployed by name and type
 * Build function to support validation of files, dependencies and config
+* Unit Tests of selected Pipelines and Linked Services
 
 > The module publish code which is created and maintanance by ADF in code repository, when configured.
 
@@ -69,9 +73,9 @@ SQLPlayerDemo
 
 Some of these folders might not exist when ADF has none of that kind of objects.
 
-## Examples
+# Examples
 
-Publish ADF code into ADF service in Azure:
+Publish (entire) ADF code into ADF service in Azure:
 
 ```powershell
 Publish-AdfV2FromJson 
@@ -79,7 +83,8 @@ Publish-AdfV2FromJson
    -ResourceGroupName     <String>
    -DataFactoryName       <String>
    -Location              <String>
-[-Stage]                <String>
+   [-Stage]               <String>
+   [-Option]              <AdfPublishOption>
 ```
 
 Assuming your ADF names ```SQLPlayerDemo``` and code located in ```c:\GitHub\AdfName\```, replace the values for *SubscriptionName*, *ResourceGroupName*, *DataFactoryName* and run the following command using PowerShell CLI:
@@ -94,24 +99,100 @@ $RootFolder = "c:\GitHub\AdfName\"
 Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName" -Location "$Location"
 ```
 
-### Other environments (stage)
+## Other environments (stage)
 
 Use optional ```[-Stage]``` parameter to prepare json files of ADF with appropriate values for properties and deploy to another environment correctly. See section: **How it works / Step 2** for more details.
 
 
 > Detailed *Wiki* documentation - coming soon.
 
+## Publish Options
+
+The options allows you control which objects should be deployed by including or excluding them from the list. First of all you need to create the object:
+
+```powershell
+# Example 0: Creating Publish Option object
+$opt = New-AdfPublishOption
+```
+`AdfPublishOption` contains the following options:  
+[HashTable] **Includes** - defines a list of objects to be published (default: *empty*)  
+[HashTable] **Excludes** - defines a list of objects to be NOT published (default: *empty*)  
+[Boolean] **DeleteNotInSource** - indicates whether the objects not in the source should be deleted or not (default: *true*)  
+[Boolean] **StopStartTriggers** - indicates whether the triggers would be stopped and restarted during the deployment (default: *true*)
+
+
+Subsequently, you can define the needed options:
+
+```powershell
+# Example 1: Including objects by type and name pattern
+$opt = New-AdfPublishOption
+$opt.Includes.Add("pipeline.Copy*", "")
+$opt.DeleteNotInSource = $false
+
+# Example 2: Excluding objects by type
+$opt = New-AdfPublishOption
+$opt.Excludes.Add("linkedService.*", "")
+$opt.Excludes.Add("integrationruntime.*", "")
+$opt.Excludes.Add("trigger.*", "")
+$opt = New-AdfPublishOption
+
+# Example 3: Excluding all objects from deployment
+$opt = New-AdfPublishOption
+$opt.Excludes.Add("*", "")
+$opt.StopStartTriggers = $false
+
+# Example 4: Including only one object to deployment
+$opt = New-AdfPublishOption
+$opt.Includes.Add("pipeline.Wait1", "")
+$opt.StopStartTriggers = $false
+```
+
+> Bear in mind that *Includes* and *Excludes* lists are **rules out each other**.  
+Objects would be excluded from deployment only if *Includes* list remains empty.  
+When both lists are empty - all objects going to be published.
+
+Once you define all necessary options, just add the parameter to **Publish** function:  
+```powershell
+Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+   -ResourceGroupName "$ResourceGroupName" `
+   -DataFactoryName "$DataFactoryName" `
+   -Location "$Location" `
+   -Option $opt
+```
+
+### Pattern (WildCard)
+As you probably noticed, you can use some patterns when defining name or type for objects to be included of excluded to/from deployment. 
+To determine whether an object matches to the pattern (wildcard) - module uses `-like` operator known in PowerShell.
+Therefore you can use the following combinations:  
+```
+trigger.*
+dataset.DS_*
+*.PL_*
+linkedService.???KeyVault*
+pipeline.ScdType[123]
+```
+Full name of objects supported by the module is built of: `{Type}.{Name}`  
+All potential combinations can be found in code repository of ADF:  
+*Type* - name of folder  
+*Name* - name of file (without JSON extension)
+
+> More info about wildcard: [About Wildcard](https://docs.microsoft.com/en-gb/powershell/module/microsoft.powershell.core/about/about_wildcards?view=powershell-5.1)
+
+
+
+
 # How it works
 
 This section describes what the function ```Publish-AdfV2FromJson``` does step by step.
 
-## Step 1: Create ADF (if not exist)
+## Step: Create ADF (if not exist)
 
 You must have appropriate permission to create new instance.  
 *Location* parameter is required for this action.
 
-## Step 2: Replacing all properties environment-related
+## Step: Replacing all properties environment-related
 
+This step will be executed only when *[Stage]* parameter has been provided.  
 The whole concept of CI & CD (Continuous Integration and Continuous Delivery) process is to deploy automatically and riskless onto target infrastructure, supporting multi-environments. Each environment (or stage) to be exact the same code except selected properties. Very often these properties are:  
 - Data Factory name
 - Azure Key Vault URL (endpoint)
@@ -151,10 +232,24 @@ SQLPlayerDemo
 ```
 > Use optional [-Stage] parameter when executing ```Publish-AdfV2FromJson``` module to replace values for/with properties specified in config file(s).
 
-## Step 3: Deployment of all ADF objects
-This step is actually responsible to do all the stuff.
-More details soon.
+## Step: Stoping triggers
+This block stops all triggers which must be stopped due to deployment.
+> Operation might be skip when `StopStartTriggers = false` in *Publish Options*
 
+## Step: Deployment of ADF objects
+This step is actually responsible to do all the stuff.
+The mechanism is smart enough to publish all objects in the right order, thence a developer doesn't need to care of object names due to deployment failure any longer.
+> Find out *Publish Option* capabilities in terms of filtering objects intended to be deployed.
+
+## Step: Deleting objects not in source
+This process removes all objects from ADF service whom couldn't be found in the source (ADF code).  
+The mechanism is smart enough to dropping the objects in right order.
+
+> Operation might be skip when `DeleteNotInSource = false` in *Publish Options*
+
+## Step: Restarting all triggers
+Restarting all triggers that should be enabled.
+> Operation might be skip when `StopStartTriggers = false` in *Publish Options*
 
 # Publish from Azure DevOps
 

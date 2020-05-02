@@ -4,19 +4,22 @@ function Deploy-AdfObject {
         [parameter(Mandatory = $true)] [AdfObject] $obj
     )
 
-    if ($obj.Deployed) { 
-        Write-Verbose ("Object [$($obj.Name)] is already deployed.")
+    if ($obj.ToBeDeployed -eq $false) { 
+        Write-Verbose ("Object $($obj.FullName($true)) is not intended to be deployed due to publish options.")
         return; 
     }
-    Write-Host "Start deploying object: [$($obj.Name)] ($($obj.DependsOn.Count) dependency/ies)"
-    Write-Verbose "  Type: $($obj.Type)"
+    if ($obj.Deployed) { 
+        Write-Verbose ("Object $($obj.FullName($true)) is already deployed.")
+        return; 
+    }
+    Write-Host "Start deploying object: $($obj.FullName($true)) ($($obj.DependsOn.Count) dependency/ies)"
     Write-Debug ($obj | Format-List | Out-String)
 
     $adf = $obj.Adf
 
     if ($obj.DependsOn.Count -gt 0)
     {
-        Write-Verbose "Checking all dependencies of [$($obj.Name)]..."
+        Write-Debug "Checking all dependencies of [$($obj.Name)]..."
         $i = 1
         $obj.DependsOn.getEnumerator() | ForEach-Object {
             $name = $_.key

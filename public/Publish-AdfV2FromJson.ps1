@@ -6,7 +6,8 @@ function Publish-AdfV2FromJson {
         [parameter(Mandatory = $true)] [String] $ResourceGroupName,
         [parameter(Mandatory = $true)] [String] $DataFactoryName,
         [parameter(Mandatory = $false)] [String] $Stage = $null,
-        [parameter(Mandatory = $false)] [String] $Location
+        [parameter(Mandatory = $false)] [String] $Location,
+        [parameter(Mandatory = $false)] [AdfPublishOption] $Option
     )
 
     $m = Get-Module -Name "azure.datafactory.tools"
@@ -26,8 +27,7 @@ function Publish-AdfV2FromJson {
 
     $script:StartTime = Get-Date
 
-    # STEP 1: Create ADF if not exists
-    Write-Host "STEP 1: Verifying whether ADF exists..."
+    Write-Host "STEP: Verifying whether ADF exists..."
     $adf = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -ErrorAction:Ignore
     if (!$adf) {
         Write-Host "Creating Azure Data Factory..."
@@ -36,43 +36,63 @@ function Publish-AdfV2FromJson {
         Write-Host "Azure Data Factory exists."
     }
 
+    Write-Host "===================================================================================";
+    Write-Host "STEP: Reading Azure Data Factory from JSON files..."
     $adf = Import-AdfFromFolder -FactoryName $DataFactoryName -RootFolder "$RootFolder"
     $adf.ResourceGroupName = "$ResourceGroupName";
     Write-Debug ($adf | Format-List | Out-String)
 
-    # STEP 2
+    # Apply Deployment Options if applicable
+    if ($null -ne $Option) {
+        Write-Host "Publish options are provided."
+        ApplyExclusionOptions -adf $adf -option $Option
+        $opt = $Option
+    }
+    else {
+        Write-Host "Publish options are not provided."
+        $opt = New-AdfPublishOption
+    }
+
     Write-Host "===================================================================================";
-    Write-Host "STEP 2: Replacing all properties environment-related..."
+    Write-Host "STEP: Replacing all properties environment-related..."
     if (![string]::IsNullOrEmpty($Stage)) {
         Update-PropertiesFromCsvFile -adf $adf -stage $Stage
     } else {
         Write-Host "Stage parameter was not provided - action skipped."
     }
 
-    # STEP 3a
     Write-Host "===================================================================================";
-    Write-Host "STEP 3a: Stopping triggers..."
-    Stop-Triggers -adf $adf
+    Write-Host "STEP: Stopping triggers..."
+    if ($opt.StopStartTriggers -eq $true) {
+        Stop-Triggers -adf $adf
+    } else {
+        Write-Host "Operation skipped as publish option 'StopStartTriggers' = false"
+    }
 
-    # STEP 3b
     Write-Host "===================================================================================";
-    Write-Host "STEP 3b: Deployment of all ADF objects..."
+    Write-Host "STEP: Deployment of all ADF objects..."
     $adf.AllObjects() | ForEach-Object {
         Deploy-AdfObject -obj $_
     }
 
-    # STEP 3c
     Write-Host "===================================================================================";
-    Write-Host "STEP 3c: Deleting objects not in source ..."
-    $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
-    $adfIns.AllObjects() | ForEach-Object {
-        Remove-AdfObjectIfNotInSource -adfSource $adf -adfTargetObj $_ -adfInstance $adfIns
+    Write-Host "STEP: Deleting objects not in source ..."
+    if ($opt.DeleteNotInSource -eq $true) {
+        $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
+        $adfIns.AllObjects() | ForEach-Object {
+            Remove-AdfObjectIfNotInSource -adfSource $adf -adfTargetObj $_ -adfInstance $adfIns
+        }
+    } else {
+        Write-Host "Operation skipped as publish option 'DeleteNotInSource' = false"
     }
-    
-    # STEP 3d
+
     Write-Host "===================================================================================";
-    Write-Host "STEP 3d: Starting all triggers..."
-    Start-Triggers -adf $adf
+    Write-Host "STEP: Starting all triggers..."
+    if ($opt.StopStartTriggers -eq $true) {
+        Start-Triggers -adf $adf
+    } else {
+        Write-Host "Operation skipped as publish option 'StopStartTriggers' = false"
+    }
     
     $elapsedTime = new-timespan $script:StartTime $(get-date)
     Write-Host "==============================================================================";
