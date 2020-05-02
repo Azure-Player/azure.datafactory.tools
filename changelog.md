@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.6.0] - 2020-05-02
+### Added
+* Filtering (include or exclude) objects to be deployed by name and/or type
+* Publish options allow you to control:
+  * Whether stop and restarting triggers
+  * Whether delete or not objects not in the source
+
 ## [0.5.0] - 2020-04-24
 ### Added
 * Drop objects not in the source
