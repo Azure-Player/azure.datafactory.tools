@@ -1,0 +1,20 @@
+TOPIC
+    about_azure.datafactory.tools
+
+SHORT DESCRIPTION
+    Explains how to use the azure.datafactory.tools PowerShell module
+
+LONG DESCRIPTION
+    Explains how to use the azure.datafactory.tools PowerShell module
+
+EXAMPLES
+    Install-Module -Name azure.datafactory.tools -Scope CurrentUser
+    Import-Module -Name azure.datafactory.tools
+
+KEYWORDS
+    ADF Azure Data Factory Publish JSON
+
+SEE ALSO
+    Publish-AdfV2FromJson
+    New-AdfPublishOption
+    Get-AdfFromService

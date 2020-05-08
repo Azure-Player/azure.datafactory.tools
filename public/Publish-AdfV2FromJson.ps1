@@ -1,3 +1,59 @@
+<#
+.SYNOPSIS
+Publishes all ADF objects from JSON files into target ADF service.
+
+.DESCRIPTION
+Publishes all ADF objects from JSON files into target ADF service.
+Creates a data factory with the specified resource group name and location, if that doesn't exist.
+Takes care of creating ADF, appropriate order of deployment, deleting objects not in the source anymore, replacing properties environment-related based on CSV config file, and more.
+
+.PARAMETER RootFolder
+Source folder where all ADF objects are kept. The folder should contain subfolders like pipeline, linkedservice, etc.
+
+.PARAMETER ResourceGroupName
+Resource Group Name of target instance of ADF
+
+.PARAMETER DataFactoryName
+Name of target ADF instance
+
+.PARAMETER Stage
+Optional parameter. When defined, process will replace all properties defined in (csv) configuration file.
+
+.PARAMETER Location
+Azure Region for target ADF. Used only for create new ADF instance.
+
+.PARAMETER Option
+This objects allows to define certain behaviour of deployment process. Use cmdlet "New-AdfPublishOption" to create new instance of objects and set required properties.
+
+.EXAMPLE
+# Publish entire ADF
+$ResourceGroupName = 'rg-devops-factory'
+$DataFactoryName = "SQLPlayerDemo"
+$Location = "NorthEurope"
+$RootFolder = "c:\GitHub\AdfName\"
+Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName" -Location "$Location"
+
+.EXAMPLE
+# Publish entire ADF to with specified properties (different environment)
+Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName" -Location "$Location" -Stage "UAT"
+
+.EXAMPLE
+# Including objects by type and name pattern
+$opt = New-AdfPublishOption
+$opt.Includes.Add("pipeline.Copy*", "")
+$opt.DeleteNotInSource = $false
+Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName" -Location "$Location" -Stage "UAT" -Option $opt
+
+.EXAMPLE
+# Including only one object to deployment and do not stop/start triggers
+$opt = New-AdfPublishOption
+$opt.Includes.Add("pipeline.Wait1", "")
+$opt.StopStartTriggers = $false
+Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName" -Location "$Location" -Stage "UAT" -Option $opt
+
+.LINK
+Online version: https://github.com/SQLPlayer/azure.datafactory.tools/
+#>
 function Publish-AdfV2FromJson {
     [CmdletBinding()]
     param

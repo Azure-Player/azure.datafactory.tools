@@ -1,3 +1,25 @@
+<#
+.SYNOPSIS
+Loads all objects from Azure Data Factory instance (service).
+
+.DESCRIPTION
+Loads all objects from Azure Data Factory instance (service).
+
+.PARAMETER FactoryName
+Name of Azure Data Factory service to be loaded.
+
+.PARAMETER ResourceGroupName
+Resource Group Name of ADF service to be loaded.
+
+.EXAMPLE
+$ResourceGroupName = 'rg-devops-factory'
+$DataFactoryName = "SQLPlayerDemo"
+$adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
+$adfIns.AllObjects()
+
+.LINK
+Online version: https://github.com/SQLPlayer/azure.datafactory.tools/
+#>
 function Get-AdfFromService {
     [CmdletBinding()]
     param (
