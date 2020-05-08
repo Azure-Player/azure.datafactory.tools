@@ -178,8 +178,38 @@ All potential combinations can be found in code repository of ADF:
 
 > More info about wildcard: [About Wildcard](https://docs.microsoft.com/en-gb/powershell/module/microsoft.powershell.core/about/about_wildcards?view=powershell-5.1)
 
+## Publising objects from selected ADF's folder only
+Although providing pattern of selected object names to be published gives great flexibility in terms of part-deployment, it might not cover other scenario. When your ADF has objects organised in folders, you may want to publish objects only within that folder, no matter what will change in the future.  
+Let's take the following ADF as an example:  
 
+![Azure Data Factory Resources](.\media\adf-folders.png)  
+If you want to publish only objects from "Copy" folder(s), you must perform three steps before publish:
+1) Load all ADF objects from your code (local folder)
+2) Execute function which returns list of objects located in selected folder in ADF
+3) Add returned list (of objects) to **Includes** in **Publish Option**
+> Sounds complicated? You have tools to do all those things!
+```PowerShell
+# Step 1
+$adf = Import-AdfFromFolder -RootFolder "$RootFolder" -FactoryName $DataFactoryName
 
+# Step 2
+$list1 = $adf.GetObjectsByFolderName('Copy')
+
+# Step 3
+$opt = New-AdfPublishOption
+$opt.Includes += $list1
+
+# Finally: Run Publish as usual
+Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName" -Location "$Location" -Option $opt
+```
+
+Naturally, you can add more objects from different folder. Just repeat steps 2-3:
+```PowerShell
+$list2 = $adf.GetObjectsByFolderName('JSON')
+$opt.Includes += $list2
+```
+
+> **Remember:** Current version will not publish related objects when list of objects would be provided in *Includes* publish options. You must ensure that all dependent objects are already exist on target ADF service.
 
 # How it works
 

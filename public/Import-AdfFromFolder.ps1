@@ -1,3 +1,28 @@
+<#
+.SYNOPSIS
+Reads all ADF objects (JSON files) from pointed location and returns instance of [ADF] class.
+
+.DESCRIPTION
+Reads all ADF objects (JSON files) from pointed location and returns instance of [ADF] class.
+
+.PARAMETER FactoryName
+Gives the name for created object of ADF
+
+.PARAMETER RootFolder
+Location where all folders and JSON files are kept.
+
+.EXAMPLE
+$adf = Import-AdfFromFolder -FactoryName "AdfSQLPlayerDemo" -RootFolder "c:\GitHub\AdfName\"
+IntegrationRuntimes: 4 object(s) loaded.
+LinkedServices: 9 object(s) loaded.
+Pipelines: 12 object(s) loaded.
+DataSets: 26 object(s) loaded.
+DataFlows: 7 object(s) loaded.
+Triggers: 3 object(s) loaded.
+
+.NOTES
+Online version: https://github.com/SQLPlayer/azure.datafactory.tools/
+#>
 function Import-AdfFromFolder {
     [CmdletBinding()]
     param (
