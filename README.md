@@ -208,7 +208,11 @@ In order to address that needs, the process are able to read flat **configuratio
 type,name,path,value
 linkedService,LS_AzureKeyVault,typeProperties.baseUrl,"https://kv-blog-uat.vault.azure.net/"
 linkedService,LS_BlobSqlPlayer,typeProperties.connectionString,"DefaultEndpointsProtocol=https;AccountName=blobstorageuat;EndpointSuffix=core.windows.net;"
+pipeline,PL_CopyMovies,activities[0].outputs[0].parameters.BlobContainer,UAT
+pipeline,PL_CopyMovies_with_param,parameters.DstBlobContainer.defaultValue,UAT
 ```
+> You can replace any property with that method.
+
 There are 4 columns in CSV file:
 - type - Type of object. It's the same as folder where the object's file located
 - name - Name of objects. It's the same as json file in the folder
