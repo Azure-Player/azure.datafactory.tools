@@ -26,7 +26,7 @@ function Import-AdfObjects {
         $o.Type = $SubFolder
         $o.FileName = $_.FullName
         $o.Body = $txt | ConvertFrom-Json
-        $m = [regex]::matches($txt,'"referenceName": ?"(?<r>.+?)",[\n\r\s]+"type": ?"(?<t>.+?)"')
+        $m = [regex]::matches($txt,'"referenceName":\s*?"(?<r>.+?)",[\n\r\s]+"type":\s*?"(?<t>.+?)"')
         $m | ForEach-Object {
             $o.AddDependant( $_.Groups['r'].Value, $_.Groups['t'].Value ) | Out-Null
         }

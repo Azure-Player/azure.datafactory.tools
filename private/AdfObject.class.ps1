@@ -37,4 +37,16 @@ class AdfObject {
         return $this.FullName($true)
     }
 
+    [String] GetFolderName()
+    {
+        $o = $this.Body.properties
+        $ofn = $null
+        if ($o.PSobject.Properties.Name -contains "folder")
+        {
+            $ofn = $_.Body.properties.folder.name
+        }
+        return $ofn
+    }
+
+
 }
