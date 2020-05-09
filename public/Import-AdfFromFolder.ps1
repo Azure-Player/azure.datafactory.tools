@@ -35,7 +35,8 @@ function Import-AdfFromFolder {
     $adf = New-Object -TypeName Adf 
     $adf.Name = $FactoryName
 
-    Test-Path -Path $RootFolder | Out-Null 
+    if ( !(Test-Path -Path $RootFolder) ) { Write-Error "Folder '$RootFolder' doesn't exist." }
+    
     $adf.Location = $RootFolder
 
     Import-AdfObjects -Adf $adf -All $adf.IntegrationRuntimes -RootFolder $RootFolder -SubFolder "integrationRuntime" | Out-Null
