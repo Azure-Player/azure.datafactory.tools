@@ -4,12 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.7.0] - 2020-05-08
+## [0.7.0] - 2020-05-09
 ### Fixed
 * Fixed RegEx to scanning dependant objects (references). They were not found when multiple whitespaces figured.
+* Function `Import-AdfFromFolder` throws an exception when passed folder doesn't exist.
 ### Added
 * Capability to publish only objects located in the selected folder(s) in ADF
-  * Function 'Import-AdfFromFolder' is public now. Return instance of ADF class
+  * Function `Import-AdfFromFolder` is public now. Return instance of ADF class
   * Functions in ADF class allows returning a list of objects by name or folder
 
 ## [0.6.1] - 2020-05-02
