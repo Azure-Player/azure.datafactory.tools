@@ -182,7 +182,7 @@ All potential combinations can be found in code repository of ADF:
 Although providing pattern of selected object names to be published gives great flexibility in terms of part-deployment, it might not cover other scenario. When your ADF has objects organised in folders, you may want to publish objects only within that folder, no matter what will change in the future.  
 Let's take the following ADF as an example:  
 
-![Azure Data Factory Resources](.\media\adf-folders.png)  
+![Azure Data Factory Resources](./media/adf-folders.png)  
 If you want to publish only objects from "Copy" folder(s), you must perform three steps before publish:
 1) Load all ADF objects from your code (local folder)
 2) Execute function which returns list of objects located in selected folder in ADF
