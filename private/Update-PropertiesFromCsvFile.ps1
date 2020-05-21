@@ -31,7 +31,8 @@ function Update-PropertiesFromCsvFile {
         $newFile = $file
         Write-Debug "File: $file"
         $json = (Get-Content $file | ConvertFrom-Json)
-        $prop = "$($_.name).properties.$($_.path) = `"$($_.value)`""
+        $newValue = $ExecutionContext.InvokeCommand.ExpandString($_.value)
+        $prop = "$($_.name).properties.$($_.path) = `"$($newValue)`""
         Write-Verbose "- $prop"
         Invoke-Expression "`$json.properties.$($_.path) = `"$($_.value)`""
         $json | ConvertTo-Json -Depth 10 | Out-File $newFile -Encoding ascii
