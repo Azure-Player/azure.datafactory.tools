@@ -18,6 +18,8 @@ Name of target ADF instance
 
 .PARAMETER Stage
 Optional parameter. When defined, process will replace all properties defined in (csv) configuration file.
+The parameter can be either full path to csv file (must ends with .csv) or just stage name.
+When you provide parameter value 'UAT' the process will try open config file located .\deployment\config-UAT.csv
 
 .PARAMETER Location
 Azure Region for target ADF. Used only for create new ADF instance.
@@ -34,8 +36,13 @@ $RootFolder = "c:\GitHub\AdfName\"
 Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName" -Location "$Location"
 
 .EXAMPLE
-# Publish entire ADF to with specified properties (different environment)
+# Publish entire ADF with specified properties (different environment stage name provided)
 Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName" -Location "$Location" -Stage "UAT"
+
+.EXAMPLE
+# Publish entire ADF with specified properties (different environment config full path file provided)
+$configCsvFile = 'c:\myCode\myadf\deployment\config-UAT.csv'
+Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName" -Location "$Location" -Stage "$configCsvFile"
 
 .EXAMPLE
 # Including objects by type and name pattern
@@ -79,17 +86,34 @@ function Publish-AdfV2FromJson {
     Write-Host "DataFactoryName:    $DataFactoryName";
     Write-Host "Location:           $Location";
     Write-Host "Stage:              $Stage";
+    Write-Host "Options provided:   $($null -ne $Option)";
     Write-Host "======================================================================================";
 
     $script:StartTime = Get-Date
 
+    if ($null -ne $Option) {
+        Write-Host "Publish options are provided."
+        $opt = $Option
+    }
+    else {
+        Write-Host "Publish options are not provided."
+        $opt = New-AdfPublishOption
+    }
+
     Write-Host "STEP: Verifying whether ADF exists..."
-    $adf = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -ErrorAction:Ignore
-    if (!$adf) {
-        Write-Host "Creating Azure Data Factory..."
-        Set-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -Location "$Location"
-    } else {
+    $targetAdf = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -ErrorAction:Ignore
+    if ($targetAdf) {
         Write-Host "Azure Data Factory exists."
+    } else {
+        $msg = "Azure Data Factory instance does not exist."
+        if ($opt.CreateNewInstance) {
+            Write-Host "$msg"
+            Write-Host "Creating a new instance of Azure Data Factory..."
+            Set-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -Location "$Location"
+        } else {
+            Write-Host "Creation operation skipped as publish option 'CreateNewInstance' = false"
+            Write-Error "$msg"
+        }
     }
 
     Write-Host "===================================================================================";
@@ -100,13 +124,7 @@ function Publish-AdfV2FromJson {
 
     # Apply Deployment Options if applicable
     if ($null -ne $Option) {
-        Write-Host "Publish options are provided."
-        ApplyExclusionOptions -adf $adf -option $Option
-        $opt = $Option
-    }
-    else {
-        Write-Host "Publish options are not provided."
-        $opt = New-AdfPublishOption
+        ApplyExclusionOptions -adf $adf -option $opt
     }
 
     Write-Host "===================================================================================";

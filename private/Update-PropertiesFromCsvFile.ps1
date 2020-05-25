@@ -11,7 +11,13 @@ function Update-PropertiesFromCsvFile {
     if ([string]::IsNullOrEmpty($srcFolder)) {
         Write-Error "adf.Location property has not been provided."
     }
-    $configFileName = Join-Path $srcFolder "deployment\config-$stage.csv"
+    
+    if ($stage.EndsWith(".csv")) { 
+        $configFileName = $stage 
+    } else {
+        $configFileName = Join-Path $srcFolder "deployment\config-$stage.csv"
+    }
+
     Write-Verbose "Replacing values for ADF properties from CSV config file"
     Write-Host "Config file:   $configFileName"
     Write-Debug "Testing config file..."
@@ -19,10 +25,6 @@ function Update-PropertiesFromCsvFile {
 
     $configtxt = Get-Content $configFileName | Out-String
     $configcsv = ConvertFrom-Csv $configtxt 
-    # Write-Debug "-----ConfigCsvFile------"
-    # Write-Debug $configtxt
-    # Write-Debug "------------------------"
-
     $cnt = 0
 
     $configcsv | ForEach-Object {
