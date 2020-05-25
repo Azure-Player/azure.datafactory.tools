@@ -93,7 +93,28 @@ InModuleScope azure.datafactory.tools {
                 $pipelines.Name | Should -Be $PipelineName
             }
         }
+
+
         
+
+
+
+
+
+        Context 'ADF exist and publish whole ADF' {
+            It 'Should finish successfully' {
+                Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.json" -Recurse:$true -Force 
+                Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                    -ResourceGroupName "$ResourceGroupName" `
+                    -DataFactoryName "$DataFactoryName" -Location "$Location" 
+            }
+            It 'Should contains the same number of objects as files' {
+                $filesCount = (Get-ChildItem -Path "$TmpFolder" -Filter "*.json" -Recurse:$true | Measure-Object).Count
+                $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
+                $adfIns.AllObjects().Count | Should Be $filesCount
+            }
+        }
+
 
     } 
 }
