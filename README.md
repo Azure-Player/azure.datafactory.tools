@@ -102,7 +102,7 @@ Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGro
 
 ## Other environments (stage)
 
-Use optional ```[-Stage]``` parameter to prepare json files of ADF with appropriate values for properties and deploy to another environment correctly. See section: **How it works / Step 2** for more details.
+Use optional ```[-Stage]``` parameter to prepare json files of ADF with appropriate values for properties and deploy to another environment correctly. See section: **How it works / Step: Replacing all properties environment-related** for more details.  
 
 
 > Detailed *Wiki* documentation - coming soon.
@@ -252,7 +252,19 @@ There are 4 columns in CSV file:
 
 > File name must follow the pattern: **config-{stage}.csv** and be located in folder named: **deployment**.
 
-For example, planning deployment into UAT and PROD environments you need to create these files:
+
+
+Optional parameter. When defined, process will replace all properties defined in (csv) configuration file.
+The parameter can be either full path to csv file (must ends with .csv) or just stage name.
+When you provide parameter value 'UAT' the process will try open config file located .\deployment\config-UAT.csv
+
+> Use optional [-Stage] parameter when executing ```Publish-AdfV2FromJson``` module to replace values for/with properties specified in config file(s).
+
+There are 2 ways to provide value for `Stage` parameter:  
+### Stage value as environment code/name
+
+You can provide short environment code, e.g. UAT, PROD for `Stage` parameter.  
+In that case, planning deployment into UAT and PROD environments you need to create these files (subfolder `deployment` in relation to main ADF location):
 ```
 SQLPlayerDemo  
     dataflow  
@@ -265,7 +277,10 @@ SQLPlayerDemo
     pipeline  
     trigger  
 ```
-> Use optional [-Stage] parameter when executing ```Publish-AdfV2FromJson``` module to replace values for/with properties specified in config file(s).
+### Stage value as full path to CSV config file
+The second way is to provide full path to configuration file.  
+For example, if you provide `c:\MyCode\adf\uat-parameters.csv`, an exact file will be use to read configuration as the value ends with ".csv". Although, in that case, the file may be located anywhere, it's recommended to keep them along with other ADF files. 
+
 
 ## Step: Stoping triggers
 This block stops all triggers which must be stopped due to deployment.

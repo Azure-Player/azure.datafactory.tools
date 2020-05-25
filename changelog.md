@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 * Creation of ADF (if does not exist) is optional now
 * The first set of unit tests for the module
+* Capability to pass full path to csv config file location via `stage` parameter 
 
 ## [0.7.0] - 2020-05-09
 ### Fixed
