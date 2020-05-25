@@ -79,17 +79,34 @@ function Publish-AdfV2FromJson {
     Write-Host "DataFactoryName:    $DataFactoryName";
     Write-Host "Location:           $Location";
     Write-Host "Stage:              $Stage";
+    Write-Host "Options provided:   $($null -ne $Option)";
     Write-Host "======================================================================================";
 
     $script:StartTime = Get-Date
 
+    if ($null -ne $Option) {
+        Write-Host "Publish options are provided."
+        $opt = $Option
+    }
+    else {
+        Write-Host "Publish options are not provided."
+        $opt = New-AdfPublishOption
+    }
+
     Write-Host "STEP: Verifying whether ADF exists..."
-    $adf = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -ErrorAction:Ignore
-    if (!$adf) {
-        Write-Host "Creating Azure Data Factory..."
-        Set-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -Location "$Location"
-    } else {
+    $targetAdf = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -ErrorAction:Ignore
+    if ($targetAdf) {
         Write-Host "Azure Data Factory exists."
+    } else {
+        $msg = "Azure Data Factory instance does not exist."
+        if ($opt.CreateNewInstance) {
+            Write-Host "$msg"
+            Write-Host "Creating a new instance of Azure Data Factory..."
+            Set-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -Location "$Location"
+        } else {
+            Write-Host "Creation operation skipped as publish option 'CreateNewInstance' = false"
+            Write-Error "$msg"
+        }
     }
 
     Write-Host "===================================================================================";
@@ -100,13 +117,7 @@ function Publish-AdfV2FromJson {
 
     # Apply Deployment Options if applicable
     if ($null -ne $Option) {
-        Write-Host "Publish options are provided."
-        ApplyExclusionOptions -adf $adf -option $Option
-        $opt = $Option
-    }
-    else {
-        Write-Host "Publish options are not provided."
-        $opt = New-AdfPublishOption
+        ApplyExclusionOptions -adf $adf -option $opt
     }
 
     Write-Host "===================================================================================";

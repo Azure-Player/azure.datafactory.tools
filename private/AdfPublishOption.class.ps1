@@ -3,4 +3,5 @@ class AdfPublishOption {
     [hashtable] $Excludes = @{}
     [Boolean] $DeleteNotInSource = $true
     [Boolean] $StopStartTriggers = $true
+    [Boolean] $CreateNewInstance = $true
 }
