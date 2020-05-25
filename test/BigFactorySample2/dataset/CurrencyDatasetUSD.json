@@ -1,0 +1,21 @@
+{
+	"name": "CurrencyDatasetUSD",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "BlobSampleData",
+			"type": "LinkedServiceReference"
+		},
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "Currency_USD.txt",
+				"folderPath": "adfdataflowdocs",
+				"container": "adfv2"
+			},
+			"columnDelimiter": "\t",
+			"firstRowAsHeader": false
+		},
+		"schema": []
+	}
+}

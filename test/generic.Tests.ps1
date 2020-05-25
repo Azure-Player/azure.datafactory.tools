@@ -58,5 +58,9 @@ Describe 'azure.datafactory.tools Module'{
         It 'Should have less than 10000 characters in the release notes of the module manifest' {
             $script:moduleManifest.ReleaseNotes.Length | Should -BeLessThan 10000
         }
+
+        It 'Should have tags with no spaces' {
+            $script:moduleManifest.PrivateData["PSData"]["Tags"] | Where-Object { $_.Split(' ').Length -gt 1 } | Should -Be $null
+        }
     }
 }
