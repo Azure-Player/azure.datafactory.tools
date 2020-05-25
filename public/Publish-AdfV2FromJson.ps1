@@ -18,6 +18,8 @@ Name of target ADF instance
 
 .PARAMETER Stage
 Optional parameter. When defined, process will replace all properties defined in (csv) configuration file.
+The parameter can be either full path to csv file (must ends with .csv) or just stage name.
+When you provide parameter value 'UAT' the process will try open config file located .\deployment\config-UAT.csv
 
 .PARAMETER Location
 Azure Region for target ADF. Used only for create new ADF instance.
@@ -34,8 +36,13 @@ $RootFolder = "c:\GitHub\AdfName\"
 Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName" -Location "$Location"
 
 .EXAMPLE
-# Publish entire ADF to with specified properties (different environment)
+# Publish entire ADF with specified properties (different environment stage name provided)
 Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName" -Location "$Location" -Stage "UAT"
+
+.EXAMPLE
+# Publish entire ADF with specified properties (different environment config full path file provided)
+$configCsvFile = 'c:\myCode\myadf\deployment\config-UAT.csv'
+Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName" -Location "$Location" -Stage "$configCsvFile"
 
 .EXAMPLE
 # Including objects by type and name pattern
