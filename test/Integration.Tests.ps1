@@ -15,6 +15,7 @@ Import-Module -Name $moduleManifestPath -Force -Verbose:$false
 InModuleScope azure.datafactory.tools {
     #$testHelperPath = $PSScriptRoot | Split-Path -Parent | Join-Path -ChildPath 'TestHelper'
     #Import-Module -Name $testHelperPath -Force
+    . ".\test\New-TempDirectory.ps1"
 
     # Variables for use in tests
     $script:ResourceGroupName = 'rg-devops-factory'
