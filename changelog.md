@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.8.0] - 2020-05-26
+### Added
+* Creation of ADF (if does not exist) is optional now
+* The first set of unit tests for the module
+* Capability to pass full path to csv config file location via `stage` parameter 
+
 ## [0.7.0] - 2020-05-09
 ### Fixed
 * Fixed RegEx to scanning dependant objects (references). They were not found when multiple whitespaces figured.

@@ -1,0 +1,21 @@
+{
+	"name": "taxi_trip_fare_input",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "BlobSampleData",
+			"type": "LinkedServiceReference"
+		},
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "trip_fare_1.csv",
+				"folderPath": "adfdataflowdocs",
+				"container": "adfv2"
+			},
+			"columnDelimiter": ",",
+			"firstRowAsHeader": true
+		},
+		"schema": []
+	}
+}

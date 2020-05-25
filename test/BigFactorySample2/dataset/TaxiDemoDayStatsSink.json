@@ -1,0 +1,21 @@
+{
+	"name": "TaxiDemoDayStatsSink",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "BlobSampleData",
+			"type": "LinkedServiceReference"
+		},
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "",
+				"folderPath": "adfdataflowdocs",
+				"container": "adfv2"
+			},
+			"columnDelimiter": ",",
+			"firstRowAsHeader": true
+		},
+		"schema": []
+	}
+}

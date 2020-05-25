@@ -1,0 +1,21 @@
+{
+	"name": "CurrencyDatasetCAD",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "BlobSampleData",
+			"type": "LinkedServiceReference"
+		},
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "Currency_CAD.txt",
+				"folderPath": "adfdataflowdocs",
+				"container": "adfv2"
+			},
+			"columnDelimiter": "\t",
+			"firstRowAsHeader": false
+		},
+		"schema": []
+	}
+}
