@@ -35,9 +35,9 @@ InModuleScope azure.datafactory.tools {
     Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "###" -Recurse:$true -Force 
 
     Describe 'Publish-AdfV2FromJson' -Tag 'Integration' {
-        It 'Folder should exist' {
-            { Get-Command -Name Import-AdfFromFolder -ErrorAction Stop } | Should -Not -Throw
-        }
+        # It 'Folder should exist' {
+        #     { Get-Command -Name Import-AdfFromFolder -ErrorAction Stop } | Should -Not -Throw
+        # }
 
         Context 'when does not exist and called without Location' {
             It 'Throw error' {
@@ -47,7 +47,19 @@ InModuleScope azure.datafactory.tools {
             }
         }
 
-        Context 'when does not exist and called with Location and Option Exclude all' {
+        Context 'when does not exist and called with option CreateNewInstance=false' {
+            It 'Throw error' {
+                { 
+                    $opt = New-AdfPublishOption
+                    $opt.CreateNewInstance = $false
+                    Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                    -ResourceGroupName "$ResourceGroupName" `
+                    -DataFactoryName "$DataFactoryName" `
+                    -Location "$Location" -Option $opt } | Should -Throw
+            }
+        }
+
+        Context 'when does not exist and called with Location but without objects' {
             It 'Should create new ADF instance' {
                 $script:result = Publish-AdfV2FromJson -RootFolder "$RootFolder" `
                     -ResourceGroupName "$ResourceGroupName" `
@@ -65,6 +77,8 @@ InModuleScope azure.datafactory.tools {
                 $adfService.ResourceGroupName | Should -Be "$ResourceGroupName"
             }
         }
+
+        #Context 'when does not exist and called with Location and Option Exclude all' {
 
         Context 'ADF exist and publish 1 new pipeline' {
             It 'Should contains 1 pipeline' {

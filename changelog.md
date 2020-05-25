@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.8.0] - 2020-05-??
+### Added
+* Creation of ADF (if does not exist) is optional now
+* The first set of unit tests for the module
+
 ## [0.7.0] - 2020-05-09
 ### Fixed
 * Fixed RegEx to scanning dependant objects (references). They were not found when multiple whitespaces figured.
