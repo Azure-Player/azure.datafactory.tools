@@ -22,7 +22,7 @@ InModuleScope azure.datafactory.tools {
     $script:Stage = 'UAT'
     $script:guid =  (New-Guid).ToString().Substring(0,8)
     $script:guid = '5889b15h'
-    $script:DataFactoryName = "SQLPlayerDemo-$Stage-$guid"
+    $script:DataFactoryName = (Split-Path -Path $env:ADF_ExampleCode -Leaf) + "-$guid"
     $script:SrcFolder = $env:ADF_ExampleCode
     $script:Location = "NorthEurope"
     $script:AllExcluded = (New-AdfPublishOption)

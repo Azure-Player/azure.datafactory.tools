@@ -5,16 +5,18 @@
 			"referenceName": "BlobSampleData",
 			"type": "LinkedServiceReference"
 		},
+		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "",
 				"folderPath": "adfdataflowdocs",
 				"container": "adfv2"
 			},
 			"columnDelimiter": ",",
-			"firstRowAsHeader": false
+			"escapeChar": "\\",
+			"firstRowAsHeader": false,
+			"quoteChar": "\""
 		},
 		"schema": []
 	}

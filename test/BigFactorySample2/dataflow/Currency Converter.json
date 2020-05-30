@@ -10,16 +10,14 @@
 						"referenceName": "CurrencyDatasetUSD",
 						"type": "DatasetReference"
 					},
-					"name": "USDCurrency",
-					"script": "source(output(\n\t\tPreviousConversionRate as double,\n\t\tCountry as string,\n\t\tDateTime1 as string,\n\t\tCurrentConversionRate as double\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false) ~> USDCurrency"
+					"name": "USDCurrency"
 				},
 				{
 					"dataset": {
 						"referenceName": "CurrencyDatasetCAD",
 						"type": "DatasetReference"
 					},
-					"name": "CADSource",
-					"script": "source(output(\n\t\tPreviousConversionRate as double,\n\t\tCountry as string,\n\t\tDateTime1 as string,\n\t\tCurrentConversionRate as double\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false) ~> CADSource"
+					"name": "CADSource"
 				}
 			],
 			"sinks": [
@@ -28,35 +26,31 @@
 						"referenceName": "USDOutput",
 						"type": "DatasetReference"
 					},
-					"name": "USDSink",
-					"script": "ConditionalSplit1@USD sink(allowSchemaDrift: true,\n\tvalidateSchema: false) ~> USDSink"
+					"name": "USDSink"
 				},
 				{
 					"dataset": {
 						"referenceName": "CADOutput1",
 						"type": "DatasetReference"
 					},
-					"name": "CADSink",
-					"script": "ConditionalSplit1@CAD sink(allowSchemaDrift: true,\n\tvalidateSchema: false) ~> CADSink"
+					"name": "CADSink"
 				}
 			],
 			"transformations": [
 				{
 					"name": "Union",
-					"description": "The Union combines 2 streams together",
-					"script": "USDCurrency, CADSource union(byName: true)~> Union"
+					"description": "The Union combines 2 streams together"
 				},
 				{
 					"name": "NewCurrencyColumn",
-					"description": "Create a new calculated column from currency rate",
-					"script": "Union derive(NewCurrencyRate = round(CurrentConversionRate*1.25)) ~> NewCurrencyColumn"
+					"description": "Create a new calculated column from currency rate"
 				},
 				{
 					"name": "ConditionalSplit1",
-					"description": "Split the data on state to create 2 streams",
-					"script": "NewCurrencyColumn split(Country == 'USD',\n\tCountry == 'CAD',\n\tdisjoint: false) ~> ConditionalSplit1@(USD, CAD)"
+					"description": "Split the data on state to create 2 streams"
 				}
-			]
+			],
+			"script": "source(output(\n\t\tPreviousConversionRate as double,\n\t\tCountry as string,\n\t\tDateTime1 as string,\n\t\tCurrentConversionRate as double\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false) ~> USDCurrency\nsource(output(\n\t\tPreviousConversionRate as double,\n\t\tCountry as string,\n\t\tDateTime1 as string,\n\t\tCurrentConversionRate as double\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false) ~> CADSource\nUSDCurrency, CADSource union(byName: true)~> Union\nUnion derive(NewCurrencyRate = round(CurrentConversionRate*1.25)) ~> NewCurrencyColumn\nNewCurrencyColumn split(Country == 'USD',\n\tCountry == 'CAD',\n\tdisjoint: false) ~> ConditionalSplit1@(USD, CAD)\nConditionalSplit1@USD sink(allowSchemaDrift: true,\n\tvalidateSchema: false) ~> USDSink\nConditionalSplit1@CAD sink(allowSchemaDrift: true,\n\tvalidateSchema: false) ~> CADSink"
 		}
 	}
 }
