@@ -41,7 +41,7 @@ function Import-AdfFromFolder {
 
     Import-AdfObjects -Adf $adf -All $adf.IntegrationRuntimes -RootFolder $RootFolder -SubFolder "integrationRuntime" | Out-Null
     Write-Host ("IntegrationRuntimes: {0} object(s) loaded." -f $adf.IntegrationRuntimes.Count)
-    Import-AdfObjects -Adf $adf -All $adf.LinkedServices -RootFolder $RootFolder -SubFolder "LinkedService" | Out-Null
+    Import-AdfObjects -Adf $adf -All $adf.LinkedServices -RootFolder $RootFolder -SubFolder "linkedService" | Out-Null
     Write-Host ("LinkedServices: {0} object(s) loaded." -f $adf.LinkedServices.Count)
     Import-AdfObjects -Adf $adf -All $adf.Pipelines -RootFolder $RootFolder -SubFolder "pipeline" | Out-Null
     Write-Host ("Pipelines: {0} object(s) loaded." -f $adf.Pipelines.Count)
