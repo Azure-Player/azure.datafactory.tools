@@ -1,0 +1,29 @@
+{
+	"name": "TR_AlwaysDisabled",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Month",
+				"interval": 1,
+				"startTime": "2020-05-28T23:19:00.000Z",
+				"timeZone": "UTC",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						3
+					],
+					"monthDays": [
+						1,
+						15
+					]
+				}
+			}
+		}
+	}
+}

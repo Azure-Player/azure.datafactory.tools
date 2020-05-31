@@ -1,0 +1,24 @@
+{
+	"name": "LS_SqlServer_DEV19_AW2017",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": "Integrated Security=True;Data Source=dev19;Initial Catalog=AdventureWorks2017",
+			"userName": "etlprocess",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "LS_AzureKeyVault",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "dev19-etlprocess-password"
+			}
+		},
+		"connectVia": {
+			"referenceName": "SharedIR-DEV2019",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
