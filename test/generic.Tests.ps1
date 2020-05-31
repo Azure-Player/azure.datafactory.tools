@@ -7,8 +7,8 @@ param
     $ModuleRootPath = (Get-Location)
 )
 
-$moduleManifestName = 'azure.datafactory.tools.psd1'
-$moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
+$script:moduleManifestName = 'azure.datafactory.tools.psd1'
+$script:moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
 
 Describe 'azure.datafactory.tools Module'{
 
@@ -21,7 +21,7 @@ Describe 'azure.datafactory.tools Module'{
         }
 
         $PSScriptAnalyzerResult = Invoke-ScriptAnalyzer `
-            -Path $moduleManifestPath `
+            -Path $script:moduleManifestPath `
             -Settings $s `
             -ErrorAction SilentlyContinue `
             -Verbose:$false
