@@ -15,7 +15,7 @@ Get-Location | Out-Host
 Write-Host "Installing PS modules..."
 Install-Module 'Az.DataFactory' -Force -MinimumVersion 1.8.0
 Install-Module 'PSScriptAnalyzer' -Force
-Install-Module 'Pester' -Force
+Install-Module 'Pester' -Force -MinimumVersion 5.0.1
 Import-Module 'Pester'
 Import-Module 'PSScriptAnalyzer'
 Import-Module 'Az.DataFactory'

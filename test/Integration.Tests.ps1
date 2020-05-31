@@ -126,7 +126,7 @@ InModuleScope azure.datafactory.tools {
             It "Should contains the same number of objects as files - $($script:FinalOpt.Excludes.Count)" {
                 $filesCount = (Get-ChildItem -Path "$TmpFolder" -Filter "*.json" -Recurse:$true | Measure-Object).Count
                 $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
-                $adfIns.AllObjects().Count | Should Be ($filesCount - $script:FinalOpt.Excludes.Count)
+                $adfIns.AllObjects().Count | Should -Be ($filesCount - $script:FinalOpt.Excludes.Count)
             }
         }
 
