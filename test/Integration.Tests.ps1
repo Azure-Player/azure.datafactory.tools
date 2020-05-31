@@ -4,7 +4,7 @@ param
 (
     [Parameter()]
     [System.String]
-    $ModuleRootPath = ($PSScriptRoot | Split-Path -Parent)
+    $ModuleRootPath = (Get-Location)
 )
 
 $moduleManifestName = 'azure.datafactory.tools.psd1'
