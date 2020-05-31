@@ -31,6 +31,8 @@ InModuleScope azure.datafactory.tools {
     $script:AllExcluded.DeleteNotInSource = $false
     $script:TmpFolder = (New-TemporaryDirectory).FullName
     $script:RootFolder = Join-Path -Path $script:TmpFolder -ChildPath (Split-Path -Path $script:SrcFolder -Leaf)
+    $script:FinalOpt = New-AdfPublishOption
+
 
     Remove-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -Force
     Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "###" -Recurse:$true -Force 
@@ -83,7 +85,7 @@ InModuleScope azure.datafactory.tools {
 
         Context 'ADF exist and publish 1 new pipeline' {
             It 'Should contains 1 pipeline' {
-                $PipelineName = "PL_Wait"
+                $PipelineName = "PL_Wait5sec"
                 Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "$PipelineName.json" -Recurse:$true -Force 
                 #Get-ChildItem -Path $RootFolder -Recurse:$true
                 Publish-AdfV2FromJson -RootFolder "$RootFolder" `
@@ -95,24 +97,36 @@ InModuleScope azure.datafactory.tools {
             }
         }
 
-
+        Context 'when waitTimeInSeconds in Wait Activity contains expression instead of Int32' {
+            It 'Deployment of contained pipeline fails (until Microsoft will not fix it)' { {
+                $PipelineName = "PL_Wait_Dynamic"
+                $script:FinalOpt.Excludes.Add("*.$PipelineName","")
+                Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "$PipelineName.json" -Recurse:$true -Force 
+                Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                    -ResourceGroupName "$ResourceGroupName" `
+                    -DataFactoryName "$DataFactoryName" -Location "$Location" 
+                } | Should -Throw
+            }
+        }
         
 
 
 
 
 
-        Context 'ADF exist and publish whole ADF' {
+        Context 'ADF exist and publish whole ADF (except SharedIR)' {
             It 'Should finish successfully' {
                 Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.json" -Recurse:$true -Force 
+                $script:FinalOpt.Excludes.Add("*.SharedIR*","")
+                $script:FinalOpt.Excludes.Add("*.LS_SqlServer_DEV19_AW2017","")
                 Publish-AdfV2FromJson -RootFolder "$RootFolder" `
                     -ResourceGroupName "$ResourceGroupName" `
-                    -DataFactoryName "$DataFactoryName" -Location "$Location" 
+                    -DataFactoryName "$DataFactoryName" -Location "$Location" -Option $script:FinalOpt
             }
-            It 'Should contains the same number of objects as files' {
+            It "Should contains the same number of objects as files - $($script:FinalOpt.Excludes.Count)" {
                 $filesCount = (Get-ChildItem -Path "$TmpFolder" -Filter "*.json" -Recurse:$true | Measure-Object).Count
                 $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
-                $adfIns.AllObjects().Count | Should Be $filesCount
+                $adfIns.AllObjects().Count | Should Be ($filesCount - $script:FinalOpt.Excludes.Count)
             }
         }
 

@@ -1,0 +1,29 @@
+{
+	"name": "PL_Wait_Dynamic",
+	"properties": {
+		"activities": [
+			{
+				"name": "DynamicWait",
+				"type": "Wait",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": {
+						"value": "@pipeline().parameters.WaitInSec",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"WaitInSec": {
+				"type": "int",
+				"defaultValue": 10
+			}
+		},
+		"folder": {
+			"name": "ExternalError"
+		},
+		"annotations": []
+	}
+}
