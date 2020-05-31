@@ -9,16 +9,14 @@
 						"referenceName": "taxi_trip_data_input",
 						"type": "DatasetReference"
 					},
-					"name": "TripData",
-					"script": "source(output(\n\t\tmedallion as string,\n\t\thack_license as string,\n\t\tvendor_id as string,\n\t\trate_code as string,\n\t\tstore_and_fwd_flag as string,\n\t\tpickup_datetime as string,\n\t\tdropoff_datetime as string,\n\t\tpassenger_count as short,\n\t\ttrip_time_in_secs as long,\n\t\ttrip_distance as double,\n\t\tpickup_longitude as double,\n\t\tpickup_latitude as double,\n\t\tdropoff_longitude as double,\n\t\tdropoff_latitude as double\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false) ~> TripData"
+					"name": "TripData"
 				},
 				{
 					"dataset": {
 						"referenceName": "taxi_trip_fare_input",
 						"type": "DatasetReference"
 					},
-					"name": "TripFare",
-					"script": "source(output(\n\t\tmedallion as string,\n\t\t{ hack_license} as string,\n\t\t{ vendor_id} as string,\n\t\t{ pickup_datetime} as string,\n\t\t{ payment_type} as string,\n\t\t{ fare_amount} as double,\n\t\t{ surcharge} as double,\n\t\t{ mta_tax} as double,\n\t\t{ tip_amount} as double,\n\t\t{ tolls_amount} as double,\n\t\t{ total_amount} as double\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false) ~> TripFare"
+					"name": "TripFare"
 				}
 			],
 			"sinks": [
@@ -27,44 +25,38 @@
 						"referenceName": "TaxiDemoVendorStatsSink",
 						"type": "DatasetReference"
 					},
-					"name": "VendorStatsSink",
-					"script": "AggregateVendorStats sink(allowSchemaDrift: true,\n\tvalidateSchema: false) ~> VendorStatsSink"
+					"name": "VendorStatsSink"
 				},
 				{
 					"dataset": {
 						"referenceName": "TaxiDemoDayStatsSink",
 						"type": "DatasetReference"
 					},
-					"name": "DayStatsSink",
-					"script": "AggregateDayStats sink(allowSchemaDrift: true,\n\tvalidateSchema: false) ~> DayStatsSink"
+					"name": "DayStatsSink"
 				},
 				{
 					"dataset": {
 						"referenceName": "TaxiDemoTotalByPaymentType",
 						"type": "DatasetReference"
 					},
-					"name": "TotalPaymentByPaymentType",
-					"script": "AggregateByPaymentType sink(allowSchemaDrift: true,\n\tvalidateSchema: false) ~> TotalPaymentByPaymentType"
+					"name": "TotalPaymentByPaymentType"
 				}
 			],
 			"transformations": [
 				{
-					"name": "JoinMatchedData",
-					"script": "TripData, TripFare join(hack_license == { hack_license}\n\t&& TripData@medallion == TripFare@medallion\n\t&& vendor_id == { vendor_id}\n\t&& pickup_datetime == { pickup_datetime},\n\tjoinType:'inner',\n\tbroadcast: 'none')~> JoinMatchedData"
+					"name": "JoinMatchedData"
 				},
 				{
-					"name": "AggregateVendorStats",
-					"script": "JoinMatchedData aggregate(groupBy(vendor_id),\n\tpassenger_count = round(sum(passenger_count), 2),\n\t\ttrip_time_in_secs = round(sum(trip_time_in_secs)/60, 2),\n\t\ttrip_distance = round(sum(trip_distance), 2),\n\t\tTotalTripFare = round(sum({ total_amount}), 2)) ~> AggregateVendorStats"
+					"name": "AggregateVendorStats"
 				},
 				{
-					"name": "AggregateDayStats",
-					"script": "JoinMatchedData aggregate(groupBy(DayOfTheWeek = dayOfWeek(toDate(pickup_datetime,'yyyy-mm-dd hh:mm:ss'))),\n\ttrip_distance = round(avg(trip_distance), 2),\n\t\tpassenger_count = round(avg(passenger_count), 2),\n\t\ttrip_time_in_secs = round(avg(trip_time_in_secs)/60, 2),\n\t\taverage_fare = round(avg({ total_amount}), 2)) ~> AggregateDayStats"
+					"name": "AggregateDayStats"
 				},
 				{
-					"name": "AggregateByPaymentType",
-					"script": "TripFare aggregate(groupBy({ payment_type}),\n\teach(match(type=='double'), concat($$, '_total') = round(sum ($$)))) ~> AggregateByPaymentType"
+					"name": "AggregateByPaymentType"
 				}
-			]
+			],
+			"script": "source(output(\n\t\tmedallion as string,\n\t\thack_license as string,\n\t\tvendor_id as string,\n\t\trate_code as string,\n\t\tstore_and_fwd_flag as string,\n\t\tpickup_datetime as string,\n\t\tdropoff_datetime as string,\n\t\tpassenger_count as short,\n\t\ttrip_time_in_secs as long,\n\t\ttrip_distance as double,\n\t\tpickup_longitude as double,\n\t\tpickup_latitude as double,\n\t\tdropoff_longitude as double,\n\t\tdropoff_latitude as double\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false) ~> TripData\nsource(output(\n\t\tmedallion as string,\n\t\t{ hack_license} as string,\n\t\t{ vendor_id} as string,\n\t\t{ pickup_datetime} as string,\n\t\t{ payment_type} as string,\n\t\t{ fare_amount} as double,\n\t\t{ surcharge} as double,\n\t\t{ mta_tax} as double,\n\t\t{ tip_amount} as double,\n\t\t{ tolls_amount} as double,\n\t\t{ total_amount} as double\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false) ~> TripFare\nTripData, TripFare join(hack_license == { hack_license}\n\t&& TripData@medallion == TripFare@medallion\n\t&& vendor_id == { vendor_id}\n\t&& pickup_datetime == { pickup_datetime},\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> JoinMatchedData\nJoinMatchedData aggregate(groupBy(vendor_id),\n\tpassenger_count = round(sum(passenger_count), 2),\n\t\ttrip_time_in_secs = round(sum(trip_time_in_secs)/60, 2),\n\t\ttrip_distance = round(sum(trip_distance), 2),\n\t\tTotalTripFare = round(sum({ total_amount}), 2)) ~> AggregateVendorStats\nJoinMatchedData aggregate(groupBy(DayOfTheWeek = dayOfWeek(toDate(pickup_datetime,'yyyy-mm-dd hh:mm:ss'))),\n\ttrip_distance = round(avg(trip_distance), 2),\n\t\tpassenger_count = round(avg(passenger_count), 2),\n\t\ttrip_time_in_secs = round(avg(trip_time_in_secs)/60, 2),\n\t\taverage_fare = round(avg({ total_amount}), 2)) ~> AggregateDayStats\nTripFare aggregate(groupBy({ payment_type}),\n\teach(match(type=='double'), concat($$, '_total') = round(sum ($$)))) ~> AggregateByPaymentType\nAggregateVendorStats sink(allowSchemaDrift: true,\n\tvalidateSchema: false) ~> VendorStatsSink\nAggregateDayStats sink(allowSchemaDrift: true,\n\tvalidateSchema: false) ~> DayStatsSink\nAggregateByPaymentType sink(allowSchemaDrift: true,\n\tvalidateSchema: false) ~> TotalPaymentByPaymentType"
 		}
 	}
 }

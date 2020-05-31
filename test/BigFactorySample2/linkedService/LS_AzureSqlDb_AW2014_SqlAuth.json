@@ -1,0 +1,19 @@
+{
+	"name": "LS_AzureSqlDb_AW2014_SqlAuth",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=sqlplayer.database.windows.net;Initial Catalog=AdventureWorks2014;User ID=kamil@sqlplayer",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "LS_AzureKeyVault",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "sqlplayer-sqlserver-password"
+			}
+		}
+	}
+}

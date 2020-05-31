@@ -1,9 +1,9 @@
 {
-	"name": "PL_Wait",
+	"name": "PL_Wait5sec",
 	"properties": {
 		"activities": [
 			{
-				"name": "Wait1",
+				"name": "Wait5",
 				"type": "Wait",
 				"dependsOn": [],
 				"userProperties": [],

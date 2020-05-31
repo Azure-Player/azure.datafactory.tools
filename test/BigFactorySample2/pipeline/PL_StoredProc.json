@@ -1,0 +1,41 @@
+{
+	"name": "PL_StoredProc",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetBillOfMaterials",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[uspGetBillOfMaterials]",
+					"storedProcedureParameters": {
+						"CheckDate": {
+							"value": "2018-03-02",
+							"type": "DateTime"
+						},
+						"StartProductID": {
+							"value": null,
+							"type": "Int32"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureSqlDb_AW2014_SqlAuth",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "ExternalError"
+		},
+		"annotations": []
+	}
+}

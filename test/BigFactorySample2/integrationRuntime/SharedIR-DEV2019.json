@@ -1,0 +1,12 @@
+{
+	"name": "SharedIR-DEV2019",
+	"properties": {
+		"type": "SelfHosted",
+		"typeProperties": {
+			"linkedInfo": {
+				"resourceId": "/subscriptions/0278080f-e1af-4ee8-98b3-881a286350aa/resourcegroups/rg-datafactory/providers/Microsoft.DataFactory/factories/SQLPlayerIRs/integrationruntimes/IR-DEV2019",
+				"authorizationType": "Rbac"
+			}
+		}
+	}
+}
