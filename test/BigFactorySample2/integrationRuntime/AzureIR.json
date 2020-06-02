@@ -1,0 +1,17 @@
+{
+	"name": "AzureIR",
+	"properties": {
+		"type": "Managed",
+		"description": "NorthEurope",
+		"typeProperties": {
+			"computeProperties": {
+				"location": "North Europe",
+				"dataFlowProperties": {
+					"computeType": "General",
+					"coreCount": 8,
+					"timeToLive": 15
+				}
+			}
+		}
+	}
+}

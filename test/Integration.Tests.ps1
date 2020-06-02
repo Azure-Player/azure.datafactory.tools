@@ -104,7 +104,7 @@ InModuleScope azure.datafactory.tools {
                 Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "$PipelineName.json" -Recurse:$true -Force 
                 Publish-AdfV2FromJson -RootFolder "$RootFolder" `
                     -ResourceGroupName "$ResourceGroupName" `
-                    -DataFactoryName "$DataFactoryName" -Location "$Location" 
+                    -DataFactoryName "$DataFactoryName" -Location "$Location" -Method "AzDataFactory"
                 } | Should -Throw
             }
         }

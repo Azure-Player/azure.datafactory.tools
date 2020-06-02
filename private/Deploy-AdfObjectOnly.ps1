@@ -17,12 +17,14 @@ function Deploy-AdfObjectOnly {
     Write-Verbose ("Ready to deploy from file: {0}" -f $obj.FileName)
     $body = (Get-Content -Path $obj.FileName | Out-String)
     Write-Debug -Message $body
+    $json = $body | ConvertFrom-Json
 
-    switch -Exact ($obj.Type)
+    $type = $obj.Type
+    if ($script:PublishMethod -eq "AzResource") { $type = "AzResource" }
+    switch -Exact ($type)
     {
         'integrationRuntime'
         {
-            $json = $body | ConvertFrom-Json
             Set-StrictMode -Version 1.0
             if ($json.properties.type -eq "SelfHosted") {
                 $desc = if ($null -eq $json.properties.description) { " " } else { $json.properties.description }
@@ -111,6 +113,17 @@ function Deploy-AdfObjectOnly {
             -Name $obj.Name `
             -DefinitionFile $obj.FileName `
             -Force | Out-Null
+        }
+        'AzResource'
+        {
+            $resType = Get-AzureResourceType $obj.Type
+            New-AzResource `
+            -ResourceType $resType `
+            -ResourceGroupName $resourceGroupName `
+            -Name "$DataFactoryName/$($obj.Name)" `
+            -ApiVersion "2018-06-01" `
+            -Properties $json `
+            -IsFullObject -Force | Out-Null
         }
         default
         {
