@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.9.0] - 2020-06-03
+### Added
+* Additional method of deployment by New-AzResource cmdlet (default)
+### Fixed
+* Correct casing for folder "linkedService" in Import-AdfObjects cmdlet
+
 ## [0.8.0] - 2020-05-26
 ### Added
 * Creation of ADF (if does not exist) is optional now

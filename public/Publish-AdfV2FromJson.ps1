@@ -27,6 +27,10 @@ Azure Region for target ADF. Used only for create new ADF instance.
 .PARAMETER Option
 This objects allows to define certain behaviour of deployment process. Use cmdlet "New-AdfPublishOption" to create new instance of objects and set required properties.
 
+.PARAMETER Method
+Optional parameter. Currently this cmdlet contains two method of publishing: AzDataFactory, AzResource (default).
+AzResource method has been introduced due to bugs in Az.DataFactory PS module.
+
 .EXAMPLE
 # Publish entire ADF
 $ResourceGroupName = 'rg-devops-factory'
@@ -58,6 +62,10 @@ $opt.Includes.Add("pipeline.Wait1", "")
 $opt.StopStartTriggers = $false
 Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName" -Location "$Location" -Stage "UAT" -Option $opt
 
+.EXAMPLE
+# Publish entire ADF via Az.DataFactory module instead of Az.Resources
+Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName" -Location "$Location" -Method "AzDataFactory"
+
 .LINK
 Online version: https://github.com/SQLPlayer/azure.datafactory.tools/
 #>
@@ -65,12 +73,27 @@ function Publish-AdfV2FromJson {
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)] [String] $RootFolder,
-        [parameter(Mandatory = $true)] [String] $ResourceGroupName,
-        [parameter(Mandatory = $true)] [String] $DataFactoryName,
-        [parameter(Mandatory = $false)] [String] $Stage = $null,
-        [parameter(Mandatory = $false)] [String] $Location,
-        [parameter(Mandatory = $false)] [AdfPublishOption] $Option
+        [parameter(Mandatory = $true)] 
+        [String] $RootFolder,
+        
+        [parameter(Mandatory = $true)] 
+        [String] $ResourceGroupName,
+        
+        [parameter(Mandatory = $true)] 
+        [String] $DataFactoryName,
+        
+        [parameter(Mandatory = $false)] 
+        [String] $Stage = $null,
+        
+        [parameter(Mandatory = $false)] 
+        [String] $Location,
+        
+        [parameter(Mandatory = $false)] 
+        [AdfPublishOption] $Option,
+
+        [parameter(Mandatory = $false)] 
+        [ValidateSet('AzDataFactory','AzResource')] 
+        [String]$Method = 'AzResource'
     )
 
     $m = Get-Module -Name "azure.datafactory.tools"
@@ -87,9 +110,11 @@ function Publish-AdfV2FromJson {
     Write-Host "Location:           $Location";
     Write-Host "Stage:              $Stage";
     Write-Host "Options provided:   $($null -ne $Option)";
+    Write-Host "Publishing method:  $Method";
     Write-Host "======================================================================================";
 
     $script:StartTime = Get-Date
+    $script:PublishMethod = $Method
 
     if ($null -ne $Option) {
         Write-Host "Publish options are provided."

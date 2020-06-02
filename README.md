@@ -86,6 +86,7 @@ Publish-AdfV2FromJson
    -Location              <String>
    [-Stage]               <String>
    [-Option]              <AdfPublishOption>
+   [-Method]              <String>
 ```
 
 Assuming your ADF names ```SQLPlayerDemo``` and code located in ```c:\GitHub\AdfName\```, replace the values for *SubscriptionName*, *ResourceGroupName*, *DataFactoryName* and run the following command using PowerShell CLI:
@@ -211,6 +212,16 @@ $opt.Includes += $list2
 ```
 
 > **Remember:** Current version will not publish related objects when list of objects would be provided in *Includes* publish options. You must ensure that all dependent objects are already exist on target ADF service.
+
+## Publishing Method
+
+Parameter: ```Method``` (optional)  
+Currently ```Publish-AdfV2FromJson``` cmdlet contains two methods of publishing: 
+* AzDataFactory, 
+* AzResource *(default)*.  
+
+**AzResource** method has been introduced in version 0.9.0 due to bugs in **Az.DataFactory** PowerShell module and uses **Az.Resources** module to deploy Data Factory resources. However, if you still want to use Az.DataFactory module for deployments for any reasons - just use this parameter and specify the first method.
+
 
 # How it works
 
