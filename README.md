@@ -314,7 +314,19 @@ Restarting all triggers that should be enabled.
 
 # Publish from Azure DevOps
 
-> Custom Build/Release Task for Azure DevOps will be prepared and shared in Marketplace for free soon. Until then leverage PowerShell Task to execute the function from this module.
+There are two ways you can deploy Azure Data Factory with this approach (directly from code) within Azure DevOps Pipeline using:  
+* Publish Azure Data factory task (recommended)
+* Azure PowerShell task
+
+## Using Publish Azure Data factory (task)
+
+Custom Build/Release Task for Azure DevOps has been prepared as a very convenient way of configuring deployment task in Release Pipeline (Azure DevOps). Although it's only UI put on top of azure.datafactory.tools PS module, it gives users great experience if they don't have PowerShell skills or perhaps prefer using clear and simple fields configuration approach.  
+The "Publish Azure Data factory" task is available for free and open-source. 
+You can install it from Microsoft MarketPlace onto your organisation.  
+More information: [Marketplace](https://marketplace.visualstudio.com/items?itemName=SQLPlayer.DataFactoryTools)
+| [Source code and documentation](https://github.com/SQLPlayer/azure.datafactory.devops)
+
+## Using Azure PowerShell (task)
 
 Having PowerShell module it is very ease to configure Release Pipeline in Azure DevOps to publish ADF code as if from local machine. All steps you must create are:  
 - Download & install ```Az.DataFactory``` and ```azure.datafactory.tools``` PowerShell modules
