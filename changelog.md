@@ -9,9 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 * DeleteNotInSource option is $false by default now
 * Creates copy of files when replacing properties with values from config
 ### Fixed
+* When DeleteNotInSource=True and a trigger vanished from the source then the active trigger was not removing from service (#17)
 * Starting triggers based on properties replaced within config values (#18)
-* Changed encoding to UTF8 when writing files with replaced properties
 * Encoding UTF8 is set when reading all objects from disk (#19)
+* Changed encoding to UTF8 when writing files with replaced properties
 
 ## [0.9.0] - 2020-06-03
 ### Added

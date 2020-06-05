@@ -36,8 +36,9 @@ InModuleScope azure.datafactory.tools {
 
     Remove-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -Force
     Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.csv" -Recurse:$true -Force 
+    #Invoke-Expression "explorer.exe '$TmpFolder'"
 
-    Describe 'Publish-AdfV2FromJson' -Tag 'Integration' {
+    Describe 'Publish-AdfV2FromJson' -Tag 'Integration', 'adf' {
         # It 'Folder should exist' {
         #     { Get-Command -Name Import-AdfFromFolder -ErrorAction Stop } | Should -Not -Throw
         # }
@@ -98,14 +99,14 @@ InModuleScope azure.datafactory.tools {
         }
 
         Context 'when waitTimeInSeconds in Wait Activity contains expression instead of Int32' {
-            It 'Deployment of contained pipeline fails (until Microsoft will not fix it)' { {
+            It 'Deployment of contained pipeline fails (until Microsoft will not fix it)' { #{
                 $PipelineName = "PL_Wait_Dynamic"
                 $script:FinalOpt.Excludes.Add("*.$PipelineName","")
-                Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "$PipelineName.json" -Recurse:$true -Force 
-                Publish-AdfV2FromJson -RootFolder "$RootFolder" `
-                    -ResourceGroupName "$ResourceGroupName" `
-                    -DataFactoryName "$DataFactoryName" -Location "$Location" -Method "AzDataFactory"
-                } | Should -Throw
+                # Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "$PipelineName.json" -Recurse:$true -Force 
+                # Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                #     -ResourceGroupName "$ResourceGroupName" `
+                #     -DataFactoryName "$DataFactoryName" -Location "$Location" -Method "AzDataFactory"
+                # } | Should -Throw
             }
         }
         
@@ -124,6 +125,7 @@ InModuleScope azure.datafactory.tools {
             It 'Disabled trigger but enabled by config should be deployed and Started' {
                 $TriggerName = "TR_AlwaysDisabled"
                 Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "$TriggerName.json" -Recurse:$true -Force 
+                Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "config-c001.csv" -Recurse:$true -Force 
                 Publish-AdfV2FromJson -RootFolder "$RootFolder" `
                     -ResourceGroupName "$ResourceGroupName" `
                     -DataFactoryName "$DataFactoryName" -Location "$Location" -Stage "c001"
@@ -156,4 +158,88 @@ InModuleScope azure.datafactory.tools {
 
 
     } 
+
+
+    Describe 'Publish-AdfV2FromJson' -Tag 'Integration', 'triggers' {
+        Context 'when deploy all triggers' {
+            It 'Should contains the same number of files in trigger folder' {
+                Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "PL_Wait5sec.json" -Recurse:$true -Force 
+                Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "TR_*.json" -Recurse:$true -Force 
+                $script:opt = New-AdfPublishOption
+                $script:opt.Includes.Add("trigger.*", "")
+                $script:opt.Includes.Add("*.PL_Wait5sec", "")
+                Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                    -ResourceGroupName "$ResourceGroupName" `
+                    -DataFactoryName "$DataFactoryName" `
+                    -Location "$Location" -Option $script:opt
+                $script:TriggersOnDiskCount = (Get-ChildItem -Path "$RootFolder\trigger" -Filter "TR_*.json" -Recurse:$true | Measure-Object).Count
+                $tr = Get-AzDataFactoryV2Trigger -DataFactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
+                $arr = $tr | ToArray
+                $script:TriggersInServiceCount = $arr.Count
+                $arr.Count | Should -Be $script:TriggersOnDiskCount
+            }
+        }
+        Context 'when run Stop-Triggers and files are in source' {
+            It 'All triggers in service should be stopped afterwards' {
+                $adf = Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder "$RootFolder"
+                $adf.ResourceGroupName = "$ResourceGroupName";
+                Stop-Triggers -adf $adf
+                $tr = Get-AzDataFactoryV2Trigger -DataFactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
+                $notstopped = ($tr | Where-Object { $_.RuntimeState -ne "Stopped" } | ToArray)
+                $notstopped.Count | Should -Be 0
+            }
+        }
+        Context 'when run Stop-Triggers and no files in source' {
+            It 'All triggers in service should be stopped afterwards' {
+                Start-Triggers -adf $adf
+                Remove-Item -Path "$RootFolder\trigger\*" -Filter "TR_RunEveryDay.json" -Force
+                Remove-Item -Path "$RootFolder\trigger\*" -Filter "TR_TumblingWindow.json" -Force 
+                $script:TriggersOnDiskCount -= 2
+                $adf = Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder "$RootFolder"
+                $adf.ResourceGroupName = "$ResourceGroupName";
+                Stop-Triggers -adf $adf
+                $tr = Get-AzDataFactoryV2Trigger -DataFactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
+                $notstopped = ($tr | Where-Object { $_.RuntimeState -ne "Stopped" } | ToArray)
+                $notstopped.Count | Should -Be 0
+            }
+        }
+        Context 'when 2 triggers dissapear and option DeleteNotInSource=false' {
+            It 'Number of triggers in service should remain untouched' {
+                $script:opt.DeleteNotInSource = $false
+                Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                    -ResourceGroupName "$ResourceGroupName" `
+                    -DataFactoryName "$DataFactoryName" `
+                    -Location "$Location" -Option $opt
+                $tr = Get-AzDataFactoryV2Trigger -DataFactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
+                $arr = $tr | ToArray
+                $arr.Count | Should -Be $script:TriggersInServiceCount
+            }
+        }
+        Context 'when 2 triggers dissapear and option DeleteNotInSource=true' {
+            It 'Number of triggers in service should decreases by 2' {
+                $script:opt.DeleteNotInSource = $true
+                Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                    -ResourceGroupName "$ResourceGroupName" `
+                    -DataFactoryName "$DataFactoryName" `
+                    -Location "$Location" -Option $script:opt
+                $tr = Get-AzDataFactoryV2Trigger -DataFactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
+                $arr = $tr | ToArray
+                $arr.Count | Should -Be $script:TriggersOnDiskCount
+            }
+        }
+        Context 'When called and 3 triggers are in service' {
+            Mock Stop-AzDataFactoryV2Trigger { }
+            $adf = Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder "$RootFolder"
+            $adf.ResourceGroupName = "$ResourceGroupName";
+
+            It 'Should disable only those active' {
+                Stop-Triggers -adf $adf
+                $allTriggers = Get-AzDataFactoryV2Trigger -DataFactoryName $DataFactoryName -ResourceGroupName $ResourceGroupName
+                $activeTriggers = $allTriggers | Where-Object { $_.RuntimeState -ne "Stopped" } | ToArray
+                Assert-MockCalled Stop-AzDataFactoryV2Trigger -Times $activeTriggers.Count
+            }
+        }
+
+
+    }
 }
