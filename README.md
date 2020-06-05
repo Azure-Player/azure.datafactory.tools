@@ -119,7 +119,7 @@ $opt = New-AdfPublishOption
 `AdfPublishOption` contains the following options:  
 * [HashTable] **Includes** - defines a list of objects to be published (default: *empty*)  
 * [HashTable] **Excludes** - defines a list of objects to be NOT published (default: *empty*)  
-* [Boolean] **DeleteNotInSource** - indicates whether the objects not in the source should be deleted or not (default: *true*)  
+* [Boolean] **DeleteNotInSource** - indicates whether the objects not in the source should be deleted or not (default: *false*)  
 * [Boolean] **StopStartTriggers** - indicates whether the triggers would be stopped and restarted during the deployment (default: *true*)
 * [Boolean] **CreateNewInstance** - specifies whether the target ADF should be created when it does not exist. When target ADF doesn't exist and this option is set to *false* then `Publish-AdfV2FromJson` function fails.  (default: *true*)
 
