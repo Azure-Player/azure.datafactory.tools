@@ -1,0 +1,3 @@
+type,name,path,value
+trigger,TR_AlwaysDisabled,runtimeState,Started
+trigger,TR_AlwaysDisabled,typeProperties.recurrence.interval,2

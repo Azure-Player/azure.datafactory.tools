@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.10.0] - 2020-06-06
+### Changed
+* DeleteNotInSource option is $false by default now
+* Creates copy of files when replacing properties with values from config
+### Fixed
+* When DeleteNotInSource=True and a trigger vanished from the source then the active trigger was not removing from service (#17)
+* Starting triggers based on properties replaced within config values (#18)
+* Encoding UTF8 is set when reading all objects from disk (#19)
+* Changed encoding to UTF8 when writing files with replaced properties
+
 ## [0.9.0] - 2020-06-03
 ### Added
 * Additional method of deployment by New-AzResource cmdlet (default)

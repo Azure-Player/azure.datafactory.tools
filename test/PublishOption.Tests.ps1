@@ -37,7 +37,7 @@ InModuleScope azure.datafactory.tools {
                 $script:result.Excludes.Count | Should -Be 0
             }
             It 'Should contains additional properties with default values set' {
-                $script:result.DeleteNotInSource | Should -Be $true
+                $script:result.DeleteNotInSource | Should -Be $false
                 $script:result.StopStartTriggers | Should -Be $true
             }
 
