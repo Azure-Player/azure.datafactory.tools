@@ -13,7 +13,7 @@
 				"folderPath": "adfdataflowdocs",
 				"container": "adfv2"
 			},
-			"columnDelimiter": ",",
+			"columnDelimiter": "¦",
 			"escapeChar": "\\",
 			"firstRowAsHeader": false,
 			"quoteChar": "\""
