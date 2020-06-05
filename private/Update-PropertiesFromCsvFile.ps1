@@ -29,14 +29,29 @@ function Update-PropertiesFromCsvFile {
 
     $configcsv | ForEach-Object {
         Write-Debug "Item: $_"
-        $file = Join-Path $srcFolder "$($_.type)\$($_.name).json"
-        $newFile = $file
-        Write-Debug "File: $file"
-        $json = (Get-Content $file | ConvertFrom-Json)
-        $prop = "$($_.name).properties.$($_.path) = `"$($_.value)`""
-        Write-Verbose "- $prop"
-        Invoke-Expression "`$json.properties.$($_.path) = `"$($_.value)`""
-        $json | ConvertTo-Json -Depth 10 | Out-File $newFile -Encoding ascii
+        $path = $_.path
+        $value = $_.value
+        $name = $_.name
+        $type = $_.type
+        $o = Get-AdfObjectByName -adf $adf -name $name -type $type
+        if ($null -eq $o) {
+            Write-Error "Could not find object: $type.$name"
+        }
+        $json = $o.Body
+        
+        Invoke-Expression "`$fieldType = `$json.properties.$path.GetType()"
+        Write-Debug "Type of field [$path] = $fieldType"
+        if ($fieldType -eq [String]) {
+            $exp = "`$json.properties.$path = `"$value`""
+        } else {
+            $exp = "`$json.properties.$path = $value"
+        }
+        Invoke-Expression "$exp"
+
+        # Save new file for deployment purposes and change pointer in object instance
+        $f = (Save-AdfObjectAsFile -obj $o)
+        $o.FileName = $f
+
         $cnt++
     }
     Write-Host "*** Replaced $cnt properties. ***`n"
