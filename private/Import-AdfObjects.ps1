@@ -17,10 +17,10 @@ function Import-AdfObjects {
     }
 
     Write-Verbose "Folder: $folder"
-    Get-ChildItem "$folder" -Filter "*.json" | 
+    Get-ChildItem "$folder" -Filter "*.json" | Where-Object { !$_.Name.StartsWith('~') } |
     Foreach-Object {
         Write-Verbose "- $($_.Name)"
-        $txt = get-content $_.FullName
+        $txt = Get-Content $_.FullName -Encoding "UTF8"
         $o = New-Object -TypeName AdfObject 
         $o.Name = $_.BaseName
         $o.Type = $SubFolder

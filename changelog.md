@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 * Starting triggers based on properties replaced within config values (#18)
 * Changed encoding to UTF8 when writing files with replaced properties
+* Encoding UTF8 is set when reading all objects from disk (#19)
 
 ## [0.9.0] - 2020-06-03
 ### Added

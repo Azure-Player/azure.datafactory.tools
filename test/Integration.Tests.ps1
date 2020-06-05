@@ -126,7 +126,7 @@ InModuleScope azure.datafactory.tools {
                 Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "$TriggerName.json" -Recurse:$true -Force 
                 Publish-AdfV2FromJson -RootFolder "$RootFolder" `
                     -ResourceGroupName "$ResourceGroupName" `
-                    -DataFactoryName "$DataFactoryName" -Location "$Location" -Stage "uat"
+                    -DataFactoryName "$DataFactoryName" -Location "$Location" -Stage "c001"
                 $tr = Get-AzDataFactoryV2Trigger -DataFactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName" -Name "$TriggerName"
                 $tr.Name | Should -Be $TriggerName
                 $tr.RuntimeState | Should -Be "Started"

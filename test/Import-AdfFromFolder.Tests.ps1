@@ -96,6 +96,12 @@ InModuleScope azure.datafactory.tools {
                 if (Test-Path $folder) { $cnt = ($folder | Get-ChildItem -Recurse:$false -Filter "*.json" | Measure-Object).Count }
                 $script:result.IntegrationRuntimes.Count | Should -Be $cnt
             }
+            It 'Should contains valid non-ascii character' {
+                $o = Get-AdfObjectByName -adf $script:result -name "CADOutput1" -Type "dataset"
+                $char = $o.Body.properties.typeProperties.columnDelimiter
+                $char | Should -Be ([CHAR][BYTE]166)
+                $char.Length | Should -Be 1
+            }
 
         }
         
