@@ -4,9 +4,11 @@ param
 (
     [Parameter()]
     [System.String]
-    $ModuleRootPath = (Get-Location)
+    $ModuleRootPath
 )
 
+$ModuleRootPath = (Split-Path -Path $PSScriptRoot -Parent)
+Set-Location -Path $ModuleRootPath
 $moduleManifestName = 'azure.datafactory.tools.psd1'
 $moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
 
@@ -139,20 +141,24 @@ InModuleScope azure.datafactory.tools {
 
 
 
-
+        
         Context 'ADF exist and publish whole ADF (except SharedIR)' {
             It 'Should finish successfully' {
                 Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.json" -Recurse:$true -Force 
+                $script:AllFilesCount = (Get-ChildItem -Path "$TmpFolder" -Filter "*.json" -Recurse:$true | `
+                    Where-Object { !$_.Name.StartsWith('~') } | `
+                    Measure-Object).Count
                 $script:FinalOpt.Excludes.Add("*.SharedIR*","")
                 $script:FinalOpt.Excludes.Add("*.LS_SqlServer_DEV19_AW2017","")
-                Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                $script:ExcludeCount = $script:FinalOpt.Excludes.Count
+                { Publish-AdfV2FromJson -RootFolder "$RootFolder" `
                     -ResourceGroupName "$ResourceGroupName" `
                     -DataFactoryName "$DataFactoryName" -Location "$Location" -Option $script:FinalOpt
+                } | Should -Not -Throw
             }
-            It "Should contains the same number of objects as files - $($script:FinalOpt.Excludes.Count)" {
-                $filesCount = (Get-ChildItem -Path "$TmpFolder" -Filter "*.json" -Recurse:$true | Measure-Object).Count
+            It "Should contains the same number of objects as files subtract few excluded" {
                 $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
-                $adfIns.AllObjects().Count | Should -Be ($filesCount - $script:FinalOpt.Excludes.Count)
+                $adfIns.AllObjects().Count | Should -Be ($script:AllFilesCount - $script:ExcludeCount)
             }
         }
 
@@ -187,11 +193,11 @@ InModuleScope azure.datafactory.tools {
                 $tr = Get-AzDataFactoryV2Trigger -DataFactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
                 $notstopped = ($tr | Where-Object { $_.RuntimeState -ne "Stopped" } | ToArray)
                 $notstopped.Count | Should -Be 0
+                Start-Triggers -adf $adf
             }
         }
         Context 'when run Stop-Triggers and no files in source' {
             It 'All triggers in service should be stopped afterwards' {
-                Start-Triggers -adf $adf
                 Remove-Item -Path "$RootFolder\trigger\*" -Filter "TR_RunEveryDay.json" -Force
                 Remove-Item -Path "$RootFolder\trigger\*" -Filter "TR_TumblingWindow.json" -Force 
                 $script:TriggersOnDiskCount -= 2
@@ -229,12 +235,12 @@ InModuleScope azure.datafactory.tools {
         }
         Context 'When called and 3 triggers are in service' {
             Mock Stop-AzDataFactoryV2Trigger { }
-            $adf = Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder "$RootFolder"
-            $adf.ResourceGroupName = "$ResourceGroupName";
+            $script:adf = Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder "$RootFolder"
+            $script:adf.ResourceGroupName = "$ResourceGroupName";
 
             It 'Should disable only those active' {
-                Stop-Triggers -adf $adf
-                $allTriggers = Get-AzDataFactoryV2Trigger -DataFactoryName $DataFactoryName -ResourceGroupName $ResourceGroupName
+                Stop-Triggers -adf $script:adf
+                $allTriggers = Get-AzDataFactoryV2Trigger -DataFactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
                 $activeTriggers = $allTriggers | Where-Object { $_.RuntimeState -ne "Stopped" } | ToArray
                 Assert-MockCalled Stop-AzDataFactoryV2Trigger -Times $activeTriggers.Count
             }
