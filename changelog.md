@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## Incoming version
+## [0.10.0] - 2020-06-06
 ### Changed
 * DeleteNotInSource option is $false by default now
 * Creates copy of files when replacing properties with values from config
