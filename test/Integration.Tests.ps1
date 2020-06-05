@@ -35,7 +35,7 @@ InModuleScope azure.datafactory.tools {
 
 
     Remove-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -Force
-    Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "###" -Recurse:$true -Force 
+    Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.csv" -Recurse:$true -Force 
 
     Describe 'Publish-AdfV2FromJson' -Tag 'Integration' {
         # It 'Folder should exist' {
@@ -43,7 +43,7 @@ InModuleScope azure.datafactory.tools {
         # }
 
         Context 'when does not exist and called without Location' {
-            It 'Throw error' {
+            It 'Throw error #1' {
                 { Publish-AdfV2FromJson -RootFolder "$RootFolder" `
                     -ResourceGroupName "$ResourceGroupName" `
                     -DataFactoryName "$DataFactoryName" } | Should -Throw
@@ -51,7 +51,7 @@ InModuleScope azure.datafactory.tools {
         }
 
         Context 'when does not exist and called with option CreateNewInstance=false' {
-            It 'Throw error' {
+            It 'Throw error #2' {
                 { 
                     $opt = New-AdfPublishOption
                     $opt.CreateNewInstance = $false
@@ -109,7 +109,31 @@ InModuleScope azure.datafactory.tools {
             }
         }
         
+        Context 'when publishing Triggers' {
+            It 'Enabled trigger should be deployed and Started' {
+                $TriggerName = "TR_RunEveryDay"
+                Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "$TriggerName.json" -Recurse:$true -Force 
+                Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                    -ResourceGroupName "$ResourceGroupName" `
+                    -DataFactoryName "$DataFactoryName" -Location "$Location" 
+                $tr = Get-AzDataFactoryV2Trigger -DataFactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName" -Name "$TriggerName"
+                $tr.Name | Should -Be $TriggerName
+                $tr.RuntimeState | Should -Be "Started"
+            }
 
+            It 'Disabled trigger but enabled by config should be deployed and Started' {
+                $TriggerName = "TR_AlwaysDisabled"
+                Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "$TriggerName.json" -Recurse:$true -Force 
+                Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                    -ResourceGroupName "$ResourceGroupName" `
+                    -DataFactoryName "$DataFactoryName" -Location "$Location" -Stage "uat"
+                $tr = Get-AzDataFactoryV2Trigger -DataFactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName" -Name "$TriggerName"
+                $tr.Name | Should -Be $TriggerName
+                $tr.RuntimeState | Should -Be "Started"
+                $tr.Properties.Recurrence.Interval | Should -Be 2
+            }
+
+        }
 
 
 

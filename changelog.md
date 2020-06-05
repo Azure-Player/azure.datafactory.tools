@@ -7,7 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## Incoming version
 ### Changed
 * DeleteNotInSource option is $false by default now
-* 
+* Creates copy of files when replacing properties with values from config
+### Fixed
+* Starting triggers based on properties replaced within config values (#18)
+* Changed encoding to UTF8 when writing files with replaced properties
 
 ## [0.9.0] - 2020-06-03
 ### Added
