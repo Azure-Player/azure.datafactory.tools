@@ -234,7 +234,7 @@ You must have appropriate permission to create new instance.
 
 ## Step: Replacing all properties environment-related
 
-This step will be executed only when *[Stage]* parameter has been provided.  
+This step will be executed only when `[Stage]` parameter has been provided.  
 The whole concept of CI & CD (Continuous Integration and Continuous Delivery) process is to deploy automatically and riskless onto target infrastructure, supporting multi-environments. Each environment (or stage) to be exact the same code except selected properties. Very often these properties are:  
 - Data Factory name
 - Azure Key Vault URL (endpoint)
@@ -252,6 +252,8 @@ linkedService,LS_AzureKeyVault,typeProperties.baseUrl,"https://kv-blog-uat.vault
 linkedService,LS_BlobSqlPlayer,typeProperties.connectionString,"DefaultEndpointsProtocol=https;AccountName=blobstorageuat;EndpointSuffix=core.windows.net;"
 pipeline,PL_CopyMovies,activities[0].outputs[0].parameters.BlobContainer,UAT
 pipeline,PL_CopyMovies_with_param,parameters.DstBlobContainer.defaultValue,UAT
+pipeline,PL_Wait_Dynamic,parameters.WaitInSec,"{'type': 'int32','defaultValue': 22}"
+# This is comment - the line will be omitted
 ```
 > You can replace any property with that method.
 
@@ -261,8 +263,19 @@ There are 4 columns in CSV file:
 - path - Path of the property's value to be replaced within specific json file
 - value - Value to be set
 
-> File name must follow the pattern: **config-{stage}.csv** and be located in folder named: **deployment**.
+Column `type` accepts one of the following values only:
+- integrationRuntime
+- pipeline
+- dataset
+- dataflow
+- linkedService
+- trigger
 
+You can define 3 types of values in column `value`: number, string, (nested) JSON object.  
+If you need to use comma (,) in `value` column - remember to enclose entire value within double-quotes ("), like in this example below:
+```
+pipeline,PL_Wait_Dynamic,parameters.WaitInSec,"{'type': 'int32','defaultValue': 22}"
+```
 
 
 Optional parameter. When defined, process will replace all properties defined in (csv) configuration file.
@@ -288,6 +301,9 @@ SQLPlayerDemo
     pipeline  
     trigger  
 ```
+> File name must follow the pattern: **config-{stage}.csv** and be located in folder named: **deployment**.
+
+
 ### Stage value as full path to CSV config file
 The second way is to provide full path to configuration file.  
 For example, if you provide `c:\MyCode\adf\uat-parameters.csv`, an exact file will be use to read configuration as the value ends with ".csv". Although, in that case, the file may be located anywhere, it's recommended to keep them along with other ADF files. 
