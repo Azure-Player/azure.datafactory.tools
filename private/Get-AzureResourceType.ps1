@@ -11,7 +11,7 @@ function Get-AzureResourceType {
 
     switch -Exact ($type)
     {
-        'IntegrationRuntime'    { $resType = 'Microsoft.DataFactory/factories/integrationruntimes' }
+        'integrationRuntime'    { $resType = 'Microsoft.DataFactory/factories/integrationruntimes' }
         'pipeline'              { $resType = 'Microsoft.DataFactory/factories/pipelines' }
         'dataset'               { $resType = 'Microsoft.DataFactory/factories/datasets' }
         'dataflow'              { $resType = 'Microsoft.DataFactory/factories/dataflows' }
