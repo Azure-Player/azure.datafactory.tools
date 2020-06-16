@@ -51,6 +51,21 @@ InModuleScope azure.datafactory.tools {
 
         }
 
+        Context 'When called and CSV contains tokens to be replaced by environment variables' {
+            It 'Should complete' {
+                {
+                    $script:csv = Read-CsvConfigFile -Path ( Join-Path -Path $script:ConfigFolder -ChildPath "config-c003-variables.csv" )
+                } | Should -Not -Throw
+            }
+            It 'Should contains column value replaced' {
+                $Env:SYSTEM_STAGEDISPLAYNAME = "dev"
+                $csv[0].value | Should -Be 'Started'
+                $csv[1].value | Should -Be $Env:NUMBER_OF_PROCESSORS
+                $csv[2].value | Should -Be "https://kv-devStage.vault.azure.net/"
+                $csv[3].value | Should -Be "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=$Env:USERDOMAIN.database.windows.net;Initial Catalog=AdventureWorks2014;User ID=$Env:USERNAME@$Env:USERDOMAIN"
+            }
+        }
+
 
     } 
 }

@@ -1,0 +1,5 @@
+type,name,path,value
+trigger,TR_AlwaysDisabled,runtimeState,Started
+trigger,TR_AlwaysDisabled,typeProperties.recurrence.interval,$Env:NUMBER_OF_PROCESSORS
+linkedService,LS_AzureKeyVault,typeProperties.baseUrl,"https://kv-$($Env:SYSTEM_STAGEDISPLAYNAME)Stage.vault.azure.net/"
+linkedService,LS_AzureSqlDb_AW2014_SqlAuth,typeProperties.connectionString,"Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=$Env:USERDOMAIN.database.windows.net;Initial Catalog=AdventureWorks2014;User ID=$Env:USERNAME@$Env:USERDOMAIN"
