@@ -17,6 +17,7 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
   * Whether stop and restarting triggers
   * Whether delete or not objects not in the source
   * Whether create or not a new instance of ADF if it not exist
+* Tokenisation in config file allows replace any value by Environment Variable or Variable from DevOps Pipeline
 
 The following features coming soon:
 * Build function to support validation of files, dependencies and config
@@ -271,14 +272,31 @@ Column `type` accepts one of the following values only:
 - linkedService
 - trigger
 
+### Column VALUE
+
 You can define 3 types of values in column `value`: number, string, (nested) JSON object.  
 If you need to use comma (,) in `value` column - remember to enclose entire value within double-quotes ("), like in this example below:
 ```
 pipeline,PL_Wait_Dynamic,parameters.WaitInSec,"{'type': 'int32','defaultValue': 22}"
 ```
 
+#### Using Tokens as dynamic values
+You can use token syntax to define expression which should be replaced by value after reading CSV config file process. Currently PowerShell expression for environment is supported, which is: `$Env:VARIABLE` or `$($Env:VARIABLE)`.  
+Assuming you have *Environment Variable* name `USERDOMAIN` with value `CONTOSO`, this line from config file:
+```
+linkedService,AKV,typeProperties.baseUrl,"https://$Env:USERDOMAIN.vault.azure.net/"
+```
+will become that one after reading from disk:
+```
+linkedService,AKV,typeProperties.baseUrl,"https://CONTOSO.vault.azure.net/"
+```
 
-Optional parameter. When defined, process will replace all properties defined in (csv) configuration file.
+Having that in mind, you can leverage variables defined in Azure DevOps pipeline to replace tokens without extra task. This is possible because all pipeline's variables are available as environment variables within the agent.
+
+
+### Stage parameter
+
+Parameter is optional. When defined, process will replace all properties defined in (csv) configuration file.
 The parameter can be either full path to csv file (must ends with .csv) or just stage name.
 When you provide parameter value 'UAT' the process will try open config file located .\deployment\config-UAT.csv
 
