@@ -38,8 +38,14 @@ function Read-CsvConfigFile {
     Write-Host "Validation of config file completed."
 
     # Final reading
-    $configcsv = ConvertFrom-Csv $configtxt 
-    return $configcsv
+    $csv = ConvertFrom-Csv $configtxt 
+
+    # Expanding string (replace Environment Variables with values)
+    $csv | ForEach-Object {
+        $_.value = $ExecutionContext.InvokeCommand.ExpandString($_.value);
+    }
+
+    return $csv
 
     Write-Debug "END: Read-CsvConfigFile"
 
