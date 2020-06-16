@@ -20,19 +20,20 @@ function Update-PropertiesFromCsvFile {
 
     Write-Verbose "Replacing values for ADF properties from CSV config file"
     Write-Host "Config file:   $configFileName"
-    Write-Debug "Testing config file..."
-    Test-Path -Path $configFileName -PathType Leaf | Out-Null 
 
-    $configtxt = Get-Content $configFileName | Out-String
-    $configcsv = ConvertFrom-Csv $configtxt 
+    $configcsv = Read-CsvConfigFile -Path $configFileName
+
     $cnt = 0
-
     $configcsv | ForEach-Object {
         Write-Debug "Item: $_"
         $path = $_.path
         $value = $_.value
         $name = $_.name
         $type = $_.type
+
+        # Omit commented lines
+        if ($type.StartsWith('#')) { continue }
+
         $o = Get-AdfObjectByName -adf $adf -name $name -type $type
         if ($null -eq $o) {
             Write-Error "Could not find object: $type.$name"
@@ -42,8 +43,14 @@ function Update-PropertiesFromCsvFile {
         Invoke-Expression "`$fieldType = `$json.properties.$path.GetType()"
         Write-Debug "Type of field [$path] = $fieldType"
         if ($fieldType -eq [String]) {
+            Write-Debug "Setting as string value"
             $exp = "`$json.properties.$path = `"$value`""
+        } elseif ($fieldType -eq [System.Management.Automation.PSCustomObject]) {
+            Write-Debug "Setting as json value"
+            $jvalue = ConvertFrom-Json $value
+            $exp = "`$json.properties.$path = `$jvalue"
         } else {
+            Write-Debug "Setting as numeric value"
             $exp = "`$json.properties.$path = $value"
         }
         Invoke-Expression "$exp"
@@ -55,5 +62,7 @@ function Update-PropertiesFromCsvFile {
         $cnt++
     }
     Write-Host "*** Replaced $cnt properties. ***`n"
+
+    Write-Debug "END: Update-PropertiesFromCsvFile"
 
 }

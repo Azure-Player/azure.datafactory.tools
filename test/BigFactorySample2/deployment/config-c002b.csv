@@ -1,0 +1,2 @@
+type,name,path,value
+pipeline,PL_Wait_Dynamic,parameters.WaitInSec,"{'type': 'int32','defaultValue': 22}"

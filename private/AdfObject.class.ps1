@@ -50,3 +50,5 @@ class AdfObject {
 
 
 }
+
+Set-Variable ADF_FOLDERS -option ReadOnly -value ('integrationRuntime', 'pipeline', 'dataset', 'dataflow', 'linkedService', 'trigger')

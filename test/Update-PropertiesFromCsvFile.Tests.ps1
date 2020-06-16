@@ -82,6 +82,49 @@ InModuleScope azure.datafactory.tools {
             }
 
         }
+
         
+        Context 'When called and CSV has wrong format' {
+            It 'Should throw' {
+                $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
+                {
+                    Update-PropertiesFromCsvFile -adf $script:adf -stage "badformat"
+                } | Should -Throw
+            }
+            It 'Should contains all properties unchanged' {
+                $t = Get-AdfObjectByName -adf $script:adf -name "TR_AlwaysDisabled" -type "Trigger"
+                $t.Body.properties.runtimeState | Should -Be 'Stopped'
+                $t.Body.properties.typeProperties.recurrence.interval | Should -Be 1
+            }
+        }
+
+        Context 'When called and CSV contains multiple sub-properties as value' {
+            It 'Should complete' {
+                $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
+                {
+                    Update-PropertiesFromCsvFile -adf $script:adf -stage "c002"
+                } | Should -Not -Throw
+            }
+            It 'Should contains properties replaced and correct types' {
+                $t = Get-AdfObjectByName -adf $script:adf -name "PL_Wait_Dynamic" -type "pipeline"
+                $t.Body.properties.parameters.WaitInSec.type | Should -Be 'int32'
+                $t.Body.properties.parameters.WaitInSec.defaultValue | Should -Be 22
+            }
+        }
+
+        Context 'When called and CSV with commented rows' {
+            It 'Should complete' {
+                $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
+                {
+                    Update-PropertiesFromCsvFile -adf $script:adf -stage "commented"
+                } | Should -Not -Throw
+            }
+            It 'Should not apply changes for commented rows' {
+                $t = Get-AdfObjectByName -adf $script:adf -name "TR_AlwaysDisabled" -type "trigger"
+                $t.Body.properties.runtimeState | Should -Be 'Started'
+                $t.Body.properties.typeProperties.recurrence.interval | Should -Be 1
+            }
+        }
+
     } 
 }
