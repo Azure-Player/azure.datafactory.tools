@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.11.0] - 2020-06-16
+### Added
+* Validates config file during loading when `stage` parameter is provided
+* Config files allows defining whole nested JSON object (in addition to string or number only) (#16)
+* A line in CSV config file can be commented with hash character
+
 ## [0.10.0] - 2020-06-06
 ### Changed
 * DeleteNotInSource option is $false by default now
