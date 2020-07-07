@@ -43,6 +43,14 @@ function Update-PropertiesFromCsvFile {
         }
         $json = $o.Body
         
+        try {
+            Invoke-Expression "`$isExist = (`$null -ne `$json.properties.$path)"
+        }
+        catch {
+            $exc = ([System.Data.DataException]::new())
+            Write-Error -Message "Wrong path defined in config for object(path): $type.$name(properties.$path)" -Exception $exc
+        }
+
         Invoke-Expression "`$fieldType = `$json.properties.$path.GetType()"
         Write-Debug "Type of field [$path] = $fieldType"
         if ($fieldType -eq [String]) {
