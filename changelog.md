@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.13.0] - 2020-07-08
+### Fixed
+* All lines were being ignored in config file after commented line (#24)
+### Added
+* Precise error message once path provided in config file cannot be found in json file
+
 ## [0.12.0] - 2020-06-17
 ### Added
 * Config file allows using tokens in `value` column to be replaced by environment variables value

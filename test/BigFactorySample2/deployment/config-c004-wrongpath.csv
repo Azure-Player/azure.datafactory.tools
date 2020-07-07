@@ -1,0 +1,2 @@
+type,name,path,value
+linkedService,LS_AzureKeyVault,typeProperties:baseUrl,"https://kv-UAT-Stage.vault.azure.net/"
