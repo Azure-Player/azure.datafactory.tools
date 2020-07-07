@@ -126,5 +126,15 @@ InModuleScope azure.datafactory.tools {
             }
         }
 
+        Context 'When called and CSV contains incorrect path' {
+            It 'Should throw' {
+                $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
+                {
+                    Update-PropertiesFromCsvFile -adf $script:adf -stage "c004-wrongpath"
+                } | Should -Throw -ExceptionType ([System.Data.DataException])
+            }
+        }
+
+
     } 
 }
