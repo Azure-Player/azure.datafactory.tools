@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.14.0] - Upcoming soon
+### Changed
+* Removed workaround for deployment of Azure Integration Runtimes.
+
 ## [0.13.0] - 2020-07-08
 ### Fixed
 * All lines were being ignored in config file after commented line (#24)
