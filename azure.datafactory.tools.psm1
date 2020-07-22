@@ -31,7 +31,7 @@ if (Test-Path -Path "$PSScriptRoot\public" -ErrorAction Ignore)
 }
 
 $module = Get-Module Az.DataFactory
-$minVer = "1.7.0"
+$minVer = "1.8.2"
 if ($null -ne $module -and $module.Version.ToString().CompareTo($minVer) -lt 0) 
 { 
     Write-Error "This module requires Az.DataFactory version $minVer. An earlier version of Az.DataFactory is imported in the current PowerShell session. Please open a new session before importing this module. This error could indicate that multiple incompatible versions of the Azure PowerShell cmdlets are installed on your system. Please see https://aka.ms/azps-version-error for troubleshooting information." -ErrorAction Stop 
