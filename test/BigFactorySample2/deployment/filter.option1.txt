@@ -1,0 +1,6 @@
++pipeline.*
+-*.SharedIR*
+-*.LS_SqlServer_DEV19_AW2017
+trigger.*
+
+

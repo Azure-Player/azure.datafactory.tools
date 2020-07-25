@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [0.14.0] - Upcoming soon
 ### Changed
 * Removed workaround for deployment of Azure Integration Runtimes.
+### Added
+* List of filtering rules (Includes/Excludes) can be provided by file
 
 ## [0.13.0] - 2020-07-08
 ### Fixed
