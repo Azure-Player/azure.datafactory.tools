@@ -171,9 +171,11 @@ InModuleScope azure.datafactory.tools {
             It 'All properties should be deployed properly' {
                 $obName = "AzureIR"
                 Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "$obName.json" -Recurse:$true -Force 
+                $script:opt = New-AdfPublishOption
+                $script:opt.Includes.Add("*.$obName", "")
                 Publish-AdfV2FromJson -RootFolder "$RootFolder" `
                     -ResourceGroupName "$ResourceGroupName" `
-                    -DataFactoryName "$DataFactoryName" -Location "$Location" -Method "AzDataFactory"
+                    -DataFactoryName "$DataFactoryName" -Location "$Location" -Method "AzDataFactory" -Option $script:opt
                 $ir = Get-AzDataFactoryV2IntegrationRuntime -DataFactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName" -Name "$obName"
                 $ir.Name | Should -Be $obName
                 $ir.DataFlowTimeToLive | Should -Be 15
