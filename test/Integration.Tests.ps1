@@ -141,7 +141,7 @@ InModuleScope azure.datafactory.tools {
 
 
 
-        
+
         Context 'ADF exist and publish whole ADF (except SharedIR)' {
             It 'Should finish successfully' {
                 Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.json" -Recurse:$true -Force 
@@ -165,6 +165,28 @@ InModuleScope azure.datafactory.tools {
 
     } 
 
+
+    Describe 'Publish-AdfV2FromJson' -Tag 'Integration', 'ir' {
+        Context 'when publishing Azure IR' {
+            It 'All properties should be deployed properly' {
+                $obName = "AzureIR"
+                Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "$obName.json" -Recurse:$true -Force 
+                $script:opt = New-AdfPublishOption
+                $script:opt.Includes.Add("*.$obName", "")
+                Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                    -ResourceGroupName "$ResourceGroupName" `
+                    -DataFactoryName "$DataFactoryName" -Location "$Location" -Method "AzDataFactory" -Option $script:opt
+                $ir = Get-AzDataFactoryV2IntegrationRuntime -DataFactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName" -Name "$obName"
+                $ir.Name | Should -Be $obName
+                $ir.DataFlowTimeToLive | Should -Be 15
+                $ir.DataFlowComputeType | Should -Be "General"
+                $ir.DataFlowCoreCount | Should -Be 8
+                $ir.Location | Should -Be "North Europe"
+                $ir.Description | Should -Be "NorthEurope region"
+            }
+        }
+        
+    }
 
     Describe 'Publish-AdfV2FromJson' -Tag 'Integration', 'triggers' {
         Context 'when deploy all triggers' {

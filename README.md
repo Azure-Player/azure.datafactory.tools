@@ -28,7 +28,10 @@ The following features coming soon:
 # Overview
 
 This module works for Azure Data Factory **V2 only** and uses ```Az.DataFactory``` PowerShell module from Microsoft for management of objects in ADF service.  
-Supports Windows PowerShell 5.1 only. In the nearest future the module will be compatible with PowerShell Core as well.
+
+## Support
+
+The module is compatible and works with Windows PowerShell 5.1, PowerShell Core 6.0 and above. This means you can use Linux-based agents in your Azure DevOps pipelines.
 
 # How to start
 
@@ -154,6 +157,38 @@ $opt.StopStartTriggers = $false
 Objects would be excluded from deployment only if *Includes* list remains empty.  
 When both lists are empty - all objects going to be published.
 
+### Includes & Excludes rules in a file
+
+You can define set of filtering rules (includes/excludes) in a file and load all of them when creating *Publish Option* objects:
+```powershell
+# Example 5: Creating Publish Option object with an initialised rules
+$opt = New-AdfPublishOption -FilterFilePath ".\deployment\rules.txt"
+```
+Because one file contains all rules - there is a way to differentiate *Include* rules from *Exclude*.  
+Therefore, an extra character should be provided before the name/pattern:
+* `+` (plus) - for objects you want to include to a deployment
+* `-` (minus) - for objects you want to exclude from a deployment  
+
+> If char (+/-) is not provided – an inclusion rule (+) would be applied.
+
+### Filtering file example
+
+```
++pipeline.*
+trigger.*
+-*.SharedIR*
+-*.LS_SqlServer_DEV19_AW2017
+```
+
+The above file (if used) adds:
+- 2 items to *Includes* list (line 1-2)
+- 2 items to *Excludes* list (line 3-4)
+
+> The file should use UTF-8 encoding.
+
+
+### Using Publish Options in deployment
+
 Once you define all necessary options, just add the parameter to **Publish** function:  
 ```powershell
 Publish-AdfV2FromJson -RootFolder "$RootFolder" `
@@ -259,10 +294,12 @@ pipeline,PL_Wait_Dynamic,parameters.WaitInSec,"{'type': 'int32','defaultValue': 
 > You can replace any property with that method.
 
 There are 4 columns in CSV file:
-- type - Type of object. It's the same as folder where the object's file located
-- name - Name of objects. It's the same as json file in the folder
-- path - Path of the property's value to be replaced within specific json file
-- value - Value to be set
+- `type` - Type of object. It's the same as folder where the object's file located
+- `name` - Name of objects. It's the same as json file in the folder
+- `path` - Path of the property's value to be replaced within specific json file
+- `value` - Value to be set
+
+### Column TYPE
 
 Column `type` accepts one of the following values only:
 - integrationRuntime
@@ -272,10 +309,30 @@ Column `type` accepts one of the following values only:
 - linkedService
 - trigger
 
+### Column PATH
+
+Unless otherwise stated, mechanism always **replace (update)** the value for property. Location for those Properties are specified by `Path` column in Config file.  
+Additionally, you can **remove** selected property altogether or **create (add)** new one. To define desire action, put character `+` (plus) or `-` (minus) just before Property path:
+
+* `+` (plus) - Add new property with defined value
+* `-` (minus) - Remove existing property  
+
+See example below:
+```
+type,name,path,value
+# As usual - this line only update value for connectionString:
+linkedService,BlobSampleData,typeProperties.connectionString,"DefaultEndpointsProtocol=https;AccountName=sqlplayer2019;EndpointSuffix=core.windows.net;"
+# MINUS means the desired action is to REMOVE encryptedCredential:
+linkedService,BlobSampleData,-typeProperties.encryptedCredential,
+# PLUS means the desired action is to ADD new property with associated value:
+linkedService,BlobSampleData,+typeProperties.accountKey,"$($Env:VARIABLE)"
+```
+
+
 ### Column VALUE
 
-You can define 3 types of values in column `value`: number, string, (nested) JSON object.  
-If you need to use comma (,) in `value` column - remember to enclose entire value within double-quotes ("), like in this example below:
+You can define 3 types of values in column `Value`: number, string, (nested) JSON object.  
+If you need to use comma (,) in `Value` column - remember to enclose entire value within double-quotes ("), like in this example below:
 ```
 pipeline,PL_Wait_Dynamic,parameters.WaitInSec,"{'type': 'int32','defaultValue': 22}"
 ```

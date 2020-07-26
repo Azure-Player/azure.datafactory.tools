@@ -23,7 +23,7 @@ function Update-PropertiesFromCsvFile {
 
     $configcsv = Read-CsvConfigFile -Path $configFileName
 
-    $cnt = 0
+    $report = @{ Updated = 0; Added = 0; Removed = 0}
     $configcsv | ForEach-Object {
         Write-Debug "Item: $_"
         $path = $_.path
@@ -37,43 +37,64 @@ function Update-PropertiesFromCsvFile {
             return      # return is like continue for foreach and go to next item in collection
         }
 
+        $action = "update"
+        if ($path.StartsWith('+')) { 
+            $action = 'add';
+            $path = $path.Substring(1)
+        }
+        if ($path.StartsWith('-')) { 
+            $action = 'remove';
+            $path = $path.Substring(1)
+        }
+        if ($path.StartsWith("`$.properties.")) { 
+            $path = $path.Substring(13) 
+        }
+
         $o = Get-AdfObjectByName -adf $adf -name $name -type $type
-        if ($null -eq $o) {
+        if ($null -eq $o -and $action -ne "add") {
             Write-Error "Could not find object: $type.$name"
         }
         $json = $o.Body
         
+        Write-Verbose "- Performing: $action for path: properties.$path"
         try {
-            Invoke-Expression "`$isExist = (`$null -ne `$json.properties.$path)"
+            if ($action -ne "add") {
+                Invoke-Expression "`$isExist = (`$null -ne `$json.properties.$path)"
+            }
         }
         catch {
             $exc = ([System.Data.DataException]::new())
             Write-Error -Message "Wrong path defined in config for object(path): $type.$name(properties.$path)" -Exception $exc
         }
 
-        Invoke-Expression "`$fieldType = `$json.properties.$path.GetType()"
-        Write-Debug "Type of field [$path] = $fieldType"
-        if ($fieldType -eq [String]) {
-            Write-Debug "Setting as string value"
-            $exp = "`$json.properties.$path = `"$value`""
-        } elseif ($fieldType -eq [System.Management.Automation.PSCustomObject]) {
-            Write-Debug "Setting as json value"
-            $jvalue = ConvertFrom-Json $value
-            $exp = "`$json.properties.$path = `$jvalue"
-        } else {
-            Write-Debug "Setting as numeric value"
-            $exp = "`$json.properties.$path = $value"
+        switch -Exact ($action)
+        {
+            'update'
+            {
+                Update-ObjectProperty -obj $json -path "properties.$path" -value "$value"
+                $report['Updated'] += 1
+            }
+            'add'
+            {
+                Add-ObjectProperty -obj $json -path "properties.$path" -value "$value"
+                $report['Added'] += 1
+            }
+            'remove'
+            {
+                Remove-ObjectProperty -obj $json -path "properties.$path"
+                $report['Removed'] += 1
+            }
         }
-        Invoke-Expression "$exp"
 
         # Save new file for deployment purposes and change pointer in object instance
         $f = (Save-AdfObjectAsFile -obj $o)
         $o.FileName = $f
 
-        $cnt++
     }
-    Write-Host "*** Replaced $cnt properties. ***`n"
+    Write-Host "*** Properties modification report ***"
+    $report | Out-Host 
 
     Write-Debug "END: Update-PropertiesFromCsvFile"
 
 }
+
