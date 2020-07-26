@@ -291,10 +291,12 @@ pipeline,PL_Wait_Dynamic,parameters.WaitInSec,"{'type': 'int32','defaultValue': 
 > You can replace any property with that method.
 
 There are 4 columns in CSV file:
-- type - Type of object. It's the same as folder where the object's file located
-- name - Name of objects. It's the same as json file in the folder
-- path - Path of the property's value to be replaced within specific json file
-- value - Value to be set
+- `type` - Type of object. It's the same as folder where the object's file located
+- `name` - Name of objects. It's the same as json file in the folder
+- `path` - Path of the property's value to be replaced within specific json file
+- `value` - Value to be set
+
+### Column TYPE
 
 Column `type` accepts one of the following values only:
 - integrationRuntime
@@ -304,10 +306,30 @@ Column `type` accepts one of the following values only:
 - linkedService
 - trigger
 
+### Column PATH
+
+Unless otherwise stated, mechanism always **replace (update)** the value for property. Location for those Properties are specified by `Path` column in Config file.  
+Additionally, you can **remove** selected property altogether or **create (add)** new one. To define desire action, put character `+` (plus) or `-` (minus) just before Property path:
+
+* `+` (plus) - Add new property with defined value
+* `-` (minus) - Remove existing property  
+
+See example below:
+```
+type,name,path,value
+# As usual - this line only update value for connectionString:
+linkedService,BlobSampleData,typeProperties.connectionString,"DefaultEndpointsProtocol=https;AccountName=sqlplayer2019;EndpointSuffix=core.windows.net;"
+# MINUS means the desired action is to REMOVE encryptedCredential:
+linkedService,BlobSampleData,-typeProperties.encryptedCredential,
+# PLUS means the desired action is to ADD new property with associated value:
+linkedService,BlobSampleData,+typeProperties.accountKey,"$($Env:VARIABLE)"
+```
+
+
 ### Column VALUE
 
-You can define 3 types of values in column `value`: number, string, (nested) JSON object.  
-If you need to use comma (,) in `value` column - remember to enclose entire value within double-quotes ("), like in this example below:
+You can define 3 types of values in column `Value`: number, string, (nested) JSON object.  
+If you need to use comma (,) in `Value` column - remember to enclose entire value within double-quotes ("), like in this example below:
 ```
 pipeline,PL_Wait_Dynamic,parameters.WaitInSec,"{'type': 'int32','defaultValue': 22}"
 ```

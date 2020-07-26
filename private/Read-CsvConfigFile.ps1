@@ -30,7 +30,11 @@ function Read-CsvConfigFile {
             if ($_.type -notin $ADF_FOLDERS) { Write-Error -Message "Config file, row $i : Type ($($_.type)) is not supported." -Exception $exc }
             if ($_.name -eq "" -or $null -eq $_.name) { Write-Error -Message "Config file, row $i : Value in column 'Name' is empty." -Exception $exc }
             if ($_.path -eq "" -or $null -eq $_.path) { Write-Error -Message "Config file, row $i : Value in column 'Path' is empty." -Exception $exc }
-            if ($_.value -eq "" -or $null -eq $_.value) { Write-Warning -Message "Config file, row $i : Value in column 'Value' is empty." }
+            if ($_.value -eq "" -or $null -eq $_.value) { 
+                if (!$_.path.StartsWith('-')) {
+                    Write-Warning -Message "Config file, row $i : Value in column 'Value' is empty." 
+                }
+            }
             if ($null -ne $_.empty) { Write-Error -Message "Config file, row $i has too many columns." -Exception $exc }
         }
         $i++
