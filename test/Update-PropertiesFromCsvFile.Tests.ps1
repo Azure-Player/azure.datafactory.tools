@@ -135,6 +135,24 @@ InModuleScope azure.datafactory.tools {
             }
         }
 
+        Context 'When called and CSV has extra action (add/remove)' {
+            It 'Should complete' {
+                $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
+                {
+                    Update-PropertiesFromCsvFile -adf $script:adf -stage "c005-extra-action"
+                } | Should -Not -Throw
+            }
+            It 'Should contains 1 updated property' {
+                $script:ls = Get-AdfObjectByName -adf $script:adf -name "BlobSampleData" -type "linkedService"
+                $script:ls.Body.properties.typeProperties.connectionString | Should -Be "DefaultEndpointsProtocol=https;AccountName=sqlplayer2019;EndpointSuffix=core.windows.net;"
+            }
+            It 'Should contains 1 new property' {
+                $script:ls.Body.properties.typeProperties.accountKey | Should -Be "orefoifakerjgi40passwordrjegjorejgorjeogjoreg=="
+            }
+            It 'Should lost 1 property (removed)' {
+                Get-Member -InputObject $script:ls.Body.properties.typeProperties -name "encryptedCredential" -Membertype "Properties" | Should -Be $null
+            }
+        }
 
     } 
 }
