@@ -1,0 +1,4 @@
+type,name,path,value
+linkedService,BlobSampleData,-typeProperties.encryptedCredential,
+linkedService,BlobSampleData,typeProperties.connectionString,"DefaultEndpointsProtocol=https;AccountName=sqlplayer2019;EndpointSuffix=core.windows.net;"
+linkedService,BlobSampleData,+typeProperties.accountKey,"orefoifakerjgi40passwordrjegjorejgorjeogjoreg=="

@@ -2,7 +2,7 @@
 	"name": "AzureIR",
 	"properties": {
 		"type": "Managed",
-		"description": "NorthEurope",
+		"description": "NorthEurope region",
 		"typeProperties": {
 			"computeProperties": {
 				"location": "North Europe",
