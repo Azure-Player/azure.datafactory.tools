@@ -28,7 +28,10 @@ The following features coming soon:
 # Overview
 
 This module works for Azure Data Factory **V2 only** and uses ```Az.DataFactory``` PowerShell module from Microsoft for management of objects in ADF service.  
-Supports Windows PowerShell 5.1 only. In the nearest future the module will be compatible with PowerShell Core as well.
+
+## Support
+
+The module is compatible and works with Windows PowerShell 5.1, PowerShell Core 6.0 and above. This means you can use Linux-based agents in your Azure DevOps pipelines.
 
 # How to start
 
