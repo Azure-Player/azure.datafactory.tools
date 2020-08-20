@@ -9,7 +9,7 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
 * Creation of Azure Data Factory, if not exist
 * Deployment of all type of objects: pipelines, datasets, linked services, data flows, triggers, integration runtimes
 * Finding the **right order** for deploying objects (no more worrying about object names)
-* Build-in mechanism to replace the properties with the indicated values (CSV file)
+* Build-in mechanism to replace, remove or add the properties with the indicated values (CSV and JSON file formats supported)
 * Stop/start triggers
 * Dropping objects when not exist in the source (code)
 * Filtering (include or exclude) objects to be deployed by name and/or type
@@ -20,10 +20,11 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
 * Tokenisation in config file allows replace any value by Environment Variable or Variable from DevOps Pipeline
 
 The following features coming soon:
+* Support for Global Parameters
 * Build function to support validation of files, dependencies and config
 * Unit Tests of selected Pipelines and Linked Services
 
-> The module publish code which is created and maintanance by ADF in code repository, when configured.
+> The module publishes code, which is created and maintanance by ADF in code repository, when configured.
 
 # Overview
 
@@ -382,6 +383,32 @@ SQLPlayerDemo
 ### Stage value as full path to CSV config file
 The second way is to provide full path to configuration file.  
 For example, if you provide `c:\MyCode\adf\uat-parameters.csv`, an exact file will be use to read configuration as the value ends with ".csv". Although, in that case, the file may be located anywhere, it's recommended to keep them along with other ADF files. 
+
+### JSON format of Config file
+If you prefer using JSON rather than CSV for setting up configuration - JSON files are also supported now. Take a look at the following example: 
+```JSON
+{
+  "LS_AzureDatabricks": [
+    {
+      "name": "$.properties.typeProperties.existingClusterId",
+      "value": "$($Env:DatabricksClusterId)",
+      "action": "add"
+    },
+    {
+      "name": "$.properties.typeProperties.encryptedCredential",
+      "value": "",
+      "action": "remove"
+    }
+  ],
+  "LS_AzureKeyVault": [
+    {
+      "name": "$.properties.typeProperties.baseUrl",
+      "value": "https://kv-$($Env:Environment).vault.azure.net/",
+      "action": "update"
+    }
+  ]
+}
+```
 
 
 ## Step: Stoping triggers
