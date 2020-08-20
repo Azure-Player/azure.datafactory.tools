@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.15.0] - Upcoming
+### Added
+* Support of JSON format for config files
+
 ## [0.14.0] - 2020-07-26
 ### Changed
 * Removed workaround for deployment of Azure Integration Runtimes.

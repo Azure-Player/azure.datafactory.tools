@@ -1,0 +1,31 @@
+{
+    "LS_DataLakeStore": [
+      {
+        "name": "$.properties.typeProperties.url",
+        "value": "https://datalake$($Env:ProjectName)$($Env:Environment).dfs.core.windows.net/"
+      }
+    ],
+    "LS_AzureDatabricks": [
+      {
+        "name": "$.properties.typeProperties.existingClusterId",
+        "value": "$($Env:DatabricksClusterId)",
+        "action": "add"
+      },
+      {
+        "name": "$.properties.typeProperties.domain",
+        "value": "https://$($Env:Region).azuredatabricks.net",
+        "action": "update"
+      },
+      {
+        "name": "$.properties.typeProperties.encryptedCredential",
+        "value": "",
+        "action": "remove"
+      }
+    ],
+    "LS_AzureKeyVault": [
+      {
+        "name": "$.properties.typeProperties.baseUrl",
+        "value": "https://keyvault-$($Env:ProjectName)-$($Env:Environment).vault.azure.net/"
+      }
+    ]
+  }

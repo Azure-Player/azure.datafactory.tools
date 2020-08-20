@@ -21,34 +21,35 @@ InModuleScope azure.datafactory.tools {
     $script:SrcFolder = $env:ADF_ExampleCode
     $script:TmpFolder = (New-TemporaryDirectory).FullName
     $script:RootFolder = Join-Path -Path $script:TmpFolder -ChildPath (Split-Path -Path $script:SrcFolder -Leaf)
+    $script:DeploymentFolder = Join-Path -Path $script:RootFolder -ChildPath "deployment"
 
     Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.*" -Recurse:$true -Force 
     #Invoke-Expression "explorer.exe '$TmpFolder'"
 
-    Describe 'Update-PropertiesFromCsvFile' -Tag 'Unit','private' {
+    Describe 'Update-PropertiesFromFile' -Tag 'Unit','private' {
         It 'Should exist' {
-            { Get-Command -Name Update-PropertiesFromCsvFile -ErrorAction Stop } | Should -Not -Throw
+            { Get-Command -Name Update-PropertiesFromFile -ErrorAction Stop } | Should -Not -Throw
         }
 
         Context 'When called without parameters' {
             It 'Should throw an error' {
-                { Update-PropertiesFromCsvFile } | Should -Throw 
+                { Update-PropertiesFromFile } | Should -Throw 
             }
         }
 
         Context 'When called with parameters' {
             $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
             It 'and adf param is empty should throw an error ' { {
-                Update-PropertiesFromCsvFile -stage "uat" -Force
+                Update-PropertiesFromFile -stage "uat" -Force
                 } | Should -Throw 
             }
             It 'and stage param is empty should throw an error ' { {
-                Update-PropertiesFromCsvFile -adf $adf -Force
+                Update-PropertiesFromFile -adf $adf -Force
                 } | Should -Throw 
             }
             It 'and $adf.Location is empty should throw an error ' { {
                 $script:adf.Location = ""
-                Update-PropertiesFromCsvFile -adf $adf -stage "uat" -Force
+                Update-PropertiesFromFile -adf $adf -stage "uat" -Force
                 } | Should -Throw 
             }
         }
@@ -56,7 +57,7 @@ InModuleScope azure.datafactory.tools {
         Context 'When called with stage as short code but file does not exist' {
             $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
             It 'Should throw an error' { {
-                Update-PropertiesFromCsvFile -adf $script:adf -stage "FakeStage"
+                Update-PropertiesFromFile -adf $script:adf -stage "FakeStage"
                 } | Should -Throw 
             }
         }
@@ -65,7 +66,7 @@ InModuleScope azure.datafactory.tools {
             $script:now = Get-Date
             It 'Should return nothing' {
                 $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
-                $result = Update-PropertiesFromCsvFile -adf $script:adf -stage "UAT"
+                $result = Update-PropertiesFromFile -adf $script:adf -stage "UAT"
                 $result | Should -Be $null
             }
             It 'Should not modify any files' {
@@ -88,7 +89,7 @@ InModuleScope azure.datafactory.tools {
             It 'Should throw' {
                 $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
                 {
-                    Update-PropertiesFromCsvFile -adf $script:adf -stage "badformat"
+                    Update-PropertiesFromFile -adf $script:adf -stage "badformat"
                 } | Should -Throw
             }
             It 'Should contains all properties unchanged' {
@@ -102,7 +103,7 @@ InModuleScope azure.datafactory.tools {
             It 'Should complete' {
                 $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
                 {
-                    Update-PropertiesFromCsvFile -adf $script:adf -stage "c002"
+                    Update-PropertiesFromFile -adf $script:adf -stage "c002"
                 } | Should -Not -Throw
             }
             It 'Should contains properties replaced and correct types' {
@@ -116,7 +117,7 @@ InModuleScope azure.datafactory.tools {
             It 'Should complete' {
                 $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
                 {
-                    Update-PropertiesFromCsvFile -adf $script:adf -stage "commented"
+                    Update-PropertiesFromFile -adf $script:adf -stage "commented"
                 } | Should -Not -Throw
             }
             It 'Should not apply changes for commented rows' {
@@ -130,7 +131,7 @@ InModuleScope azure.datafactory.tools {
             It 'Should throw' {
                 $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
                 {
-                    Update-PropertiesFromCsvFile -adf $script:adf -stage "c004-wrongpath"
+                    Update-PropertiesFromFile -adf $script:adf -stage "c004-wrongpath"
                 } | Should -Throw -ExceptionType ([System.Data.DataException])
             }
         }
@@ -139,7 +140,7 @@ InModuleScope azure.datafactory.tools {
             It 'Should complete' {
                 $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
                 {
-                    Update-PropertiesFromCsvFile -adf $script:adf -stage "c005-extra-action"
+                    Update-PropertiesFromFile -adf $script:adf -stage "c005-extra-action"
                 } | Should -Not -Throw
             }
             It 'Should contains 1 updated property' {
@@ -155,4 +156,38 @@ InModuleScope azure.datafactory.tools {
         }
 
     } 
+
+    Describe 'Update-PropertiesFromFile with JSON' -Tag 'Unit','private','jsonconfig' {
+        
+        $testCases =  @( @{ configFile = 'config-c100.csv' }, @{ configFile = 'config-c100.json' } )
+
+        $Env:DatabricksClusterId = "0820-210125-test000"
+        $Env:Region = "uks"
+        $Env:ProjectName = "adft"
+        $Env:Environment = "uat"
+
+        Context 'When called and JSON has extra actions' {
+            It 'Should complete and has properties updated, added and removed' -TestCases $testCases {
+                $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
+                {
+                    $configFilePath = Join-Path -Path $script:DeploymentFolder -ChildPath "$configFile"
+                    Update-PropertiesFromFile -adf $script:adf -stage "$configFilePath"
+                } | Should -Not -Throw
+
+                $script:ls = Get-AdfObjectByName -adf $script:adf -name "LS_DataLakeStore" -type "linkedService"
+                $script:ls.Body.properties.typeProperties.url | Should -Be "https://datalake$($Env:ProjectName)$($Env:Environment).dfs.core.windows.net/"
+                $script:lsdbr = Get-AdfObjectByName -adf $script:adf -name "LS_AzureDatabricks" -type "linkedService"
+                $script:lsdbr.Body.properties.typeProperties.existingClusterId | Should -Be "$($Env:DatabricksClusterId)"
+                $script:lsdbr.Body.properties.typeProperties.domain | Should -Be "https://$($Env:Region).azuredatabricks.net"
+                $script:ls = Get-AdfObjectByName -adf $script:adf -name "LS_AzureKeyVault" -type "linkedService"
+                $script:ls.Body.properties.typeProperties.baseUrl | Should -Be "https://keyvault-$($Env:ProjectName)-$($Env:Environment).vault.azure.net/"
+
+                Get-Member -InputObject $script:lsdbr.Body.properties.typeProperties -name "encryptedCredential" -Membertype "Properties" | Should -Be $null
+            }
+        }
+
+
+    } 
+
+
 }
