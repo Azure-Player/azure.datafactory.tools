@@ -4,4 +4,5 @@ class AdfPublishOption {
     [Boolean] $DeleteNotInSource = $false
     [Boolean] $StopStartTriggers = $true
     [Boolean] $CreateNewInstance = $true
+    [Boolean] $DeployGlobalParams = $false
 }

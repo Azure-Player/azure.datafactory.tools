@@ -134,7 +134,8 @@ function Publish-AdfV2FromJson {
         if ($opt.CreateNewInstance) {
             Write-Host "$msg"
             Write-Host "Creating a new instance of Azure Data Factory..."
-            Set-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -Location "$Location"
+            $targetAdf = Set-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -Location "$Location"
+            $targetAdf | Format-List | Out-String
         } else {
             Write-Host "Creation operation skipped as publish option 'CreateNewInstance' = false"
             Write-Error "$msg"
@@ -146,7 +147,7 @@ function Publish-AdfV2FromJson {
     $adf = Import-AdfFromFolder -FactoryName $DataFactoryName -RootFolder "$RootFolder"
     $adf.ResourceGroupName = "$ResourceGroupName";
     Write-Debug ($adf | Format-List | Out-String)
-
+    
     # Apply Deployment Options if applicable
     if ($null -ne $Option) {
         ApplyExclusionOptions -adf $adf -option $opt
@@ -183,6 +184,14 @@ function Publish-AdfV2FromJson {
         }
     } else {
         Write-Host "Operation skipped as publish option 'DeleteNotInSource' = false"
+    }
+
+    Write-Host "===================================================================================";
+    Write-Host "STEP: Deploying Global Parameters ..."
+    if ($opt.DeployGlobalParams -eq $true) {
+        Update-GlobalParameters -adf $adf -targetAdf $targetAdf
+    } else {
+        Write-Host "Operation skipped as publish option 'DeployGlobalParams' = false"
     }
 
     Write-Host "===================================================================================";

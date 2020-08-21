@@ -1,3 +1,9 @@
+class AdfGlobalProp {
+    [string] $FilePath = ""
+    [string] $body = ""
+    [PSCustomObject] $GlobalParameters
+}
+
 class Adf {
     [string] $Name = ""
     [string] $ResourceGroupName = ""
@@ -8,6 +14,7 @@ class Adf {
     [System.Collections.ArrayList] $Triggers = @{}
     [System.Collections.ArrayList] $IntegrationRuntimes = @{}
     [string] $Location = ""
+    [AdfGlobalProp] $GlobalFactory = [AdfGlobalProp]::new()
 
     [System.Collections.ArrayList] AllObjects()
     {
