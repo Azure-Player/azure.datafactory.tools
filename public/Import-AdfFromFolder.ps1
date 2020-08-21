@@ -52,6 +52,23 @@ function Import-AdfFromFolder {
     Import-AdfObjects -Adf $adf -All $adf.Triggers -RootFolder $RootFolder -SubFolder "trigger" | Out-Null
     Write-Host ("Triggers: {0} object(s) loaded." -f $adf.Triggers.Count)
 
+
+    $factoryFolder = Join-Path -Path $RootFolder -ChildPath "factory"
+    Write-Verbose "Analyzing folder: $factoryFolder"
+    if (Test-Path -Path $factoryFolder) {
+        $file = Get-ChildItem -Path $factoryFolder -Filter "*.json" | Select-Object -First 1 
+        if ($file) {
+            $adf.GlobalFactory.FilePath = $file.FullName
+            $adf.GlobalFactory.body = Get-Content -Path $adf.GlobalFactory.FilePath -Raw -Encoding "UTF8"
+            $adf.GlobalFactory.GlobalParameters = (ConvertFrom-Json $adf.GlobalFactory.body).properties.globalParameters
+            Write-Host ("Global Factory Properties loaded.")
+        } else {
+            Write-Verbose ("Global Factory Properties not present.")
+        }
+    } else {
+        Write-Verbose ("Global Factory folder does not exist.")
+    }
+    
     Write-Debug "END: Import-AdfFromFolder()"
     return $adf
 }

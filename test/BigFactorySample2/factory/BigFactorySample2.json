@@ -12,7 +12,7 @@
 			},
 			"GP-Float": {
 				"type": "float",
-				"value": 3.141592653589793
+				"value": 3.14159265358979
 			},
 			"GP-Bool": {
 				"type": "bool",
