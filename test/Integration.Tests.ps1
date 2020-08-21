@@ -147,9 +147,11 @@ InModuleScope azure.datafactory.tools {
                 Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.json" -Recurse:$true -Force 
                 $script:AllFilesCount = (Get-ChildItem -Path "$TmpFolder" -Filter "*.json" -Recurse:$true | `
                     Where-Object { !$_.Name.StartsWith('~') } | `
+                    Where-Object { !$_.Name.StartsWith('config-') } | `
                     Measure-Object).Count
                 $script:FinalOpt.Excludes.Add("*.SharedIR*","")
                 $script:FinalOpt.Excludes.Add("*.LS_SqlServer_DEV19_AW2017","")
+                $script:FinalOpt.Excludes.Add("factory.*","")   # Global properties
                 $script:ExcludeCount = $script:FinalOpt.Excludes.Count
                 { Publish-AdfV2FromJson -RootFolder "$RootFolder" `
                     -ResourceGroupName "$ResourceGroupName" `
