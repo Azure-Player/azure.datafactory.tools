@@ -1,30 +1,40 @@
-function Update-PropertiesFromCsvFile {
+function Update-PropertiesFromFile {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)] [Adf] $adf,
         [Parameter(Mandatory)] [string] $stage
         )
 
-    Write-Debug "BEGIN: Update-PropertiesFromCsvFile(adf=$adf, stage=$stage)"
+    Write-Debug "BEGIN: Update-PropertiesFromFile(adf=$adf, stage=$stage)"
 
     $srcFolder = $adf.Location
     if ([string]::IsNullOrEmpty($srcFolder)) {
         Write-Error "adf.Location property has not been provided."
     }
     
+    $ext = "CSV"
     if ($stage.EndsWith(".csv")) { 
         $configFileName = $stage 
-    } else {
+    } elseif ($stage.EndsWith(".json")) {
+        $configFileName = $stage 
+        $ext = "JSON"
+    } 
+    else {
         $configFileName = Join-Path $srcFolder "deployment\config-$stage.csv"
     }
 
-    Write-Verbose "Replacing values for ADF properties from CSV config file"
+    Write-Verbose "Replacing values for ADF properties from $ext config file"
     Write-Host "Config file:   $configFileName"
 
-    $configcsv = Read-CsvConfigFile -Path $configFileName
+    if ($ext -eq "CSV") {
+        $config = Read-CsvConfigFile -Path $configFileName
+    } else {
+        $config = Read-JsonConfigFile -Path $configFileName -adf $adf
+    }
+    # $config | Out-Host 
 
     $report = @{ Updated = 0; Added = 0; Removed = 0}
-    $configcsv | ForEach-Object {
+    $config | ForEach-Object {
         Write-Debug "Item: $_"
         $path = $_.path
         $value = $_.value
@@ -55,6 +65,9 @@ function Update-PropertiesFromCsvFile {
             Write-Error "Could not find object: $type.$name"
         }
         $json = $o.Body
+        if ($null -eq $json) {
+            Write-Error "Body of the object is empty!"
+        }
         
         Write-Verbose "- Performing: $action for path: properties.$path"
         try {
@@ -94,7 +107,7 @@ function Update-PropertiesFromCsvFile {
     Write-Host "*** Properties modification report ***"
     $report | Out-Host 
 
-    Write-Debug "END: Update-PropertiesFromCsvFile"
+    Write-Debug "END: Update-PropertiesFromFile"
 
 }
 

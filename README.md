@@ -9,7 +9,7 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
 * Creation of Azure Data Factory, if not exist
 * Deployment of all type of objects: pipelines, datasets, linked services, data flows, triggers, integration runtimes
 * Finding the **right order** for deploying objects (no more worrying about object names)
-* Build-in mechanism to replace the properties with the indicated values (CSV file)
+* Build-in mechanism to replace, remove or add the properties with the indicated values (CSV and JSON file formats supported)
 * Stop/start triggers
 * Dropping objects when not exist in the source (code)
 * Filtering (include or exclude) objects to be deployed by name and/or type
@@ -18,12 +18,13 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
   * Whether delete or not objects not in the source
   * Whether create or not a new instance of ADF if it not exist
 * Tokenisation in config file allows replace any value by Environment Variable or Variable from DevOps Pipeline
+* Global Parameters
 
-The following features coming soon:
+The following features coming in the future:
 * Build function to support validation of files, dependencies and config
 * Unit Tests of selected Pipelines and Linked Services
 
-> The module publish code which is created and maintanance by ADF in code repository, when configured.
+> The module publishes code, which is created and maintanance by ADF in code repository, when configured.
 
 # Overview
 
@@ -125,7 +126,8 @@ $opt = New-AdfPublishOption
 * [HashTable] **Excludes** - defines a list of objects to be NOT published (default: *empty*)  
 * [Boolean] **DeleteNotInSource** - indicates whether the objects not in the source should be deleted or not (default: *false*)  
 * [Boolean] **StopStartTriggers** - indicates whether the triggers would be stopped and restarted during the deployment (default: *true*)
-* [Boolean] **CreateNewInstance** - specifies whether the target ADF should be created when it does not exist. When target ADF doesn't exist and this option is set to *false* then `Publish-AdfV2FromJson` function fails.  (default: *true*)
+* [Boolean] **CreateNewInstance** - specifies whether the target ADF should be created when it does not exist. When target ADF doesn't exist and this option is set to *false* then `Publish-AdfV2FromJson` function fails.  (default: *true*)  
+* [Boolean] **DeployGlobalParams** - indicates whether deploy Global Parameters of ADF. Nothing happens when parameters are not defined. (default: *true*)
 
 Subsequently, you can define the needed options:
 
@@ -308,6 +310,7 @@ Column `type` accepts one of the following values only:
 - dataflow
 - linkedService
 - trigger
+- factory *(for Global Parameters)*
 
 ### Column PATH
 
@@ -326,6 +329,7 @@ linkedService,BlobSampleData,typeProperties.connectionString,"DefaultEndpointsPr
 linkedService,BlobSampleData,-typeProperties.encryptedCredential,
 # PLUS means the desired action is to ADD new property with associated value:
 linkedService,BlobSampleData,+typeProperties.accountKey,"$($Env:VARIABLE)"
+factory,BigFactorySample2,"$.properties.globalParameters.'Env-Code'.value","PROD"
 ```
 
 
@@ -371,6 +375,7 @@ SQLPlayerDemo
     deployment               (new folder)  
         config-uat.csv       (file for UAT environment)
         config-prod.csv      (file for PROD environment)
+    factory
     integrationRuntime  
     linkedService  
     pipeline  
@@ -382,6 +387,32 @@ SQLPlayerDemo
 ### Stage value as full path to CSV config file
 The second way is to provide full path to configuration file.  
 For example, if you provide `c:\MyCode\adf\uat-parameters.csv`, an exact file will be use to read configuration as the value ends with ".csv". Although, in that case, the file may be located anywhere, it's recommended to keep them along with other ADF files. 
+
+### JSON format of Config file
+If you prefer using JSON rather than CSV for setting up configuration - JSON files are also supported now. Take a look at the following example: 
+```JSON
+{
+  "LS_AzureDatabricks": [
+    {
+      "name": "$.properties.typeProperties.existingClusterId",
+      "value": "$($Env:DatabricksClusterId)",
+      "action": "add"
+    },
+    {
+      "name": "$.properties.typeProperties.encryptedCredential",
+      "value": "",
+      "action": "remove"
+    }
+  ],
+  "LS_AzureKeyVault": [
+    {
+      "name": "$.properties.typeProperties.baseUrl",
+      "value": "https://kv-$($Env:Environment).vault.azure.net/",
+      "action": "update"
+    }
+  ]
+}
+```
 
 
 ## Step: Stoping triggers
@@ -426,7 +457,7 @@ Having PowerShell module it is very ease to configure Release Pipeline in Azure 
 Both steps you can find here:  
 ```powershell
 # Step 1
-Install-Module Az.DataFactory -MinimumVersion "1.7.0" -Force
+Install-Module Az.DataFactory -MinimumVersion "1.10.0" -Force
 Install-Module -Name "azure.datafactory.tools" -Force
 Import-Module -Name "azure.datafactory.tools" -Force
 
@@ -441,7 +472,7 @@ variables:
   DataFactoryName: 'SQLPlayerDemo'
 steps:
 - powershell: |
-   Install-Module Az.DataFactory -MinimumVersion "1.7.0" -Force
+   Install-Module Az.DataFactory -MinimumVersion "1.10.0" -Force
    Install-Module -Name "azure.datafactory.tools" -Force
    Import-Module -Name "azure.datafactory.tools" -Force
   displayName: 'PowerShell Script'

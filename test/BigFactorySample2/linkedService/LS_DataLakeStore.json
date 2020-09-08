@@ -1,0 +1,12 @@
+{
+	"name": "LS_DataLakeStore",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://sqlplayer2019.dfs.core.windows.net/",
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMOWU0LTBiZjUtNDZkMy1iYTNkLTE2ZjJlZGI1OWFlOCINCn0="
+		}
+	}
+}
