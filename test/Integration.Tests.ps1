@@ -172,6 +172,7 @@ InModuleScope azure.datafactory.tools {
             It 'Should run successfully' {
                 $script:opt = New-AdfPublishOption
                 $script:opt.Excludes.Add("*.*", "")
+                $script:opt.Includes.Add("factory.*", "")
                 $script:opt.DeployGlobalParams = $true
                 $script:opt.StopStartTriggers = $false
                 {
@@ -185,7 +186,7 @@ InModuleScope azure.datafactory.tools {
             It 'Should run and deploy 6 global properties' {
                 Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "$($script:DataFactoryOrigName).json" -Recurse:$true -Force 
                 $adf = Import-AdfFromFolder -FactoryName "$($script:DataFactoryName)" -RootFolder "$RootFolder"
-                $gp = ($adf.GlobalFactory.body | ConvertFrom-Json).properties.GlobalParameters
+                $gp = $adf.Factories[0].Body.properties.globalParameters
                 Publish-AdfV2FromJson -RootFolder "$RootFolder" `
                     -ResourceGroupName "$ResourceGroupName" `
                     -DataFactoryName "$DataFactoryName" -Location "$Location" -Option $script:opt 
@@ -202,7 +203,7 @@ InModuleScope azure.datafactory.tools {
                 $adfi.GlobalParameters.'GP-Object'.Type | Should -Be $gp.'GP-Object'.type
                 $adfi.GlobalParameters.'GP-Object'.Value | Should -Be $gp.'GP-Object'.value
                 $adfi.GlobalParameters.'GP-Array'.Type | Should -Be $gp.'GP-Array'.type
-                # $adfi.GlobalParameters.'GP-Array'.Value | Should -Be $gp.'GP-Array'.value
+                #$adfi.GlobalParameters.'GP-Array'.Value | Should -Be $gp.'GP-Array'.value # This is known bug
             }
         }
         
