@@ -134,7 +134,8 @@ function Publish-AdfV2FromJson {
         if ($opt.CreateNewInstance) {
             Write-Host "$msg"
             Write-Host "Creating a new instance of Azure Data Factory..."
-            Set-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -Location "$Location"
+            $targetAdf = Set-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -Location "$Location"
+            $targetAdf | Format-List | Out-String
         } else {
             Write-Host "Creation operation skipped as publish option 'CreateNewInstance' = false"
             Write-Error "$msg"
@@ -145,6 +146,7 @@ function Publish-AdfV2FromJson {
     Write-Host "STEP: Reading Azure Data Factory from JSON files..."
     $adf = Import-AdfFromFolder -FactoryName $DataFactoryName -RootFolder "$RootFolder"
     $adf.ResourceGroupName = "$ResourceGroupName";
+    $adf.Region = "$Location";
     Write-Debug ($adf | Format-List | Out-String)
 
     # Apply Deployment Options if applicable
@@ -155,7 +157,7 @@ function Publish-AdfV2FromJson {
     Write-Host "===================================================================================";
     Write-Host "STEP: Replacing all properties environment-related..."
     if (![string]::IsNullOrEmpty($Stage)) {
-        Update-PropertiesFromCsvFile -adf $adf -stage $Stage
+        Update-PropertiesFromFile -adf $adf -stage $Stage
     } else {
         Write-Host "Stage parameter was not provided - action skipped."
     }
@@ -170,6 +172,12 @@ function Publish-AdfV2FromJson {
 
     Write-Host "===================================================================================";
     Write-Host "STEP: Deployment of all ADF objects..."
+    if ($opt.DeployGlobalParams -eq $false) {
+        Write-Host "Deployment of Global Parameters will be skipped as publish option 'DeployGlobalParams' = false"
+        if ($adf.Factories.Count -gt 0) {
+            $adf.Factories[0].ToBeDeployed = $false
+        }
+    }
     $adf.AllObjects() | ForEach-Object {
         Deploy-AdfObject -obj $_
     }
@@ -195,7 +203,11 @@ function Publish-AdfV2FromJson {
     
     $elapsedTime = new-timespan $script:StartTime $(get-date)
     Write-Host "==============================================================================";
-    Write-Host "       Azure Data Factory files have been deployed successfully.";
-    Write-Host ([string]::Format("             Elapsed time: {0:d1}:{1:d2}:{2:d2}.{3:d3}", $elapsedTime.Hours, $elapsedTime.Minutes, $elapsedTime.Seconds, $elapsedTime.Milliseconds))
+    Write-Host "   *****   Azure Data Factory files have been deployed successfully.   *****`n";
+    Write-Host "Data Factory name:  $DataFactoryName";
+    Write-Host "Region (Location):  $location";
+    Write-Host ([string]::Format("     Elapsed time:  {0:d1}:{1:d2}:{2:d2}.{3:d3}`n", $elapsedTime.Hours, $elapsedTime.Minutes, $elapsedTime.Seconds, $elapsedTime.Milliseconds))
     Write-Host "==============================================================================";
+
+    return $adf
 }

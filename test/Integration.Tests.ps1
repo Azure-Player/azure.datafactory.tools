@@ -4,11 +4,9 @@ param
 (
     [Parameter()]
     [System.String]
-    $ModuleRootPath
+    $ModuleRootPath = (Get-Location)
 )
 
-$ModuleRootPath = (Split-Path -Path $PSScriptRoot -Parent)
-Set-Location -Path $ModuleRootPath
 $moduleManifestName = 'azure.datafactory.tools.psd1'
 $moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
 
@@ -24,7 +22,8 @@ InModuleScope azure.datafactory.tools {
     $script:Stage = 'UAT'
     $script:guid =  (New-Guid).ToString().Substring(0,8)
     $script:guid = '5889b15h'
-    $script:DataFactoryName = (Split-Path -Path $env:ADF_ExampleCode -Leaf) + "-$guid"
+    $script:DataFactoryOrigName = (Split-Path -Path $env:ADF_ExampleCode -Leaf)
+    $script:DataFactoryName = $script:DataFactoryOrigName + "-$guid"
     $script:SrcFolder = $env:ADF_ExampleCode
     $script:Location = "NorthEurope"
     $script:AllExcluded = (New-AdfPublishOption)
@@ -34,7 +33,7 @@ InModuleScope azure.datafactory.tools {
     $script:TmpFolder = (New-TemporaryDirectory).FullName
     $script:RootFolder = Join-Path -Path $script:TmpFolder -ChildPath (Split-Path -Path $script:SrcFolder -Leaf)
     $script:FinalOpt = New-AdfPublishOption
-
+    #RootFolder = c:\Users\kamil\AppData\Local\Temp\uddqzuen.tbu\BigFactorySample2
 
     Remove-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -Force
     Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.csv" -Recurse:$true -Force 
@@ -141,15 +140,17 @@ InModuleScope azure.datafactory.tools {
 
 
 
-
+        
         Context 'ADF exist and publish whole ADF (except SharedIR)' {
             It 'Should finish successfully' {
                 Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.json" -Recurse:$true -Force 
                 $script:AllFilesCount = (Get-ChildItem -Path "$TmpFolder" -Filter "*.json" -Recurse:$true | `
                     Where-Object { !$_.Name.StartsWith('~') } | `
+                    Where-Object { !$_.Name.StartsWith('config-') } | `
                     Measure-Object).Count
                 $script:FinalOpt.Excludes.Add("*.SharedIR*","")
                 $script:FinalOpt.Excludes.Add("*.LS_SqlServer_DEV19_AW2017","")
+                $script:FinalOpt.Excludes.Add("factory.*","")   # Global properties
                 $script:ExcludeCount = $script:FinalOpt.Excludes.Count
                 { Publish-AdfV2FromJson -RootFolder "$RootFolder" `
                     -ResourceGroupName "$ResourceGroupName" `
@@ -164,6 +165,50 @@ InModuleScope azure.datafactory.tools {
 
 
     } 
+
+
+    Describe 'Publish-AdfV2FromJson and DeployGlobalParams=true' -Tag 'Integration', 'global' {
+        Context 'But factory folder does not exist' {
+            It 'Should run successfully' {
+                $script:opt = New-AdfPublishOption
+                $script:opt.Excludes.Add("*.*", "")
+                $script:opt.Includes.Add("factory.*", "")
+                $script:opt.DeployGlobalParams = $true
+                $script:opt.StopStartTriggers = $false
+                {
+                    Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                        -ResourceGroupName "$ResourceGroupName" `
+                        -DataFactoryName "$DataFactoryName" -Location "$Location" -Option $script:opt 
+                } | Should -Not -Throw
+            }
+        }
+        Context 'and factory folder exists' {
+            It 'Should run and deploy 6 global properties' {
+                Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "$($script:DataFactoryOrigName).json" -Recurse:$true -Force 
+                $adf = Import-AdfFromFolder -FactoryName "$($script:DataFactoryName)" -RootFolder "$RootFolder"
+                $gp = $adf.Factories[0].Body.properties.globalParameters
+                Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                    -ResourceGroupName "$ResourceGroupName" `
+                    -DataFactoryName "$DataFactoryName" -Location "$Location" -Option $script:opt 
+                $adfi = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName"
+                $adfi.GlobalParameters.Count | Should -Be 6
+                $adfi.GlobalParameters.'GP-String'.Type | Should -Be $gp.'GP-String'.type
+                $adfi.GlobalParameters.'GP-String'.Value | Should -Be $gp.'GP-String'.value
+                $adfi.GlobalParameters.'GP-Int'.Type | Should -Be $gp.'GP-Int'.type
+                $adfi.GlobalParameters.'GP-Int'.Value | Should -Be $gp.'GP-Int'.value
+                $adfi.GlobalParameters.'GP-Float'.Type | Should -Be $gp.'GP-Float'.type
+                $adfi.GlobalParameters.'GP-Float'.Value | Should -Be $gp.'GP-Float'.value
+                $adfi.GlobalParameters.'GP-Bool'.Type | Should -Be $gp.'GP-Bool'.type
+                $adfi.GlobalParameters.'GP-Bool'.Value | Should -Be $gp.'GP-Bool'.value
+                $adfi.GlobalParameters.'GP-Object'.Type | Should -Be $gp.'GP-Object'.type
+                $adfi.GlobalParameters.'GP-Object'.Value | Should -Be $gp.'GP-Object'.value
+                $adfi.GlobalParameters.'GP-Array'.Type | Should -Be $gp.'GP-Array'.type
+                #$adfi.GlobalParameters.'GP-Array'.Value | Should -Be $gp.'GP-Array'.value # This is known bug
+            }
+        }
+        
+    }
+
 
 
     Describe 'Publish-AdfV2FromJson' -Tag 'Integration', 'ir' {

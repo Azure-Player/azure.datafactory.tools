@@ -51,6 +51,8 @@ function Import-AdfFromFolder {
     Write-Host ("DataFlows: {0} object(s) loaded." -f $adf.DataFlows.Count)
     Import-AdfObjects -Adf $adf -All $adf.Triggers -RootFolder $RootFolder -SubFolder "trigger" | Out-Null
     Write-Host ("Triggers: {0} object(s) loaded." -f $adf.Triggers.Count)
+    Import-AdfObjects -Adf $adf -All $adf.Factories -RootFolder $RootFolder -SubFolder "factory" | Out-Null
+    Write-Host ("Factories: {0} object(s) loaded." -f $adf.Factories.Count)
 
     Write-Debug "END: Import-AdfFromFolder()"
     return $adf

@@ -1,0 +1,6 @@
+type,name,path,value
+linkedService,LS_DataLakeStore,"$.properties.typeProperties.url","https://datalake$($Env:ProjectName)$($Env:Environment).dfs.core.windows.net/"
+linkedService,LS_AzureDatabricks,"+$.properties.typeProperties.existingClusterId","$($Env:DatabricksClusterId)"
+linkedService,LS_AzureDatabricks,"$.properties.typeProperties.domain","https://$($Env:Region).azuredatabricks.net"
+linkedService,LS_AzureDatabricks,"-$.properties.typeProperties.encryptedCredential",
+linkedService,LS_AzureKeyVault,"$.properties.typeProperties.baseUrl","https://keyvault-$($Env:ProjectName)-$($Env:Environment).vault.azure.net/"
