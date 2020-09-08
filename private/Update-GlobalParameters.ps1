@@ -8,22 +8,29 @@ param
 
     Write-Debug "BEGIN: Update-GlobalParameters"
 
-
     if ($adf.GlobalFactory.body.Length -gt 0)
     {
         $newGlobalParameters = New-Object 'system.collections.generic.dictionary[string,Microsoft.Azure.Management.DataFactory.Models.GlobalParameterSpecification]'
         Write-Verbose "Parsing JSON..."
         $globalFactoryObject = [Newtonsoft.Json.Linq.JObject]::Parse($adf.GlobalFactory.body)
-        $globalParametersObject = $globalFactoryObject.properties.globalParameters
+        #$globalParametersObject = $globalFactoryObject.properties.globalParameters
 
         Write-Host "Adding global parameter..."
-        foreach ($gp in $globalParametersObject.GetEnumerator()) {
-            Write-Host "- $($gp.Key)"
-            $globalParameterValue = $gp.Value.ToObject([Microsoft.Azure.Management.DataFactory.Models.GlobalParameterSpecification])
-            $newGlobalParameters.Add($gp.Key, $globalParameterValue)
+        foreach ($p in $adf.GlobalFactory.GlobalParameters.properties.globalParameters.PSObject.Properties)
+        {
+            # $p.Name
+            # $p.Value.type
+            # $p.Value.value
+            $gpspec = New-Object 'Microsoft.Azure.Management.DataFactory.Models.GlobalParameterSpecification'
+            $gpspec.Type = $p.Value.type
+            $gpspec.Value = $p.Value.value
+            $globalParameterValue = $gpspec
+            $newGlobalParameters.Add($p.Name, $globalParameterValue)
         }
-
         $targetAdf.GlobalParameters = $newGlobalParameters
+
+        # Write-Host "--- newGlobalParameters ---"
+        #$newGlobalParameters.Values | Out-Host
 
         Write-Verbose "Updating $($newGlobalParameters.Count) global parameters..."
         Set-AzDataFactoryV2 -InputObject $targetAdf -Force | Out-Null

@@ -21,6 +21,9 @@ function Deploy-AdfObjectOnly {
 
     $type = $obj.Type
     if ($script:PublishMethod -eq "AzResource") { $type = "AzResource" }
+    # Global parameters is being deployed with different method:
+    if ($obj.Type -eq "factory") { $type = "GlobalParameters" }
+
     switch -Exact ($type)
     {
         'integrationRuntime'
@@ -128,6 +131,12 @@ function Deploy-AdfObjectOnly {
             -ApiVersion "2018-06-01" `
             -Properties $json `
             -IsFullObject -Force | Out-Null
+        }
+        'GlobalParameters'
+        {
+            $adf.GlobalFactory.GlobalParameters = $json
+            $adf.GlobalFactory.body = $body
+            Update-GlobalParameters -adf $adf -targetAdf $targetAdf
         }
         default
         {

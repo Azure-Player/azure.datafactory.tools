@@ -18,9 +18,9 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
   * Whether delete or not objects not in the source
   * Whether create or not a new instance of ADF if it not exist
 * Tokenisation in config file allows replace any value by Environment Variable or Variable from DevOps Pipeline
+* Global Parameters
 
-The following features coming soon:
-* Support for Global Parameters
+The following features coming in the future:
 * Build function to support validation of files, dependencies and config
 * Unit Tests of selected Pipelines and Linked Services
 
@@ -126,7 +126,8 @@ $opt = New-AdfPublishOption
 * [HashTable] **Excludes** - defines a list of objects to be NOT published (default: *empty*)  
 * [Boolean] **DeleteNotInSource** - indicates whether the objects not in the source should be deleted or not (default: *false*)  
 * [Boolean] **StopStartTriggers** - indicates whether the triggers would be stopped and restarted during the deployment (default: *true*)
-* [Boolean] **CreateNewInstance** - specifies whether the target ADF should be created when it does not exist. When target ADF doesn't exist and this option is set to *false* then `Publish-AdfV2FromJson` function fails.  (default: *true*)
+* [Boolean] **CreateNewInstance** - specifies whether the target ADF should be created when it does not exist. When target ADF doesn't exist and this option is set to *false* then `Publish-AdfV2FromJson` function fails.  (default: *true*)  
+* [Boolean] **DeployGlobalParams** - indicates whether deploy Global Parameters of ADF. Nothing happens when parameters are not defined. (default: *true*)
 
 Subsequently, you can define the needed options:
 
@@ -309,6 +310,7 @@ Column `type` accepts one of the following values only:
 - dataflow
 - linkedService
 - trigger
+- factory *(for Global Parameters)*
 
 ### Column PATH
 
@@ -327,6 +329,7 @@ linkedService,BlobSampleData,typeProperties.connectionString,"DefaultEndpointsPr
 linkedService,BlobSampleData,-typeProperties.encryptedCredential,
 # PLUS means the desired action is to ADD new property with associated value:
 linkedService,BlobSampleData,+typeProperties.accountKey,"$($Env:VARIABLE)"
+factory,BigFactorySample2,"$.properties.globalParameters.'Env-Code'.value","PROD"
 ```
 
 
@@ -372,6 +375,7 @@ SQLPlayerDemo
     deployment               (new folder)  
         config-uat.csv       (file for UAT environment)
         config-prod.csv      (file for PROD environment)
+    factory
     integrationRuntime  
     linkedService  
     pipeline  
@@ -453,7 +457,7 @@ Having PowerShell module it is very ease to configure Release Pipeline in Azure 
 Both steps you can find here:  
 ```powershell
 # Step 1
-Install-Module Az.DataFactory -MinimumVersion "1.7.0" -Force
+Install-Module Az.DataFactory -MinimumVersion "1.10.0" -Force
 Install-Module -Name "azure.datafactory.tools" -Force
 Import-Module -Name "azure.datafactory.tools" -Force
 
@@ -468,7 +472,7 @@ variables:
   DataFactoryName: 'SQLPlayerDemo'
 steps:
 - powershell: |
-   Install-Module Az.DataFactory -MinimumVersion "1.7.0" -Force
+   Install-Module Az.DataFactory -MinimumVersion "1.10.0" -Force
    Install-Module -Name "azure.datafactory.tools" -Force
    Import-Module -Name "azure.datafactory.tools" -Force
   displayName: 'PowerShell Script'
