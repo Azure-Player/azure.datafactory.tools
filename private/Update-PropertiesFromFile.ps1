@@ -65,6 +65,9 @@ function Update-PropertiesFromFile {
             Write-Error "Could not find object: $type.$name"
         }
         $json = $o.Body
+        if ($null -eq $json) {
+            Write-Error "Body of the object is empty!"
+        }
         
         Write-Verbose "- Performing: $action for path: properties.$path"
         try {

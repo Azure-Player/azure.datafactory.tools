@@ -35,6 +35,10 @@ function Get-AdfObjectByName {
         {
             $r = $adf.Triggers | Where-Object { $_.Name -eq $name } | Select-Object -First 1
         }
+        'Factory'
+        {
+            $r = $adf.Factories | Where-Object { $_.Name -eq $name } | Select-Object -First 1
+        }
         default
         {
             Write-Error "Type [$type] is not supported."

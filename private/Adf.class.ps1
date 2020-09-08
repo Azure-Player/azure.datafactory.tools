@@ -7,18 +7,20 @@ class AdfGlobalProp {
 class Adf {
     [string] $Name = ""
     [string] $ResourceGroupName = ""
+    [string] $Region = ""
     [System.Collections.ArrayList] $Pipelines = @{}
     [System.Collections.ArrayList] $LinkedServices = @{}
     [System.Collections.ArrayList] $DataSets = @{}
     [System.Collections.ArrayList] $DataFlows = @{}
     [System.Collections.ArrayList] $Triggers = @{}
     [System.Collections.ArrayList] $IntegrationRuntimes = @{}
+    [System.Collections.ArrayList] $Factories = @{}
     [string] $Location = ""
     [AdfGlobalProp] $GlobalFactory = [AdfGlobalProp]::new()
 
     [System.Collections.ArrayList] AllObjects()
     {
-        return $this.LinkedServices + $this.Pipelines + $this.DataSets + $this.DataFlows + $this.Triggers + $this.IntegrationRuntimes
+        return $this.LinkedServices + $this.Pipelines + $this.DataSets + $this.DataFlows + $this.Triggers + $this.IntegrationRuntimes + $this.Factories
     }
 
     [hashtable] GetObjectsByFullName([string]$pattern)

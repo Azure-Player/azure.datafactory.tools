@@ -155,6 +155,20 @@ InModuleScope azure.datafactory.tools {
             }
         }
 
+        Context 'When called and CSV contains global parameters to be replaced' {
+            It 'Should complete' {
+                $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
+                {
+                    Update-PropertiesFromFile -adf $script:adf -stage "globalparam1"
+                } | Should -Not -Throw
+            }
+            It 'Should contains gp values replaced' {
+                $script:gp = Get-AdfObjectByName -adf $script:adf -name $script:adf.Factories[0].Name -type "factory"
+                $script:gp.Body.properties.globalParameters.'GP-String'.value | Should -Be "This text has been replaced"
+                $script:gp.Body.properties.globalParameters.'GP-Int'.value | Should -Be 2020
+            }
+        }
+
     } 
 
     Describe 'Update-PropertiesFromFile with JSON' -Tag 'Unit','private','jsonconfig' {
