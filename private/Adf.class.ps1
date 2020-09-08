@@ -40,7 +40,7 @@ class Adf {
         [hashtable] $r = @{}
         $this.AllObjects() | ForEach-Object {
             $ofn = $_.GetFolderName()
-            if ($ofn -eq $folder) 
+            if ($ofn -like $folder) 
             { 
                 $oname = $_.FullName($false);
                 $null = $r.Add($oname, $_)
