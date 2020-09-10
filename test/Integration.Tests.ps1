@@ -33,7 +33,7 @@ InModuleScope azure.datafactory.tools {
     $script:TmpFolder = (New-TemporaryDirectory).FullName
     $script:RootFolder = Join-Path -Path $script:TmpFolder -ChildPath (Split-Path -Path $script:SrcFolder -Leaf)
     $script:FinalOpt = New-AdfPublishOption
-    #RootFolder = c:\Users\kamil\AppData\Local\Temp\uddqzuen.tbu\BigFactorySample2
+    # $RootFolder = "c:\Users\kamil\AppData\Local\Temp\24zet2bv.qvg\BigFactorySample2"
 
     Remove-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -Force
     Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.csv" -Recurse:$true -Force 
@@ -182,7 +182,7 @@ InModuleScope azure.datafactory.tools {
                 } | Should -Not -Throw
             }
         }
-        Context 'and factory folder exists' {
+        Context 'factory folder exists and some global params exist' {
             It 'Should run and deploy 6 global properties' {
                 Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "$($script:DataFactoryOrigName).json" -Recurse:$true -Force 
                 $adf = Import-AdfFromFolder -FactoryName "$($script:DataFactoryName)" -RootFolder "$RootFolder"
@@ -204,6 +204,21 @@ InModuleScope azure.datafactory.tools {
                 $adfi.GlobalParameters.'GP-Object'.Value | Should -Be $gp.'GP-Object'.value
                 $adfi.GlobalParameters.'GP-Array'.Type | Should -Be $gp.'GP-Array'.type
                 #$adfi.GlobalParameters.'GP-Array'.Value | Should -Be $gp.'GP-Array'.value # This is known bug
+            }
+        }
+        Context 'factory folder exists but no global params exist' {
+            It 'Should run successfully' {
+                Remove-Item -Path "$RootFolder\factory\*.*"
+                Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "$($script:DataFactoryOrigName)-without-gp.json#" -Recurse:$true -Force 
+                Rename-Item -Path "$RootFolder\factory\$($script:DataFactoryOrigName)-without-gp.json#" -NewName "$($script:DataFactoryOrigName)-without-gp.json"
+                $opt = New-AdfPublishOption
+                $opt.Excludes.Add("*.*", "")
+                $opt.Includes.Add("factory*.*", "")
+                {
+                    Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                        -ResourceGroupName "$ResourceGroupName" `
+                        -DataFactoryName "$DataFactoryName" -Location "$Location" -Option $script:opt 
+                } | Should -Not -Throw
             }
         }
         

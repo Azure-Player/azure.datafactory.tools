@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.16.1] - 2020-09-10
+### Fixed
+* Bug during a publication when General Parameters are not existed (#39)
+* Bug in GetObjectsByFolderName when General Parameters are not existed (#38)
+
 ## [0.16.0] - 2020-09-09
 ### Added
 * Added public function: Stop-AdfTriggers
