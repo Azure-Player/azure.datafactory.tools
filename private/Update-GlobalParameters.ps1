@@ -15,26 +15,31 @@ param
         $globalFactoryObject = [Newtonsoft.Json.Linq.JObject]::Parse($adf.GlobalFactory.body)
         #$globalParametersObject = $globalFactoryObject.properties.globalParameters
 
-        Write-Host "Adding global parameter..."
-        foreach ($p in $adf.GlobalFactory.GlobalParameters.properties.globalParameters.PSObject.Properties)
+        $gpExist = Get-Member -InputObject $adf.GlobalFactory.GlobalParameters -name "properties" -Membertype "Properties"
+        if ($null -ne $gpExist)
         {
-            # $p.Name
-            # $p.Value.type
-            # $p.Value.value
-            $gpspec = New-Object 'Microsoft.Azure.Management.DataFactory.Models.GlobalParameterSpecification'
-            $gpspec.Type = $p.Value.type
-            $gpspec.Value = $p.Value.value
-            $globalParameterValue = $gpspec
-            $newGlobalParameters.Add($p.Name, $globalParameterValue)
+
+            Write-Host "Adding global parameter..."
+            foreach ($p in $adf.GlobalFactory.GlobalParameters.properties.globalParameters.PSObject.Properties)
+            {
+                # $p.Name
+                # $p.Value.type
+                # $p.Value.value
+                $gpspec = New-Object 'Microsoft.Azure.Management.DataFactory.Models.GlobalParameterSpecification'
+                $gpspec.Type = $p.Value.type
+                $gpspec.Value = $p.Value.value
+                $globalParameterValue = $gpspec
+                $newGlobalParameters.Add($p.Name, $globalParameterValue)
+            }
+            $targetAdf.GlobalParameters = $newGlobalParameters
+
+            # Write-Host "--- newGlobalParameters ---"
+            #$newGlobalParameters.Values | Out-Host
+
+            Write-Verbose "Updating $($newGlobalParameters.Count) global parameters..."
+            Set-AzDataFactoryV2 -InputObject $targetAdf -Force | Out-Null
+            Write-Host "Update of $($newGlobalParameters.Count) global parameters complete."
         }
-        $targetAdf.GlobalParameters = $newGlobalParameters
-
-        # Write-Host "--- newGlobalParameters ---"
-        #$newGlobalParameters.Values | Out-Host
-
-        Write-Verbose "Updating $($newGlobalParameters.Count) global parameters..."
-        Set-AzDataFactoryV2 -InputObject $targetAdf -Force | Out-Null
-        Write-Host "Update of $($newGlobalParameters.Count) global parameters complete."
     }
     
     Write-Debug "END: Update-GlobalParameters"
