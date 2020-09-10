@@ -102,8 +102,28 @@ InModuleScope azure.datafactory.tools {
                 $char | Should -Be ([CHAR][BYTE]166)
                 $char.Length | Should -Be 1
             }
-
         }
         
+        Context 'when GetObjectsByFolderName function called' {
+            It 'Should run fine' {
+                { $script:result.GetObjectsByFolderName("AnyFolder") } | Should -Not -Throw
+            }
+            It 'Should return list of 2 objects' {
+                $list = $script:result.GetObjectsByFolderName("ExternalError")
+                $list.Count | Should -Be 2
+            }
+        }
+
+        Context 'when GetObjectsByFullName function called' {
+            It 'Should run fine' {
+                { $script:result.GetObjectsByFullName("AnyObject") } | Should -Not -Throw
+            }
+            It 'Should return list of 2 objects' {
+                $list = $script:result.GetObjectsByFullName("dataset.taxi_*")
+                $list.Count | Should -Be 2
+            }
+        }
+        
+
     } 
 }
