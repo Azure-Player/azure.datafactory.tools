@@ -5,12 +5,12 @@
 # azure.datafactory.tools
 
 PowerShell module to help simplify Azure Data Factory CI/CD processes. This module was created to meet the demand for a quick and trouble-free deployment of an Azure Data Factory instance to another environment.  
-The main advantage of the module is the ability to publish all the Azure Data Factory service code from JSON files by calling one method. The method supports now:  
-* Creation of Azure Data Factory, if not exist
+The main advantage of the module is the ability to publish all the Azure Data Factory service code from JSON files by calling one method. The module supports now:  
+* Creation of Azure Data Factory, if it doesn't exist
 * Deployment of all type of objects: pipelines, datasets, linked services, data flows, triggers, integration runtimes
 * Finding the **right order** for deploying objects (no more worrying about object names)
-* Build-in mechanism to replace, remove or add the properties with the indicated values (CSV and JSON file formats supported)
-* Stop/start triggers
+* Built-in mechanism to replace, remove or add the properties with the indicated values (CSV and JSON file formats supported)
+* Stopping/starting triggers
 * Dropping objects when not exist in the source (code)
 * Filtering (include or exclude) objects to be deployed by name and/or type
 * Publish options allow you to control:
@@ -24,11 +24,11 @@ The following features coming in the future:
 * Build function to support validation of files, dependencies and config
 * Unit Tests of selected Pipelines and Linked Services
 
-> The module publishes code, which is created and maintanance by ADF in code repository, when configured.
+> The module publishes code, which is created and maintained by ADF in a code repository, when configured.
 
 # Overview
 
-This module works for Azure Data Factory **V2 only** and uses ```Az.DataFactory``` PowerShell module from Microsoft for management of objects in ADF service.  
+This module works for Azure Data Factory **V2 only** and uses ```Az.DataFactory``` PowerShell module from Microsoft for the management of objects in ADF service.  
 
 ## Support
 
@@ -61,12 +61,12 @@ Source: https://www.powershellgallery.com/packages/azure.datafactory.tools
 
 ## Publish Azure Data Factory 
 
-This module publishes all objects from JSON files stored by ADF in code repository (collaboration branch). Bear in mind we are talking about *master* branch, NOT *adf_publish* branch.  
+This module publishes all objects from JSON files stored by ADF in a code repository (collaboration branch). Bear in mind we are talking about *master* branch, NOT *adf_publish* branch.  
 If you want to deploy from *adf_publish* branch - read this article: [Deployment of Azure Data Factory with Azure DevOps](https://sqlplayer.net/2019/06/deployment-of-azure-data-factory-with-azure-devops/).
 
 ## Where is my code?
-If you never seen code of your Azure Data Factory instance - you need to configure code repository for you ADF. This article helps you to do that: [Setting up Code Repository for Azure Data Factory v2](https://sqlplayer.net/2018/10/setting-up-code-repository-for-azure-data-factory-v2/).  
-Once you set up code repository, clone the repo and pull (download) onto local machine. The folder structure should looks like this:  
+If you have never seen code of your Azure Data Factory instance - then you need to configure the code repository for your ADF. This article helps you to do that: [Setting up Code Repository for Azure Data Factory v2](https://sqlplayer.net/2018/10/setting-up-code-repository-for-azure-data-factory-v2/).  
+Once you have set up the code repository, clone the repo and pull (download) onto local machine. The folder structure should look like this:  
 ```
 SQLPlayerDemo  
     dataflow  
@@ -94,7 +94,7 @@ Publish-AdfV2FromJson
    [-Method]              <String>
 ```
 
-Assuming your ADF names ```SQLPlayerDemo``` and code located in ```c:\GitHub\AdfName\```, replace the values for *SubscriptionName*, *ResourceGroupName*, *DataFactoryName* and run the following command using PowerShell CLI:
+Assuming your ADF is named ```SQLPlayerDemo``` and the code is located in ```c:\GitHub\AdfName\```, replace the values for *SubscriptionName*, *ResourceGroupName*, *DataFactoryName* and run the following command using PowerShell CLI:
 
 ```powershell
 $SubscriptionName = 'Subscription'
@@ -191,7 +191,7 @@ The above file (if used) adds:
 
 ### Using Publish Options in deployment
 
-Once you define all necessary options, just add the parameter to **Publish** function:  
+Once you define all necessary options, just add the parameter to the **Publish** function:  
 ```powershell
 Publish-AdfV2FromJson -RootFolder "$RootFolder" `
    -ResourceGroupName "$ResourceGroupName" `
@@ -201,8 +201,8 @@ Publish-AdfV2FromJson -RootFolder "$RootFolder" `
 ```
 
 ### Pattern (WildCard)
-As you probably noticed, you can use some patterns when defining name or type for objects to be included of excluded to/from deployment. 
-To determine whether an object matches to the pattern (wildcard) - module uses `-like` operator known in PowerShell.
+As you probably noticed, you can use some patterns when defining name or type for objects to be included or excluded to/from deployment. 
+To determine whether an object matches to the pattern (wildcard) - module uses the `-like` operator, as known in PowerShell.
 Therefore you can use the following combinations:  
 ```
 trigger.*
@@ -218,12 +218,12 @@ All potential combinations can be found in code repository of ADF:
 
 > More info about wildcard: [About Wildcard](https://docs.microsoft.com/en-gb/powershell/module/microsoft.powershell.core/about/about_wildcards?view=powershell-5.1)
 
-## Publising objects from selected ADF's folder only
-Although providing pattern of selected object names to be published gives great flexibility in terms of part-deployment, it might not cover other scenario. When your ADF has objects organised in folders, you may want to publish objects only within that folder, no matter what will change in the future.  
+## Publishing objects from selected ADF's folder only
+Although providing a pattern of selected object names to be published gives great flexibility in terms of part-deployment, it might not cover other scenarios. When your ADF has objects organised in folders, you may want to publish objects only within that folder, no matter what will change in the future.  
 Let's take the following ADF as an example:  
 
 ![Azure Data Factory Resources](./media/adf-folders.png)  
-If you want to publish only objects from "Copy" folder(s), you must perform three steps before publish:
+If you want to publish only objects from "Copy" folder(s), you must perform three steps before publishing:
 1) Load all ADF objects from your code (local folder)
 2) Execute function which returns list of objects located in selected folder in ADF
 3) Add returned list (of objects) to **Includes** in **Publish Option**
@@ -273,17 +273,17 @@ You must have appropriate permission to create new instance.
 ## Step: Replacing all properties environment-related
 
 This step will be executed only when `[Stage]` parameter has been provided.  
-The whole concept of CI & CD (Continuous Integration and Continuous Delivery) process is to deploy automatically and riskless onto target infrastructure, supporting multi-environments. Each environment (or stage) to be exact the same code except selected properties. Very often these properties are:  
+The whole concept of CI & CD (Continuous Integration and Continuous Delivery) process is to deploy automatically and without risk onto target infrastructure, supporting multi-environments. Each environment (or stage) has to be exactly the same code except for selected properties. Very often these properties are:  
 - Data Factory name
 - Azure Key Vault URL (endpoint)
 - Selected properties of Linked Services 
 - Some variables
 - etc.
 
-All these values are hold among JSON files in code repository and due to their specifics - they are not parametrised as it happens in ARM template.
-That is the reason of the need of replacing selected object's parameters into one specified for particular environment. The changes must be done just before deployment.
+All these values are hold among JSON files in the code repository and due to their specifics - they are not parameterised as it happens in ARM template.
+That's why we need to replace the selected object's parameters into one specified for particular environment. The changes must be done just before deployment.
 
-In order to address that needs, the process are able to read flat **configuration file** with all required values **per environment**. Below is the example of such config file:
+In order to address those needs, the process is able to read flat **configuration file** with all required values **per environment**. Below is an example of such config file:
 ```
 type,name,path,value
 linkedService,LS_AzureKeyVault,typeProperties.baseUrl,"https://kv-blog-uat.vault.azure.net/"
@@ -315,7 +315,7 @@ Column `type` accepts one of the following values only:
 ### Column PATH
 
 Unless otherwise stated, mechanism always **replace (update)** the value for property. Location for those Properties are specified by `Path` column in Config file.  
-Additionally, you can **remove** selected property altogether or **create (add)** new one. To define desire action, put character `+` (plus) or `-` (minus) just before Property path:
+Additionally, you can **remove** selected property altogether or **create (add)** new one. To define the desired action, put character `+` (plus) or `-` (minus) just before Property path:
 
 * `+` (plus) - Add new property with defined value
 * `-` (minus) - Remove existing property  
@@ -343,7 +343,7 @@ pipeline,PL_Wait_Dynamic,parameters.WaitInSec,"{'type': 'int32','defaultValue': 
 
 #### Using Tokens as dynamic values
 You can use token syntax to define expression which should be replaced by value after reading CSV config file process. Currently PowerShell expression for environment is supported, which is: `$Env:VARIABLE` or `$($Env:VARIABLE)`.  
-Assuming you have *Environment Variable* name `USERDOMAIN` with value `CONTOSO`, this line from config file:
+Assuming you have an *Environment Variable* name `USERDOMAIN` with value `CONTOSO`, this line from config file:
 ```
 linkedService,AKV,typeProperties.baseUrl,"https://$Env:USERDOMAIN.vault.azure.net/"
 ```
@@ -357,11 +357,11 @@ Having that in mind, you can leverage variables defined in Azure DevOps pipeline
 
 ### Stage parameter
 
-Parameter is optional. When defined, process will replace all properties defined in (csv) configuration file.
+This parameter is optional. When defined, the process will replace all properties defined in (csv) configuration file.
 The parameter can be either full path to csv file (must ends with .csv) or just stage name.
 When you provide parameter value 'UAT' the process will try open config file located .\deployment\config-UAT.csv
 
-> Use optional [-Stage] parameter when executing ```Publish-AdfV2FromJson``` module to replace values for/with properties specified in config file(s).
+> Use the optional [-Stage] parameter when executing ```Publish-AdfV2FromJson``` module to replace values for/with properties specified in config file(s).
 
 There are 2 ways to provide value for `Stage` parameter:  
 ### Stage value as environment code/name
@@ -417,10 +417,10 @@ If you prefer using JSON rather than CSV for setting up configuration - JSON fil
 
 ## Step: Stoping triggers
 This block stops all triggers which must be stopped due to deployment.
-> Operation might be skip when `StopStartTriggers = false` in *Publish Options*
+> Operation might be skipped when `StopStartTriggers = false` in *Publish Options*
 
 ## Step: Deployment of ADF objects
-This step is actually responsible to do all the stuff.
+This step is actually responsible for doing all the stuff.
 The mechanism is smart enough to publish all objects in the right order, thence a developer doesn't need to care of object names due to deployment failure any longer.
 > Find out *Publish Option* capabilities in terms of filtering objects intended to be deployed.
 
@@ -428,11 +428,11 @@ The mechanism is smart enough to publish all objects in the right order, thence 
 This process removes all objects from ADF service whom couldn't be found in the source (ADF code).  
 The mechanism is smart enough to dropping the objects in right order.
 
-> Operation might be skip when `DeleteNotInSource = false` in *Publish Options*
+> Operation might be skipped when `DeleteNotInSource = false` in *Publish Options*
 
 ## Step: Restarting all triggers
 Restarting all triggers that should be enabled.
-> Operation might be skip when `StopStartTriggers = false` in *Publish Options*
+> Operation might be skipped when `StopStartTriggers = false` in *Publish Options*
 
 # Publish from Azure DevOps
 
@@ -442,7 +442,7 @@ There are two ways you can deploy Azure Data Factory with this approach (directl
 
 ## Using Publish Azure Data factory (task)
 
-Custom Build/Release Task for Azure DevOps has been prepared as a very convenient way of configuring deployment task in Release Pipeline (Azure DevOps). Although it's only UI put on top of azure.datafactory.tools PS module, it gives users great experience if they don't have PowerShell skills or perhaps prefer using clear and simple fields configuration approach.  
+Custom Build/Release Task for Azure DevOps has been prepared as a very convenient way of configuring deployment task in Release Pipeline (Azure DevOps). Although it's only UI put on top of azure.datafactory.tools PS module, it gives users great experience if they don't have PowerShell skills or perhaps prefer using a clear and simple fields configuration approach.  
 The "Publish Azure Data factory" task is available for free and open-source. 
 You can install it from Microsoft MarketPlace onto your organisation.  
 More information: [Marketplace](https://marketplace.visualstudio.com/items?itemName=SQLPlayer.DataFactoryTools)
@@ -450,11 +450,11 @@ More information: [Marketplace](https://marketplace.visualstudio.com/items?itemN
 
 ## Using Azure PowerShell (task)
 
-Having PowerShell module it is very ease to configure Release Pipeline in Azure DevOps to publish ADF code as if from local machine. All steps you must create are:  
+Having this as a PowerShell module, it is very easy to configure a Release Pipeline in Azure DevOps to publish ADF code as if it was running from a local machine. All the steps you must create are:  
 - Download & install ```Az.DataFactory``` and ```azure.datafactory.tools``` PowerShell modules
 - Execute ```Publish-AdfV2FromJson``` method with parameters
 
-Both steps you can find here:  
+Both steps you can be found here:  
 ```powershell
 # Step 1
 Install-Module Az.DataFactory -MinimumVersion "1.10.0" -Force
