@@ -49,5 +49,28 @@ class Adf {
         return $r
     }
 
+    [System.Collections.ArrayList] GetUnusedDatasets()
+    {
+        [System.Collections.ArrayList] $dataset_list = @{}
+        $this.DataSets | ForEach-Object {
+            $null = $dataset_list.Add($_.Name) 
+        }
+        # iterate over pipelines content looking for dataset names
+        foreach($pipe in $this.Pipelines.FileName){
+            $stringPipe = Get-Content $pipe
+            For ($i=0; $i -lt $dataset_list.Count; $i++) {
+                # if the dataset is being used, replace it with ''
+                if($stringPipe -match $dataset_list[$i]){
+                    $dataset_list[$i] = ''
+                }
+            }
+            # remove used datasets from the list
+            $dataset_list = $dataset_list | Where-Object { $_ –ne '' }
+        }
+        # datasets not removed from the list are the ones not being used
+        return $dataset_list
+    }   
+
+
 }
 
