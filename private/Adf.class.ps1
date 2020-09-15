@@ -55,17 +55,23 @@ class Adf {
         $this.DataSets | ForEach-Object {
             $null = $dataset_list.Add($_.Name) 
         }
-        # iterate over pipelines content looking for dataset names
-        foreach($pipe in $this.Pipelines.FileName){
-            $stringPipe = Get-Content $pipe
+        # iterate over pipelines and dataflows content looking for dataset names
+        foreach($pipe in $this.Pipelines.FileName + $this.DataFlows.FileName){
+            $stringContent = Get-Content $pipe
             For ($i=0; $i -lt $dataset_list.Count; $i++) {
                 # if the dataset is being used, replace it with ''
-                if($stringPipe -match $dataset_list[$i]){
+                if($stringContent -match $dataset_list[$i]){
                     $dataset_list[$i] = ''
                 }
             }
-            # remove used datasets from the list
-            $dataset_list = $dataset_list | Where-Object { $_ –ne '' }
+            # remove used datasets from the list, try will fail with the last object
+            # so it goes to the catch when cleaning the list.
+            try{
+                $dataset_list = $dataset_list | Where-Object { $_ –ne '' }
+            }
+            catch{
+                $dataset_list.Remove('')
+            }
         }
         # datasets not removed from the list are the ones not being used
         return $dataset_list
