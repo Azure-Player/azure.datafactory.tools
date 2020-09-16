@@ -389,7 +389,7 @@ The second way is to provide full path to configuration file.
 For example, if you provide `c:\MyCode\adf\uat-parameters.csv`, an exact file will be use to read configuration as the value ends with ".csv". Although, in that case, the file may be located anywhere, it's recommended to keep them along with other ADF files. 
 
 ### JSON format of Config file
-If you prefer using JSON rather than CSV for setting up configuration - JSON files are also supported now. Take a look at the following example: 
+If you prefer using JSON rather than CSV for setting up configuration - JSON files are also supported now. In that case, `Stage` parameter must be set with full path to configuration file. Take a look at the following example: 
 ```JSON
 {
   "LS_AzureDatabricks": [
