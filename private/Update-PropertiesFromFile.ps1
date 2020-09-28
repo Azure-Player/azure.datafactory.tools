@@ -2,7 +2,8 @@ function Update-PropertiesFromFile {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)] [Adf] $adf,
-        [Parameter(Mandatory)] [string] $stage
+        [Parameter(Mandatory)] [string] $stage,
+        [Parameter(Mandatory)] [AdfPublishOption] $option
         )
 
     Write-Debug "BEGIN: Update-PropertiesFromFile(adf=$adf, stage=$stage)"
@@ -29,7 +30,7 @@ function Update-PropertiesFromFile {
     if ($ext -eq "CSV") {
         $config = Read-CsvConfigFile -Path $configFileName
     } else {
-        $config = Read-JsonConfigFile -Path $configFileName -adf $adf
+        $config = Read-JsonConfigFile -Path $configFileName -adf $adf -option $option
     }
     # $config | Out-Host 
 

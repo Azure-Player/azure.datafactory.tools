@@ -157,7 +157,7 @@ function Publish-AdfV2FromJson {
     Write-Host "===================================================================================";
     Write-Host "STEP: Replacing all properties environment-related..."
     if (![string]::IsNullOrEmpty($Stage)) {
-        Update-PropertiesFromFile -adf $adf -stage $Stage
+        Update-PropertiesFromFile -adf $adf -stage $Stage -option $opt
     } else {
         Write-Host "Stage parameter was not provided - action skipped."
     }

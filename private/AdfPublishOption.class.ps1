@@ -5,4 +5,5 @@ class AdfPublishOption {
     [Boolean] $StopStartTriggers = $true
     [Boolean] $CreateNewInstance = $true
     [Boolean] $DeployGlobalParams = $true
+    [Boolean] $FailsWhenConfigItemNotFound = $true
 }
