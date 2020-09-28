@@ -34,7 +34,7 @@ function Read-JsonConfigFile {
                 if ($_.action -eq "add") { $cl.path = "+$($cl.path)" }
                 $null = $config.Add($cl)
             } else {
-                Write-Error "Object [$name] could not be found."
+                Write-Warning "Object [$name] could not be found."
             }
         }
     }
