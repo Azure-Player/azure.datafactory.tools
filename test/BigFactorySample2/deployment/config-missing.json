@@ -1,0 +1,8 @@
+{
+  "LS_DataLakeStore_Unknown": [
+    {
+      "name": "$.properties.typeProperties.url",
+      "value": "https://datalake$($Env:ProjectName)$($Env:Environment).dfs.core.windows.net/"
+    }
+  ]
+}

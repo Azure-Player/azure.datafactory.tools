@@ -2,7 +2,8 @@ function Read-JsonConfigFile {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)] [string] $Path,
-        [Parameter(Mandatory)] [Adf] $adf
+        [Parameter(Mandatory)] [Adf] $adf,
+        [Parameter(Mandatory)] [AdfPublishOption] $option
     )
 
     Write-Debug "BEGIN: Read-JsonConfigFile(path=$path)"
@@ -34,7 +35,11 @@ function Read-JsonConfigFile {
                 if ($_.action -eq "add") { $cl.path = "+$($cl.path)" }
                 $null = $config.Add($cl)
             } else {
-                Write-Error "Object [$name] could not be found."
+                if ($option.FailsWhenConfigItemNotFound -eq $false) {
+                    Write-Warning "Object [$name] could not be found, skipping..."
+                } else {
+                    Write-Error "Object [$name] could not be found."
+                }
             }
         }
     }

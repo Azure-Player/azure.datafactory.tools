@@ -39,26 +39,28 @@ InModuleScope azure.datafactory.tools {
 
         Context 'When called with parameters' {
             $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
+            $script:option = New-AdfPublishOption
             It 'and adf param is empty should throw an error ' { {
-                Update-PropertiesFromFile -stage "uat" -Force
-                } | Should -Throw 
+                Update-PropertiesFromFile -stage "uat" -option $option -Force
+                } | Should -Throw
             }
             It 'and stage param is empty should throw an error ' { {
-                Update-PropertiesFromFile -adf $adf -Force
-                } | Should -Throw 
+                Update-PropertiesFromFile -adf $adf -option $option -Force
+                } | Should -Throw
             }
             It 'and $adf.Location is empty should throw an error ' { {
                 $script:adf.Location = ""
-                Update-PropertiesFromFile -adf $adf -stage "uat" -Force
-                } | Should -Throw 
+                Update-PropertiesFromFile -adf $adf -stage "uat" -option $option -Force
+                } | Should -Throw
             }
         }
 
         Context 'When called with stage as short code but file does not exist' {
             $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
+            $script:option = New-AdfPublishOption
             It 'Should throw an error' { {
-                Update-PropertiesFromFile -adf $script:adf -stage "FakeStage"
-                } | Should -Throw 
+                Update-PropertiesFromFile -adf $script:adf -stage "FakeStage" -option $option
+                } | Should -Throw
             }
         }
 
@@ -66,7 +68,8 @@ InModuleScope azure.datafactory.tools {
             $script:now = Get-Date
             It 'Should return nothing' {
                 $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
-                $result = Update-PropertiesFromFile -adf $script:adf -stage "UAT"
+                $script:option = New-AdfPublishOption
+                $result = Update-PropertiesFromFile -adf $script:adf -stage "UAT" -option $option
                 $result | Should -Be $null
             }
             It 'Should not modify any files' {
@@ -88,8 +91,9 @@ InModuleScope azure.datafactory.tools {
         Context 'When called and CSV has wrong format' {
             It 'Should throw' {
                 $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
+                $script:option = New-AdfPublishOption
                 {
-                    Update-PropertiesFromFile -adf $script:adf -stage "badformat"
+                    Update-PropertiesFromFile -adf $script:adf -stage "badformat" -option $option
                 } | Should -Throw
             }
             It 'Should contains all properties unchanged' {
@@ -102,8 +106,9 @@ InModuleScope azure.datafactory.tools {
         Context 'When called and CSV contains multiple sub-properties as value' {
             It 'Should complete' {
                 $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
+                $script:option = New-AdfPublishOption
                 {
-                    Update-PropertiesFromFile -adf $script:adf -stage "c002"
+                    Update-PropertiesFromFile -adf $script:adf -stage "c002" -option $option
                 } | Should -Not -Throw
             }
             It 'Should contains properties replaced and correct types' {
@@ -116,8 +121,9 @@ InModuleScope azure.datafactory.tools {
         Context 'When called and CSV with commented rows' {
             It 'Should complete' {
                 $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
+                $script:option = New-AdfPublishOption
                 {
-                    Update-PropertiesFromFile -adf $script:adf -stage "commented"
+                    Update-PropertiesFromFile -adf $script:adf -stage "commented" -option $option
                 } | Should -Not -Throw
             }
             It 'Should not apply changes for commented rows' {
@@ -130,8 +136,9 @@ InModuleScope azure.datafactory.tools {
         Context 'When called and CSV contains incorrect path' {
             It 'Should throw' {
                 $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
+                $script:option = New-AdfPublishOption
                 {
-                    Update-PropertiesFromFile -adf $script:adf -stage "c004-wrongpath"
+                    Update-PropertiesFromFile -adf $script:adf -stage "c004-wrongpath" -option $option
                 } | Should -Throw -ExceptionType ([System.Data.DataException])
             }
         }
@@ -139,8 +146,9 @@ InModuleScope azure.datafactory.tools {
         Context 'When called and CSV has extra action (add/remove)' {
             It 'Should complete' {
                 $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
+                $script:option = New-AdfPublishOption
                 {
-                    Update-PropertiesFromFile -adf $script:adf -stage "c005-extra-action"
+                    Update-PropertiesFromFile -adf $script:adf -stage "c005-extra-action" -option $option
                 } | Should -Not -Throw
             }
             It 'Should contains 1 updated property' {
@@ -158,8 +166,9 @@ InModuleScope azure.datafactory.tools {
         Context 'When called and CSV contains global parameters to be replaced' {
             It 'Should complete' {
                 $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
+                $script:option = New-AdfPublishOption
                 {
-                    Update-PropertiesFromFile -adf $script:adf -stage "globalparam1"
+                    Update-PropertiesFromFile -adf $script:adf -stage "globalparam1" -option $option
                 } | Should -Not -Throw
             }
             It 'Should contains gp values replaced' {
@@ -183,9 +192,10 @@ InModuleScope azure.datafactory.tools {
         Context 'When called and JSON has extra actions' {
             It 'Should complete and has properties updated, added and removed' -TestCases $testCases {
                 $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
+                $script:option = New-AdfPublishOption
                 {
                     $configFilePath = Join-Path -Path $script:DeploymentFolder -ChildPath "$configFile"
-                    Update-PropertiesFromFile -adf $script:adf -stage "$configFilePath"
+                    Update-PropertiesFromFile -adf $script:adf -stage "$configFilePath" -option $option
                 } | Should -Not -Throw
 
                 $script:ls = Get-AdfObjectByName -adf $script:adf -name "LS_DataLakeStore" -type "linkedService"
