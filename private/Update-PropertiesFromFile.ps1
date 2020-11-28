@@ -71,32 +71,42 @@ function Update-PropertiesFromFile {
         }
         
         Write-Verbose "- Performing: $action for path: properties.$path"
+        $validPath = $true
+
         try {
             if ($action -ne "add") {
                 Invoke-Expression "`$isExist = (`$null -ne `$json.properties.$path)"
             }
         }
         catch {
-            $exc = ([System.Data.DataException]::new())
-            Write-Error -Message "Wrong path defined in config for object(path): $type.$name(properties.$path)" -Exception $exc
+            $validPath = $false
+
+            if ($option.FailsWhenPathNotFound -eq $false) {
+                Write-Warning "Wrong path defined in config for object(path): $type.$name(properties.$path), skipping..."
+            } else {
+                $exc = ([System.Data.DataException]::new())
+                Write-Error -Message "Wrong path defined in config for object(path): $type.$name(properties.$path)" -Exception $exc
+            }
         }
 
-        switch -Exact ($action)
-        {
-            'update'
+        if ($validPath) {
+            switch -Exact ($action)
             {
-                Update-ObjectProperty -obj $json -path "properties.$path" -value "$value"
-                $report['Updated'] += 1
-            }
-            'add'
-            {
-                Add-ObjectProperty -obj $json -path "properties.$path" -value "$value"
-                $report['Added'] += 1
-            }
-            'remove'
-            {
-                Remove-ObjectProperty -obj $json -path "properties.$path"
-                $report['Removed'] += 1
+                'update'
+                {
+                    Update-ObjectProperty -obj $json -path "properties.$path" -value "$value"
+                    $report['Updated'] += 1
+                }
+                'add'
+                {
+                    Add-ObjectProperty -obj $json -path "properties.$path" -value "$value"
+                    $report['Added'] += 1
+                }
+                'remove'
+                {
+                    Remove-ObjectProperty -obj $json -path "properties.$path"
+                    $report['Removed'] += 1
+                }
             }
         }
 

@@ -129,6 +129,7 @@ $opt = New-AdfPublishOption
 * [Boolean] **CreateNewInstance** - specifies whether the target ADF should be created when it does not exist. When target ADF doesn't exist and this option is set to *false* then `Publish-AdfV2FromJson` function fails.  (default: *true*)  
 * [Boolean] **DeployGlobalParams** - indicates whether deploy Global Parameters of ADF. Nothing happens when parameters are not defined. (default: *true*)
 * [Boolean] **FailsWhenConfigItemNotFound** - indicates whether configuration items not found fails the script. (default: *true*)
+* [Boolean] **FailsWhenPathNotFound** - indicates whether missing paths fails the script. (default: *true*)
 
 Subsequently, you can define the needed options:
 
@@ -158,6 +159,10 @@ $opt.StopStartTriggers = $false
 # Example 5: Ignore missing configuration items (will just write warning to standard output instead)
 $opt = New-AdfPublishOption
 $opt.FailsWhenConfigItemNotFound = $false
+
+# Example 5: Ignore missing paths (will just write warning to standard output instead)
+$opt = New-AdfPublishOption
+$opt.FailsWhenPathNotFound = $false
 ```
 
 > Bear in mind that *Includes* and *Excludes* lists are **rules out each other**.  
