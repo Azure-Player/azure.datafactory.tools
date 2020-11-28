@@ -143,6 +143,17 @@ InModuleScope azure.datafactory.tools {
             }
         }
 
+        Context 'When called and CSV contains incorrect path that can be skipped' {
+            It 'Should not throw' {
+                $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
+                $script:option = New-AdfPublishOption
+                $option.FailsWhenPathNotFound = $false
+                {
+                    Update-PropertiesFromFile -adf $script:adf -stage "c004-wrongpath" -option $option
+                } | Should -Not -Throw
+            }
+        }
+
         Context 'When called and CSV has extra action (add/remove)' {
             It 'Should complete' {
                 $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
