@@ -6,4 +6,5 @@ class AdfPublishOption {
     [Boolean] $CreateNewInstance = $true
     [Boolean] $DeployGlobalParams = $true
     [Boolean] $FailsWhenConfigItemNotFound = $true
+    [Boolean] $FailsWhenPathNotFound = $true
 }
