@@ -40,6 +40,7 @@ InModuleScope azure.datafactory.tools {
                 $script:result.DeleteNotInSource | Should -Be $false
                 $script:result.StopStartTriggers | Should -Be $true
                 $script:result.FailsWhenConfigItemNotFound | Should -Be $true
+                $script:result.FailsWhenPathNotFound | Should -Be $true
             }
         }
         
