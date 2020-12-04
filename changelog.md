@@ -5,9 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
-## [0.18.0 preview] - 2020-11-29
+## [0.18.0] - 2020-12-04
 ### Added
 * Added the ability to only warn on missing paths in config (#59 by @chris5287)
+### Fixed
+* JSON file could be corrupted when config update has happened on a very deep path (#33)
+* Special characters deployed wrong (#50)
 
 ## [0.17.0] - 2020-10-02
 ### Added

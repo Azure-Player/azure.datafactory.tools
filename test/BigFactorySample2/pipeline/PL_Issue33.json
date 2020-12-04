@@ -1,0 +1,1056 @@
+{
+	"name": "GetFusebillCustomers_ToBlob",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetFusebillKey",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "If Customer File",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "If Customer ID File",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "If Billing Ref File",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "If Subscription File",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": true,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://tgt-dev-it-akv-001.vault.azure.net/secrets/FusebillAPIKey/9f0dce85h2b947f7be4d2ffa28983af8?api-version=7.0",
+					"method": "GET",
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://vault.azure.net"
+					}
+				}
+			},
+			{
+				"name": "SetAPIAuthKey",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "GetFusebillKey",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "FusebillAPIAuth",
+					"value": {
+						"value": "@concat('Basic ', activity('GetFusebillKey').output.value)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Load All Customers",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "SetAPIAuthKey",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [
+					{
+						"name": "pageNumber",
+						"value": "0"
+					}
+				],
+				"typeProperties": {
+					"expression": {
+						"value": "@less(activity('Copy Customers').output.rowsCopied,int(variables('pageSize')))",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy Customers",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "set tmp_pageNumber",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "RestSource",
+									"httpRequestTimeout": "00:01:40",
+									"requestInterval": "00.00:00:00.010",
+									"requestMethod": "GET",
+									"additionalHeaders": {
+										"Authorization": {
+											"value": "@variables('FusebillAPIAuth')",
+											"type": "Expression"
+										}
+									}
+								},
+								"sink": {
+									"type": "JsonSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									},
+									"formatSettings": {
+										"type": "JsonWriteSettings",
+										"filePattern": "setOfObjects"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"path": "$['firstName']"
+											},
+											"sink": {
+												"path": "$['firstName']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['middleName']"
+											},
+											"sink": {
+												"path": "$['middleName']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['lastName']"
+											},
+											"sink": {
+												"path": "$['lastName']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['companyName']"
+											},
+											"sink": {
+												"path": "$['companyName']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['suffix']"
+											},
+											"sink": {
+												"path": "$['suffix']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['primaryEmail']"
+											},
+											"sink": {
+												"path": "$['primaryEmail']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['primaryPhone']"
+											},
+											"sink": {
+												"path": "$['primaryPhone']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['secondaryEmail']"
+											},
+											"sink": {
+												"path": "$['secondaryEmail']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['secondaryPhone']"
+											},
+											"sink": {
+												"path": "$['secondaryPhone']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['title']"
+											},
+											"sink": {
+												"path": "$['title']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['reference']"
+											},
+											"sink": {
+												"path": "$['reference']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['status']"
+											},
+											"sink": {
+												"path": "$['status']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['customerAccountStatus']"
+											},
+											"sink": {
+												"path": "$['customerAccountStatus']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['currency']"
+											},
+											"sink": {
+												"path": "$['currency']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['monthlyRecurringRevenue']"
+											},
+											"sink": {
+												"path": "$['monthlyRecurringRevenue']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['netMonthlyRecurringRevenue']"
+											},
+											"sink": {
+												"path": "$['netMonthlyRecurringRevenue']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['salesforceId']"
+											},
+											"sink": {
+												"path": "$['salesforceId']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['salesforceAccountType']"
+											},
+											"sink": {
+												"path": "$['salesforceAccountType']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['salesforceSynchStatus']"
+											},
+											"sink": {
+												"path": "$['salesforceSynchStatus']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['netsuiteId']"
+											},
+											"sink": {
+												"path": "$['netsuiteId']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['netsuiteSynchStatus']"
+											},
+											"sink": {
+												"path": "$['netsuiteSynchStatus']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['netsuiteCustomerType']"
+											},
+											"sink": {
+												"path": "$['netsuiteCustomerType']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['portalUserName']"
+											},
+											"sink": {
+												"path": "$['portalUserName']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['parentId']"
+											},
+											"sink": {
+												"path": "$['parentId']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['quickBooksLatchType']"
+											},
+											"sink": {
+												"path": "$['quickBooksLatchType']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['quickBooksId']"
+											},
+											"sink": {
+												"path": "$['quickBooksId']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['quickBooksSyncToken']"
+											},
+											"sink": {
+												"path": "$['quickBooksSyncToken']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['hubSpotId']"
+											},
+											"sink": {
+												"path": "$['hubSpotId']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['hubSpotCompanyId']"
+											},
+											"sink": {
+												"path": "$['hubSpotCompanyId']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['geotabId']"
+											},
+											"sink": {
+												"path": "$['geotabId']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['modifiedTimestamp']"
+											},
+											"sink": {
+												"path": "$['modifiedTimestamp']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['createdTimestamp']"
+											},
+											"sink": {
+												"path": "$['createdTimestamp']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['id']"
+											},
+											"sink": {
+												"path": "$['id']"
+											}
+										},
+										{
+											"source": {
+												"path": "$['uri']"
+											},
+											"sink": {
+												"path": "$['uri']"
+											}
+										}
+									],
+									"collectionReference": ""
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "FusebillCustomersAPI",
+									"type": "DatasetReference",
+									"parameters": {
+										"pageNumber": {
+											"value": "@variables('pageNumber')",
+											"type": "Expression"
+										},
+										"pageSize": {
+											"value": "@variables('pageSize')",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "FusebillCustomersFile",
+									"type": "DatasetReference",
+									"parameters": {
+										"fileName": {
+											"value": "customers@{variables('pageNumber')}.json",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Set pageNumber",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Get customer billing reference details",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "pageNumber",
+								"value": {
+									"value": "@string(add(int(variables('tmp_pageNumber')),1))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "set tmp_pageNumber",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "tmp_pageNumber",
+								"value": {
+									"value": "@variables('pageNumber')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Get customer billing reference details",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Copy Customers",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "GetFusebillCustomerBillingReferenceDetails",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"pageNumber": {
+										"value": "@variables('pageNumber')",
+										"type": "Expression"
+									},
+									"FusebillAPIAuth": {
+										"value": "@variables('FusebillAPIAuth')",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					],
+					"timeout": "7.00:00:00"
+				}
+			},
+			{
+				"name": "Push customers to staging",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Load All Customers",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "GetFusebillCustomers_ToStaging",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": false
+				}
+			},
+			{
+				"name": "Load All Subscriptions",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "SetAPIAuthKey",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@less(activity('Copy Subscriptions').output.rowsCopied,int(variables('subscriptionPageSize')))",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Set temp subscriptions page number",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "tmp_subscriptionPageNumber",
+								"value": {
+									"value": "@variables('subscriptionPageNumber')",
+									"type": "Expression"
+								}
+							}
+						}
+					],
+					"timeout": "7.00:00:00"
+				}
+			},
+			{
+				"name": "Push subscriptions to staging",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Load All Subscriptions",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "GetFusebillSubscriptions_ToStaging",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Check For Customer Files",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "FusebillCustomersFile",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "customers.json"
+						}
+					},
+					"fieldList": [
+						"exists"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true
+					},
+					"formatSettings": {
+						"type": "JsonReadSettings"
+					}
+				}
+			},
+			{
+				"name": "Check For Customer ID Files",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "FusebillCustomerIds",
+						"type": "DatasetReference",
+						"parameters": {
+							"customerIdsFileName": "*.json"
+						}
+					},
+					"fieldList": [
+						"exists"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true
+					},
+					"formatSettings": {
+						"type": "JsonReadSettings"
+					}
+				}
+			},
+			{
+				"name": "Check For Subscription Files",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "FusebillSubscription",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"exists"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true
+					},
+					"formatSettings": {
+						"type": "JsonReadSettings"
+					}
+				}
+			},
+			{
+				"name": "Check For Billing Ref Files",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "FusebillCustomerBillingDefinitions",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"exists"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true
+					},
+					"formatSettings": {
+						"type": "JsonReadSettings"
+					}
+				}
+			},
+			{
+				"name": "Set CustomerFile State",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Check For Customer Files",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "bCheckCustomerFileExists",
+					"value": {
+						"value": "@activity('Check For Customer Files').output.exists",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set Customer ID File State",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Check For Customer ID Files",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "bCheckCustomerIdFileExists",
+					"value": {
+						"value": "@activity('Check For Customer ID Files').output.exists",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set Billing Ref File State",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Check For Billing Ref Files",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "bCheckBillingFileExists",
+					"value": {
+						"value": "@activity('Check For Billing Ref Files').output.exists",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set Subscription File State",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Check For Subscription Files",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "bCheckSubscriptionFileExists",
+					"value": {
+						"value": "@activity('Check For Subscription Files').output.exists",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "If Customer File",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Set CustomerFile State",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@variables('bCheckCustomerFileExists')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Delete Customer Files",
+							"type": "Delete",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "FusebillCustomersFile",
+									"type": "DatasetReference",
+									"parameters": {
+										"fileName": "*.json"
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*.json"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "If Customer ID File",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Set Customer ID File State",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@variables('bCheckCustomerIdFileExists')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Delete Customer Id Files",
+							"type": "Delete",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "FusebillCustomerIds",
+									"type": "DatasetReference",
+									"parameters": {
+										"customerIdsFileName": "*.json"
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": false,
+									"wildcardFileName": "*.json"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "If Billing Ref File",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Set Billing Ref File State",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@variables('bCheckBillingFileExists')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Delete Customer Billing Reference Files",
+							"type": "Delete",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "FusebillCustomerBillingDefinitions",
+									"type": "DatasetReference"
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": false
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "If Subscription File",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Set Subscription File State",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@variables('bCheckSubscriptionFileExists')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Delete Subscription Files",
+							"type": "Delete",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "FusebillSubscription",
+									"type": "DatasetReference"
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Power BI Refresh",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "Push customers to staging",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Push subscriptions to staging",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://prod-27.australiaeast.logic.azure.com:443/workflows/2436e3cb600e4ceca68970fcf1268086/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=G1Lg1yxBRya-XJ-UuJkbui0hS3LpsYP6mVFGO4IO1R4",
+					"method": "POST",
+					"body": {
+						"FirstName": "Peter",
+						"LastName": "Piper",
+						"UserName": "ppiper",
+						"Email": "ppiper@example.com"
+					}
+				}
+			}
+		],
+		"variables": {
+			"FusebillAPIAuth": {
+				"type": "String"
+			},
+			"pageNumber": {
+				"type": "String",
+				"defaultValue": "0"
+			},
+			"tmp_pageNumber": {
+				"type": "String"
+			},
+			"pageSize": {
+				"type": "String",
+				"defaultValue": "5000"
+			},
+			"subscriptionPageNumber": {
+				"type": "String",
+				"defaultValue": "0"
+			},
+			"subscriptionPageSize": {
+				"type": "String",
+				"defaultValue": "5000"
+			},
+			"tmp_subscriptionPageNumber": {
+				"type": "String"
+			},
+			"bCheckCustomerFileExists": {
+				"type": "Boolean"
+			},
+			"bCheckCustomerIdFileExists": {
+				"type": "Boolean"
+			},
+			"bCheckSubscriptionFileExists": {
+				"type": "Boolean"
+			},
+			"bCheckBillingFileExists": {
+				"type": "Boolean"
+			}
+		},
+		"annotations": []
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
