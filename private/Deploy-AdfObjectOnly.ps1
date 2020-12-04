@@ -15,7 +15,7 @@ function Deploy-AdfObjectOnly {
     $DataFactoryName = $adf.Name
 
     Write-Verbose ("Ready to deploy from file: {0}" -f $obj.FileName)
-    $body = (Get-Content -Path $obj.FileName | Out-String)
+    $body = (Get-Content -Path $obj.FileName -Encoding "UTF8" | Out-String)
     Write-Debug -Message $body
     $json = $body | ConvertFrom-Json
 
