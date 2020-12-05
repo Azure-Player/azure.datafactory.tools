@@ -2,17 +2,18 @@ class AdfObject {
     [string] $Name
     [string] $Type
     [string] $FileName
-    [System.Collections.Hashtable] $DependsOn = @{}
+    [System.Collections.ArrayList] $DependsOn = @()
     [Boolean] $Deployed = $false
     [Boolean] $ToBeDeployed = $true
     [Adf] $Adf
     [PSCustomObject] $Body
 
-    [Boolean] AddDependant ([string]$name, [string]$type)
+    [Boolean] AddDependant ([string]$name, [string]$refType)
     {
-        $type2 = $type.Replace('Reference', '')
-        if (!$this.DependsOn.ContainsKey($name)) {
-            $this.DependsOn.Add( $name, $type2 ) | Out-Null
+        $objType = $refType.Replace('Reference', '')
+        $fullName = "$objType.$name"
+        if (!$this.DependsOn.Contains($fullName)) {
+            $this.DependsOn.Add( $fullName ) | Out-Null
         }
         return $true
     }
@@ -51,9 +52,12 @@ class AdfObject {
         return $ofn
     }
 
+    static $AllowedTypes = @('integrationRuntime', 'pipeline', 'dataset', 'dataflow', 'linkedService', 'trigger', 'factory')
 
 }
 
 if (!(Get-Variable ADF_FOLDERS -ErrorAction:SilentlyContinue)) {
-    Set-Variable ADF_FOLDERS -option ReadOnly -value ('integrationRuntime', 'pipeline', 'dataset', 'dataflow', 'linkedService', 'trigger', 'factory')
+    Set-Variable ADF_FOLDERS -option ReadOnly -value [AdfObject]::AllowedTypes
 }    
+
+
