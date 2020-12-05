@@ -21,16 +21,17 @@ function Deploy-AdfObject {
     {
         Write-Debug "Checking all dependencies of [$($obj.Name)]..."
         $i = 1
-        $obj.DependsOn.getEnumerator() | ForEach-Object {
-            $name = $_.key
-            $type = $_.value
+        $obj.DependsOn | ForEach-Object {
+            $on = [AdfObjectName]::new($_)
+            $name = $on.Name
+            $type = $on.Type
             Write-Verbose ("$i) Depends on: [$type].[$name]")
             $depobj = Get-AdfObjectByName -adf $adf -name "$name" -type "$type"
             if ($null -eq $depobj) {
                 if ($adf.PublishOptions.IgnoreLackOfReferencedObject -eq $true) {
-                    Write-Warning "ADFT0006: Referenced object [$name] was not found. No error raised as user wanted to carry on."
+                    Write-Warning "ADFT0006: Referenced object [$type].[$name] was not found. No error raised as user wanted to carry on."
                 } else {
-                    Write-Error "ADFT0005: Referenced object [$name] was not found."
+                    Write-Error "ADFT0005: Referenced object [$type].[$name] was not found."
                 }
             } else {
                 Deploy-AdfObject -obj $depobj
