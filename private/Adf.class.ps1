@@ -53,33 +53,18 @@ class Adf {
     [System.Collections.ArrayList] GetUnusedDatasets()
     {
         [System.Collections.ArrayList] $dataset_list = @{}
-        $this.DataSets | ForEach-Object
-        {
-            $null = $dataset_list.Add($_.Name) 
-        }
-        # iterate over pipelines and dataflows content looking for dataset names
-        foreach ($pipe in $this.Pipelines.FileName + $this.DataFlows.FileName)
-        {
-            $stringContent = Get-Content $pipe
-            For ($i=0; $i -lt $dataset_list.Count; $i++) 
-            {
-                # if the dataset is being used, replace it with ''
-                if ($stringContent -match $dataset_list[$i])
-                {
-                    $dataset_list[$i] = ''
-                }
-            }
-            # remove used datasets from the list, try will fail with the last object
-            # so it goes to the catch when cleaning the list.
-            Try 
-            {
-                $dataset_list = ( $dataset_list | Where-Object { $_ -ne '' } )
-            }
-            Catch 
-            {
-                $dataset_list.Remove('')
-            }
-        }
+        $this.DataSets | ForEach-Object { $null = $dataset_list.Add("$($_.Type.ToLower()).$($_.Name)") }
+
+        # Collect all objects used by pipelines and dataflows
+        $list = $this.Pipelines.DependsOn + $this.DataFlows.DependsOn
+        # Filter list to datasets only
+        $used = $list | Where-Object { $_.StartsWith('dataset.', "CurrentCultureIgnoreCase") } | `
+                        ForEach-Object { $_.Substring(8).Insert(0, 'dataset.') } | `
+                        Select-Object -Unique
+
+        # Remove all used datasets from $dataset_list
+        $used | ForEach-Object { $dataset_list.Remove($_) }
+        
         # datasets not removed from the list are the ones not being used
         return $dataset_list
     }   
