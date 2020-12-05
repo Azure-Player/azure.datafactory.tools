@@ -18,9 +18,12 @@ InModuleScope azure.datafactory.tools {
 
     # Variables for use in tests
 
-    Describe 'adf' -Tag 'class' {
+    Describe 'adf class' -Tag 'class' {
         It 'Should exist' {
             { $script:adf = New-Object -TypeName Adf } | Should -Not -Throw
+        }
+        It 'Should have GetUnusedDatasets method' {
+            { $script:adf.GetUnusedDatasets() } | Should -Not -Throw
         }
         
 

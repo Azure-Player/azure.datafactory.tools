@@ -27,7 +27,11 @@ function Deploy-AdfObject {
             Write-Verbose ("$i) Depends on: [$type].[$name]")
             $depobj = Get-AdfObjectByName -adf $adf -name "$name" -type "$type"
             if ($null -eq $depobj) {
-                Write-Error "Referenced object [$name] was not found."
+                if ($adf.PublishOptions.IgnoreLackOfReferencedObject -eq $true) {
+                    Write-Warning "ADFT0006: Referenced object [$name] was not found. No error raised as user wanted to carry on."
+                } else {
+                    Write-Error "ADFT0005: Referenced object [$name] was not found."
+                }
             } else {
                 Deploy-AdfObject -obj $depobj
             }

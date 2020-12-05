@@ -7,4 +7,5 @@ class AdfPublishOption {
     [Boolean] $DeployGlobalParams = $true
     [Boolean] $FailsWhenConfigItemNotFound = $true
     [Boolean] $FailsWhenPathNotFound = $true
+    [Boolean] $IgnoreLackOfReferencedObject = $false
 }
