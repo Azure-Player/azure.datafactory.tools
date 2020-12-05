@@ -124,7 +124,7 @@ function Publish-AdfV2FromJson {
         Write-Host "Publish options are not provided."
         $opt = New-AdfPublishOption
     }
-
+    
     Write-Host "STEP: Verifying whether ADF exists..."
     $targetAdf = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -ErrorAction:Ignore
     if ($targetAdf) {
@@ -147,6 +147,8 @@ function Publish-AdfV2FromJson {
     $adf = Import-AdfFromFolder -FactoryName $DataFactoryName -RootFolder "$RootFolder"
     $adf.ResourceGroupName = "$ResourceGroupName";
     $adf.Region = "$Location";
+    $adf.PublishOptions = $opt
+    
     Write-Debug ($adf | Format-List | Out-String)
 
     # Apply Deployment Options if applicable
