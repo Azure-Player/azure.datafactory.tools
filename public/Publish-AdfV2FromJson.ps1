@@ -142,6 +142,11 @@ function Publish-AdfV2FromJson {
         }
     }
 
+    if ($null -eq $targetAdf) {
+        Write-Host "The process is exiting the function. Do fix the issue and run again."
+        return 
+    }
+
     Write-Host "===================================================================================";
     Write-Host "STEP: Reading Azure Data Factory from JSON files..."
     $adf = Import-AdfFromFolder -FactoryName $DataFactoryName -RootFolder "$RootFolder"
