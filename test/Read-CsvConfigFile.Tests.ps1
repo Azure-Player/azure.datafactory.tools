@@ -1,16 +1,10 @@
-[System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
-[CmdletBinding()]
-param
-(
-    [Parameter()]
-    [System.String]
+BeforeDiscovery {
     $ModuleRootPath = (Get-Location)
-)
+    $moduleManifestName = 'azure.datafactory.tools.psd1'
+    $moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
 
-$moduleManifestName = 'azure.datafactory.tools.psd1'
-$moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
-
-Import-Module -Name $moduleManifestPath -Force -Verbose:$false
+    Import-Module -Name $moduleManifestPath -Force -Verbose:$false
+}
 
 InModuleScope azure.datafactory.tools {
     $script:SrcFolder = $env:ADF_ExampleCode
