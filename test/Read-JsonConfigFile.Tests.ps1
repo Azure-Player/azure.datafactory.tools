@@ -37,7 +37,8 @@ InModuleScope azure.datafactory.tools {
                     $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
                     $script:option = New-AdfPublishOption
                     $option.FailsWhenConfigItemNotFound = $true
-                    Read-JsonConfigFile -Path ( Join-Path -Path $script:ConfigFolder -ChildPath "config-c100.json" ) -Adf $adf -Option $option -ErrorAction Stop
+                    $script:adf.PublishOptions = $option
+                    Read-JsonConfigFile -Path ( Join-Path -Path $script:ConfigFolder -ChildPath "config-c100.json" ) -Adf $adf -ErrorAction Stop
                 } | Should -Not -Throw
             }
              It 'Should throw when object is missing' {
@@ -45,7 +46,8 @@ InModuleScope azure.datafactory.tools {
                     $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
                     $script:option = New-AdfPublishOption
                     $option.FailsWhenConfigItemNotFound = $true
-                    Read-JsonConfigFile -Path ( Join-Path -Path $script:ConfigFolder -ChildPath "config-missing.json" ) -Adf $adf -Option $option -ErrorAction Stop
+                    $script:adf.PublishOptions = $option
+                    Read-JsonConfigFile -Path ( Join-Path -Path $script:ConfigFolder -ChildPath "config-missing.json" ) -Adf $adf -ErrorAction Stop
                 } | Should -Throw
              }
         }
@@ -56,7 +58,8 @@ InModuleScope azure.datafactory.tools {
                     $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
                     $script:option = New-AdfPublishOption
                     $option.FailsWhenConfigItemNotFound = $false
-                    Read-JsonConfigFile -Path ( Join-Path -Path $script:ConfigFolder -ChildPath "config-c100.json" ) -Adf $adf -Option $option -ErrorAction Stop
+                    $script:adf.PublishOptions = $option
+                    Read-JsonConfigFile -Path ( Join-Path -Path $script:ConfigFolder -ChildPath "config-c100.json" ) -Adf $adf -ErrorAction Stop
                 } | Should -Not -Throw
             }
              It 'Should not throw when object is missing' {
@@ -64,7 +67,8 @@ InModuleScope azure.datafactory.tools {
                     $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
                     $script:option = New-AdfPublishOption
                     $option.FailsWhenConfigItemNotFound = $false
-                    Read-JsonConfigFile -Path ( Join-Path -Path $script:ConfigFolder -ChildPath "config-missing.json" ) -Adf $adf -Option $option -ErrorAction Stop
+                    $script:adf.PublishOptions = $option
+                    Read-JsonConfigFile -Path ( Join-Path -Path $script:ConfigFolder -ChildPath "config-missing.json" ) -Adf $adf -ErrorAction Stop
                 } | Should -Not -Throw
              }
         }

@@ -2,12 +2,12 @@ function Update-PropertiesFromFile {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)] [Adf] $adf,
-        [Parameter(Mandatory)] [string] $stage,
-        [Parameter(Mandatory)] [AdfPublishOption] $option
+        [Parameter(Mandatory)] [string] $stage
         )
 
     Write-Debug "BEGIN: Update-PropertiesFromFile(adf=$adf, stage=$stage)"
 
+    $option = $adf.PublishOptions
     $srcFolder = $adf.Location
     if ([string]::IsNullOrEmpty($srcFolder)) {
         Write-Error "adf.Location property has not been provided."
@@ -30,7 +30,7 @@ function Update-PropertiesFromFile {
     if ($ext -eq "CSV") {
         $config = Read-CsvConfigFile -Path $configFileName
     } else {
-        $config = Read-JsonConfigFile -Path $configFileName -adf $adf -option $option
+        $config = Read-JsonConfigFile -Path $configFileName -adf $adf
     }
     # $config | Out-Host 
 
