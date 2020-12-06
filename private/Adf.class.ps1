@@ -56,15 +56,19 @@ class Adf {
         $this.DataSets | ForEach-Object { $null = $dataset_list.Add("$($_.Type.ToLower()).$($_.Name)") }
 
         # Collect all objects used by pipelines and dataflows
-        $list = $this.Pipelines.DependsOn + $this.DataFlows.DependsOn
-        # Filter list to datasets only
-        $used = $list | Where-Object { $_.StartsWith('dataset.', "CurrentCultureIgnoreCase") } | `
-                        ForEach-Object { $_.Substring(8).Insert(0, 'dataset.') } | `
-                        Select-Object -Unique
+        $list = $this.Pipelines + $this.DataFlows
+        if ($list.Count -gt 0) { 
+            $list = $list.DependsOn
 
-        # Remove all used datasets from $dataset_list
-        $used | ForEach-Object { $dataset_list.Remove($_) }
-        
+            # Filter list to datasets only
+            $used = $list | Where-Object { $_.StartsWith('dataset.', "CurrentCultureIgnoreCase") } | `
+                            ForEach-Object { $_.Substring(8).Insert(0, 'dataset.') } | `
+                            Select-Object -Unique
+
+            # Remove all used datasets from $dataset_list
+            $used | ForEach-Object { $dataset_list.Remove($_) }
+        }
+
         # datasets not removed from the list are the ones not being used
         return $dataset_list
     }   
