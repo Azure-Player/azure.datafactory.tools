@@ -57,7 +57,5 @@ class AdfObject {
 }
 
 if (!(Get-Variable ADF_FOLDERS -ErrorAction:SilentlyContinue)) {
-    Set-Variable ADF_FOLDERS -option ReadOnly -value [AdfObject]::AllowedTypes
+    Set-Variable ADF_FOLDERS -option ReadOnly -value ([AdfObject]::AllowedTypes)
 }    
-
-
