@@ -1,11 +1,11 @@
 function ApplyExclusionOptions {
     param(
-        [Parameter(Mandatory=$True)] [Adf] $adf,
-        [Parameter(Mandatory=$True)] [AdfPublishOption] $option
+        [Parameter(Mandatory=$True)] [Adf] $adf
     )
 
     Write-Debug "BEGIN: ApplyExclusionOptions()"
     
+    $option = $adf.PublishOptions
     if ($option.Excludes.Keys.Count -gt 0 -and $option.Includes.Keys.Count -eq 0)
     {
         Write-Debug "ENTRY: ApplyExclusionOptions()::Excludes"
