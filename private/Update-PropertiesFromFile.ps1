@@ -70,7 +70,7 @@ function Update-PropertiesFromFile {
             Write-Error "Body of the object is empty!"
         }
         
-        Write-Verbose "- Performing: $action for path: properties.$path"
+        Write-Verbose "- Performing: $action for object(path): $type.$name(properties.$path)"
         $validPath = $true
 
         try {
