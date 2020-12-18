@@ -61,58 +61,11 @@ function Update-PropertiesFromFile {
             $path = $path.Substring(13) 
         }
 
-        $o = Get-AdfObjectByName -adf $adf -name $name -type $type
-        if ($null -eq $o -and $action -ne "add") {
-            Write-Error "Could not find object: $type.$name"
-        }
-        $json = $o.Body
-        if ($null -eq $json) {
-            Write-Error "Body of the object is empty!"
-        }
-        
+        $objArr = Get-AdfObjectByPattern -adf $adf -name $name -type $type
         Write-Verbose "- Performing: $action for object(path): $type.$name(properties.$path)"
-        $validPath = $true
-
-        try {
-            if ($action -ne "add") {
-                Invoke-Expression "`$isExist = (`$null -ne `$json.properties.$path)"
-            }
+        $objArr | ForEach-Object {
+            $null = Update-PropertiesForObject -o $_ -action $action -path $path -value $value -name $name -type $type -report $report
         }
-        catch {
-            $validPath = $false
-
-            if ($option.FailsWhenPathNotFound -eq $false) {
-                Write-Warning "Wrong path defined in config for object(path): $type.$name(properties.$path), skipping..."
-            } else {
-                $exc = ([System.Data.DataException]::new())
-                Write-Error -Message "Wrong path defined in config for object(path): $type.$name(properties.$path)" -Exception $exc
-            }
-        }
-
-        if ($validPath) {
-            switch -Exact ($action)
-            {
-                'update'
-                {
-                    Update-ObjectProperty -obj $json -path "properties.$path" -value "$value"
-                    $report['Updated'] += 1
-                }
-                'add'
-                {
-                    Add-ObjectProperty -obj $json -path "properties.$path" -value "$value"
-                    $report['Added'] += 1
-                }
-                'remove'
-                {
-                    Remove-ObjectProperty -obj $json -path "properties.$path"
-                    $report['Removed'] += 1
-                }
-            }
-        }
-
-        # Save new file for deployment purposes and change pointer in object instance
-        $f = (Save-AdfObjectAsFile -obj $o)
-        $o.FileName = $f
 
     }
     Write-Host "*** Properties modification report ***"
@@ -122,3 +75,77 @@ function Update-PropertiesFromFile {
 
 }
 
+
+function Update-PropertiesForObject {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]          [AdfObject] $o,
+        [Parameter(Mandatory)]          [string] $action,
+        [Parameter(Mandatory)]          [string] $path,
+        [Parameter(Mandatory = $false)] [string] $value,
+        [Parameter(Mandatory)]          [string] $name,
+        [Parameter(Mandatory)]          [string] $type,
+        [Parameter(Mandatory)]          $report
+    )
+
+    Write-Debug "BEGIN: Update-PropertiesForObject"
+
+    if ($null -eq $o -and $action -ne "add") {
+        Write-Error "Could not find object: $type.$name"
+    }
+    $json = $o.Body
+    if ($null -eq $json) {
+        Write-Error "Body of the object is empty!"
+    }
+    
+    $objName = $o.Name
+    if ($objName -ne $name) { 
+        Write-Verbose "  - Matched object: $type.$objName(properties.$path)"
+    }
+
+    $validPath = $true
+
+    try {
+        if ($action -ne "add") {
+            Invoke-Expression "`$isExist = (`$null -ne `$json.properties.$path)"
+        }
+    }
+    catch {
+        $validPath = $false
+
+        if ($option.FailsWhenPathNotFound -eq $false) {
+            Write-Warning "Wrong path defined in config for object(path): $type.$name(properties.$path), skipping..."
+        } else {
+            $exc = ([System.Data.DataException]::new())
+            Write-Error -Message "Wrong path defined in config for object(path): $type.$name(properties.$path)" -Exception $exc
+        }
+    }
+
+    if ($validPath) {
+        switch -Exact ($action)
+        {
+            'update'
+            {
+                Update-ObjectProperty -obj $json -path "properties.$path" -value "$value"
+                $report['Updated'] += 1
+            }
+            'add'
+            {
+                Add-ObjectProperty -obj $json -path "properties.$path" -value "$value"
+                $report['Added'] += 1
+            }
+            'remove'
+            {
+                Remove-ObjectProperty -obj $json -path "properties.$path"
+                $report['Removed'] += 1
+            }
+        }
+    }
+
+    # Save new file for deployment purposes and change pointer in object instance
+    $f = (Save-AdfObjectAsFile -obj $o)
+    $o.FileName = $f
+
+    Write-Debug "END: Update-PropertiesForObject"
+
+}    
