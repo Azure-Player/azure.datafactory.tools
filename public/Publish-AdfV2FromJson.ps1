@@ -186,7 +186,7 @@ function Publish-AdfV2FromJson {
     Write-Host "STEP: Deleting objects not in source ..."
     if ($opt.DeleteNotInSource -eq $true) {
         $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
-        $adfIns.AllObjects() | ForEach-Object {
+        $adfIns.AllObjectsSortedForSafeRemoval() | ForEach-Object {
             Remove-AdfObjectIfNotInSource -adfSource $adf -adfTargetObj $_ -adfInstance $adfIns
         }
     } else {

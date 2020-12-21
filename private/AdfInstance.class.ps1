@@ -12,6 +12,11 @@ class AdfInstance {
 
     [System.Collections.ArrayList] AllObjects()
     {
+        return $this.LinkedServices + $this.Pipelines + $this.DataSets + $this.DataFlows + $this.Triggers + $this.IntegrationRuntimes
+    }
+
+    [System.Collections.ArrayList] AllObjectsSortedForSafeRemoval()
+    {
         return $this.Triggers + $this.Pipelines + $this.DataFlows + $this.DataSets + $this.LinkedServices + $this.IntegrationRuntimes
     }
 }
