@@ -1,0 +1,2 @@
+type,name,path,value
+linkedService,LS_DataLakeStore_Unknown,$.properties.typeProperties.url,"https://datalake$($Env:ProjectName)$($Env:Environment).dfs.core.windows.net/"
