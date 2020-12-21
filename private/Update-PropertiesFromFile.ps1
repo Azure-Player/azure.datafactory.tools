@@ -10,7 +10,7 @@ function Update-PropertiesFromFile {
     $option = $adf.PublishOptions
     $srcFolder = $adf.Location
     if ([string]::IsNullOrEmpty($srcFolder)) {
-        Write-Error "adf.Location property has not been provided."
+        Write-Error "ADFT0011: adf.Location property has not been provided."
     }
     
     $ext = "CSV"
@@ -62,11 +62,18 @@ function Update-PropertiesFromFile {
         }
 
         $objArr = Get-AdfObjectByPattern -adf $adf -name $name -type $type
-        Write-Verbose "- Performing: $action for object(path): $type.$name(properties.$path)"
-        $objArr | ForEach-Object {
-            $null = Update-PropertiesForObject -o $_ -action $action -path $path -value $value -name $name -type $type -report $report
+        if ($null -eq $objArr) {
+            if ($option.FailsWhenConfigItemNotFound -eq $false) {
+                Write-Warning "Could not find object: $type.$name, skipping..."
+            } else {
+                Write-Error -Message "ADFT0007: Could not find object: $type.$name"
+            }
+        } else {
+            Write-Verbose "- Performing: $action for object(path): $type.$name(properties.$path)"
+            $objArr | ForEach-Object {
+                $null = Update-PropertiesForObject -o $_ -action $action -path $path -value $value -name $name -type $type -report $report
+            }
         }
-
     }
     Write-Host "*** Properties modification report ***"
     $report | Out-Host 
@@ -90,12 +97,12 @@ function Update-PropertiesForObject {
 
     Write-Debug "BEGIN: Update-PropertiesForObject"
 
-    if ($null -eq $o -and $action -ne "add") {
-        Write-Error "Could not find object: $type.$name"
-    }
+    # if ($null -eq $o -and $action -ne "add") {
+    #     Write-Error "ADFT0008: Could not find object: $type.$name"
+    # }
     $json = $o.Body
     if ($null -eq $json) {
-        Write-Error "Body of the object is empty!"
+        Write-Error "ADFT0009: Body of the object is empty!"
     }
     
     $objName = $o.Name
@@ -117,7 +124,7 @@ function Update-PropertiesForObject {
             Write-Warning "Wrong path defined in config for object(path): $type.$name(properties.$path), skipping..."
         } else {
             $exc = ([System.Data.DataException]::new())
-            Write-Error -Message "Wrong path defined in config for object(path): $type.$name(properties.$path)" -Exception $exc
+            Write-Error -Message "ADFT0010: Wrong path defined in config for object(path): $type.$name(properties.$path)" -Exception $exc
         }
     }
 
