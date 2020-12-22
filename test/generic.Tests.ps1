@@ -1,5 +1,5 @@
 BeforeDiscovery {
-    $ModuleRootPath = (Get-Location)
+    $ModuleRootPath = $PSScriptRoot | Split-Path -Parent
     $script:moduleManifestName = 'azure.datafactory.tools.psd1'
     $script:moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
 
