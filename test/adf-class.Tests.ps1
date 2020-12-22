@@ -7,7 +7,7 @@ BeforeDiscovery {
 }
 
 InModuleScope azure.datafactory.tools {
-    $testHelperPath = (Get-Location) | Join-Path -ChildPath 'TestHelper'
+    $testHelperPath = $PSScriptRoot | Join-Path -ChildPath 'TestHelper'
     Import-Module -Name $testHelperPath -Force
 
     # Variables for use in tests

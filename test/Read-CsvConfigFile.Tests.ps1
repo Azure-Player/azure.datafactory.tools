@@ -7,6 +7,10 @@ BeforeDiscovery {
 }
 
 InModuleScope azure.datafactory.tools {
+    $testHelperPath = $PSScriptRoot | Join-Path -ChildPath 'TestHelper'
+    Import-Module -Name $testHelperPath -Force
+
+    # Variables for use in tests
     $script:SrcFolder = ".\BigFactorySample2"
     $script:ConfigFolder = Join-Path -Path $script:SrcFolder -ChildPath "deployment"
 
