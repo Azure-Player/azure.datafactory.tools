@@ -156,6 +156,17 @@ InModuleScope azure.datafactory.tools {
             }
         }
 
+        Context 'ADF fully published and redeploy deleting all with DeleteNotInSource=true' {
+            It 'Should complete successfully' {
+                Remove-Item -Path "$RootFolder\*" -Recurse:$true -Force
+                $script:AllExcluded.DeleteNotInSource = $true
+                { Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                    -ResourceGroupName "$ResourceGroupName" `
+                    -DataFactoryName "$DataFactoryName" -Option $script:AllExcluded
+                } | Should -Not -Throw
+
+            }
+        }
 
     } 
 
