@@ -1,5 +1,5 @@
 BeforeDiscovery {
-    $ModuleRootPath = (Get-Location)
+    $ModuleRootPath = $PSScriptRoot | Split-Path -Parent
     $moduleManifestName = 'azure.datafactory.tools.psd1'
     $moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
     
@@ -7,8 +7,8 @@ BeforeDiscovery {
 }
 
 InModuleScope azure.datafactory.tools {
-    #$testHelperPath = $PSScriptRoot | Split-Path -Parent | Join-Path -ChildPath 'TestHelper'
-    #Import-Module -Name $testHelperPath -Force
+    $testHelperPath = (Get-Location) | Join-Path -ChildPath 'TestHelper'
+    Import-Module -Name $testHelperPath -Force
 
     # Variables for use in tests
 
