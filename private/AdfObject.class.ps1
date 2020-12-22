@@ -38,15 +38,31 @@ class AdfObject {
         return $this.FullName($true)
     }
 
+    [Boolean] IsNameMatch ([string]$wildcardPattern)
+    {
+        $folder = $this.GetFolderName()
+        $fullname = $this.FullName($false)
+        $arr = $wildcardPattern.Split('@')
+        $namePattern = $arr[0]
+        if ($arr.Count -le 1)
+        {
+            $r = ($fullname -like $namePattern) 
+        } else {
+            $folderPattern = $arr[1]
+            $r = ($fullname -like $namePattern) -and ( $folder -like $folderPattern )
+        }
+        return $r
+    }
+
     [String] GetFolderName()
     {
-        $ofn = $null
+        $ofn = ''
         if ($this.Body.PSObject.Properties.Name -contains "properties")
         {
             $o = $this.Body.properties
             if ($o.PSobject.Properties.Name -contains "folder")
             {
-                $ofn = $_.Body.properties.folder.name
+                $ofn = $this.Body.properties.folder.name
             }
         }
         return $ofn
