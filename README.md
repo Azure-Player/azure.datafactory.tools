@@ -217,14 +217,16 @@ Therefore you can use the following combinations:
 ```
 trigger.*
 dataset.DS_*
-*.PL_*
+*.PL_*@test*
 linkedService.???KeyVault*
 pipeline.ScdType[123]
+trigger.*@testFolder
 ```
-Full name of objects supported by the module is built of: `{Type}.{Name}`  
+Full name of objects supported by the module is built of: `{Type}.{Name}@{Folder}`  
 All potential combinations can be found in code repository of ADF:  
 *Type* - name of folder  
-*Name* - name of file (without JSON extension)
+*Name* - name of file (without JSON extension)  
+*Folder* - name of (ADF) folder to which objects belong to
 
 > More info about wildcard: [About Wildcard](https://docs.microsoft.com/en-gb/powershell/module/microsoft.powershell.core/about/about_wildcards?view=powershell-5.1)
 

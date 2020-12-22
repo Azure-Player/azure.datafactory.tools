@@ -4,12 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.19.0] - 2020-12-19
+## [0.19.0] - 2020-12-22
 ### Added
 * Support wildcard when specifying object(s) name in config file (#58)
 * Added option $IgnoreLackOfReferencedObject (#64)
 * Add object name to the msg before action (#49)
 * Exit publish cmd when ADF name is already in use (#43)
+* Allow selecting objects in given folder (#68)
 ### Fixed
 * Finding dependencies miss objects when the same object names occurs (#65)
 
