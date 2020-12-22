@@ -11,7 +11,7 @@ InModuleScope azure.datafactory.tools {
     Import-Module -Name $testHelperPath -Force
 
     # Variables for use in tests
-    $script:SrcFolder = $env:ADF_ExampleCode
+    $script:SrcFolder = ".\BigFactorySample2"
     $script:TmpFolder = (New-TemporaryDirectory).FullName
     $script:RootFolder = Join-Path -Path $script:TmpFolder -ChildPath (Split-Path -Path $script:SrcFolder -Leaf)
     $script:DeploymentFolder = Join-Path -Path $script:RootFolder -ChildPath "deployment"

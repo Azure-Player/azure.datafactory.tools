@@ -7,7 +7,7 @@ BeforeDiscovery {
 }
 
 InModuleScope azure.datafactory.tools {
-    $script:SrcFolder = $env:ADF_ExampleCode
+    $script:SrcFolder = ".\BigFactorySample2"
     $script:ConfigFolder = Join-Path -Path $script:SrcFolder -ChildPath "deployment"
 
     Describe 'Read-CsvConfigFile' -Tag 'Unit','private' {
