@@ -15,9 +15,9 @@ InModuleScope azure.datafactory.tools {
     $script:Stage = 'UAT'
     $script:guid =  (New-Guid).ToString().Substring(0,8)
     $script:guid = '5889b15h'
-    $script:DataFactoryOrigName = (Split-Path -Path $env:ADF_ExampleCode -Leaf)
+    $script:DataFactoryOrigName = 'BigFactorySample2'
     $script:DataFactoryName = $script:DataFactoryOrigName + "-$guid"
-    $script:SrcFolder = $env:ADF_ExampleCode
+    $script:SrcFolder = ".\$($script:DataFactoryOrigName)"
     $script:Location = "NorthEurope"
     $script:AllExcluded = (New-AdfPublishOption)
     $script:AllExcluded.Excludes.Add('*','')
