@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 * Allow selecting objects in given folder (#68)
 ### Fixed
 * Finding dependencies miss objects when the same object names occurs (#65)
+* DeleteNotInSource fails when attempting to remove active trigger or found many dependant objects (#67)
 
 ## [0.18.0] - 2020-12-04
 ### Added
