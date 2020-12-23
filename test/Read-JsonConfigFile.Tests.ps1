@@ -1,25 +1,18 @@
-[System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
-[CmdletBinding()]
-param
-(
-    [Parameter()]
-    [System.String]
-    $ModuleRootPath = (Get-Location)
-)
+BeforeDiscovery {
+    $ModuleRootPath = $PSScriptRoot | Split-Path -Parent
+    $moduleManifestName = 'azure.datafactory.tools.psd1'
+    $moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
 
-$moduleManifestName = 'azure.datafactory.tools.psd1'
-$moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
-
-Import-Module -Name $moduleManifestPath -Force -Verbose:$false
+    Import-Module -Name $moduleManifestPath -Force -Verbose:$false
+}
 
 InModuleScope azure.datafactory.tools {
-    $script:SrcFolder = $env:ADF_ExampleCode
-    $script:ConfigFolder = Join-Path -Path $script:SrcFolder -ChildPath "deployment"
-
-    . ".\test\New-TempDirectory.ps1"
+    $testHelperPath = $PSScriptRoot | Join-Path -ChildPath 'TestHelper'
+    Import-Module -Name $testHelperPath -Force
 
     # Variables for use in tests
-    #$script:SrcFolder = $env:ADF_ExampleCode
+    $script:SrcFolder = ".\BigFactorySample2"
+    $script:ConfigFolder = Join-Path -Path $script:SrcFolder -ChildPath "deployment"
     $script:TmpFolder = (New-TemporaryDirectory).FullName
     $script:RootFolder = Join-Path -Path $script:TmpFolder -ChildPath (Split-Path -Path $script:SrcFolder -Leaf)
     $script:DeploymentFolder = Join-Path -Path $script:RootFolder -ChildPath "deployment"
@@ -43,7 +36,8 @@ InModuleScope azure.datafactory.tools {
                     $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
                     $script:option = New-AdfPublishOption
                     $option.FailsWhenConfigItemNotFound = $true
-                    Read-JsonConfigFile -Path ( Join-Path -Path $script:ConfigFolder -ChildPath "config-c100.json" ) -Adf $adf -Option $option -ErrorAction Stop
+                    $script:adf.PublishOptions = $option
+                    Read-JsonConfigFile -Path ( Join-Path -Path $script:ConfigFolder -ChildPath "config-c100.json" ) -Adf $adf -ErrorAction Stop
                 } | Should -Not -Throw
             }
              It 'Should throw when object is missing' {
@@ -51,7 +45,8 @@ InModuleScope azure.datafactory.tools {
                     $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
                     $script:option = New-AdfPublishOption
                     $option.FailsWhenConfigItemNotFound = $true
-                    Read-JsonConfigFile -Path ( Join-Path -Path $script:ConfigFolder -ChildPath "config-missing.json" ) -Adf $adf -Option $option -ErrorAction Stop
+                    $script:adf.PublishOptions = $option
+                    Read-JsonConfigFile -Path ( Join-Path -Path $script:ConfigFolder -ChildPath "config-missing.json" ) -Adf $adf -ErrorAction Stop
                 } | Should -Throw
              }
         }
@@ -62,7 +57,8 @@ InModuleScope azure.datafactory.tools {
                     $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
                     $script:option = New-AdfPublishOption
                     $option.FailsWhenConfigItemNotFound = $false
-                    Read-JsonConfigFile -Path ( Join-Path -Path $script:ConfigFolder -ChildPath "config-c100.json" ) -Adf $adf -Option $option -ErrorAction Stop
+                    $script:adf.PublishOptions = $option
+                    Read-JsonConfigFile -Path ( Join-Path -Path $script:ConfigFolder -ChildPath "config-c100.json" ) -Adf $adf -ErrorAction Stop
                 } | Should -Not -Throw
             }
              It 'Should not throw when object is missing' {
@@ -70,7 +66,8 @@ InModuleScope azure.datafactory.tools {
                     $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
                     $script:option = New-AdfPublishOption
                     $option.FailsWhenConfigItemNotFound = $false
-                    Read-JsonConfigFile -Path ( Join-Path -Path $script:ConfigFolder -ChildPath "config-missing.json" ) -Adf $adf -Option $option -ErrorAction Stop
+                    $script:adf.PublishOptions = $option
+                    Read-JsonConfigFile -Path ( Join-Path -Path $script:ConfigFolder -ChildPath "config-missing.json" ) -Adf $adf -ErrorAction Stop
                 } | Should -Not -Throw
              }
         }

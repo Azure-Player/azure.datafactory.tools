@@ -1,26 +1,20 @@
-[System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
-[CmdletBinding()]
-param
-(
-    [Parameter()]
-    [System.String]
-    $ModuleRootPath = (Get-Location)
-)
+BeforeDiscovery {
+    $ModuleRootPath = $PSScriptRoot | Split-Path -Parent
+    $moduleManifestName = 'azure.datafactory.tools.psd1'
+    $moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
 
-$moduleManifestName = 'azure.datafactory.tools.psd1'
-$moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
-
-Import-Module -Name $moduleManifestPath -Force -Verbose:$false
+    Import-Module -Name $moduleManifestPath -Force -Verbose:$false
+}
 
 InModuleScope azure.datafactory.tools {
-    #$testHelperPath = $PSScriptRoot | Split-Path -Parent | Join-Path -ChildPath 'TestHelper'
-    #Import-Module -Name $testHelperPath -Force
+    $testHelperPath = $PSScriptRoot | Join-Path -ChildPath 'TestHelper'
+    Import-Module -Name $testHelperPath -Force
 
     # Variables for use in tests
     $script:ResourceGroupName = 'rg-devops-factory'
     $script:Stage = 'UAT'
     $script:DataFactoryName = "SQLPlayerDemo-$Stage"
-    $script:RootFolder = $env:ADF_ExampleCode
+    $script:RootFolder = ".\BigFactorySample2"
     $script:WrongRootFolder = Join-Path -Path $script:RootFolder -ChildPath "dfij393gfu0AJQ3"
     $script:Location = "NorthEurope"
     
@@ -57,42 +51,42 @@ InModuleScope azure.datafactory.tools {
             It 'Should contains Pipelines prop as ArrayList and # of items matches' {
                 $script:result.Pipelines.GetType() | Should -Be 'System.Collections.ArrayList'
                 $cnt = 0
-                $folder = Join-Path -Path "$env:ADF_ExampleCode" -ChildPath "pipeline"
+                $folder = Join-Path -Path "$script:RootFolder" -ChildPath "pipeline"
                 if (Test-Path $folder) { $cnt = ($folder | Get-ChildItem -Recurse:$false -Filter "*.json" | Measure-Object).Count }
                 $script:result.Pipelines.Count | Should -Be $cnt
             }
             It 'Should contains LinkedServices prop as ArrayList and # of items matches' {
                 $script:result.LinkedServices.GetType() | Should -Be 'System.Collections.ArrayList'
                 $cnt = 0
-                $folder = Join-Path -Path "$env:ADF_ExampleCode" -ChildPath "LinkedService"
+                $folder = Join-Path -Path "$script:RootFolder" -ChildPath "LinkedService"
                 if (Test-Path $folder) { $cnt = ($folder | Get-ChildItem -Recurse:$false -Filter "*.json" | Measure-Object).Count }
                 $script:result.LinkedServices.Count | Should -Be $cnt
             }
             It 'Should contains DataSets prop as ArrayList and # of items matches' {
                 $script:result.DataSets.GetType() | Should -Be 'System.Collections.ArrayList'
                 $cnt = 0
-                $folder = Join-Path -Path "$env:ADF_ExampleCode" -ChildPath "DataSet"
+                $folder = Join-Path -Path "$script:RootFolder" -ChildPath "DataSet"
                 if (Test-Path $folder) { $cnt = ($folder | Get-ChildItem -Recurse:$false -Filter "*.json" | Measure-Object).Count }
                 $script:result.DataSets.Count | Should -Be $cnt
             }
             It 'Should contains DataFlows prop as ArrayList and # of items matches' {
                 $script:result.DataFlows.GetType() | Should -Be 'System.Collections.ArrayList'
                 $cnt = 0
-                $folder = Join-Path -Path "$env:ADF_ExampleCode" -ChildPath "DataFlow"
+                $folder = Join-Path -Path "$script:RootFolder" -ChildPath "DataFlow"
                 if (Test-Path $folder) { $cnt = ($folder | Get-ChildItem -Recurse:$false -Filter "*.json" | Measure-Object).Count }
                 $script:result.DataFlows.Count | Should -Be $cnt
             }
             It 'Should contains Triggers prop as ArrayList and # of items matches' {
                 $script:result.Triggers.GetType() | Should -Be 'System.Collections.ArrayList'
                 $cnt = 0
-                $folder = Join-Path -Path "$env:ADF_ExampleCode" -ChildPath "Trigger"
+                $folder = Join-Path -Path "$script:RootFolder" -ChildPath "Trigger"
                 if (Test-Path $folder) { $cnt = ($folder | Get-ChildItem -Recurse:$false -Filter "*.json" | Measure-Object).Count }
                 $script:result.Triggers.Count | Should -Be $cnt
             }
             It 'Should contains IntegrationRuntimes prop as ArrayList and # of items matches' {
                 $script:result.IntegrationRuntimes.GetType() | Should -Be 'System.Collections.ArrayList'
                 $cnt = 0
-                $folder = Join-Path -Path "$env:ADF_ExampleCode" -ChildPath "IntegrationRuntime"
+                $folder = Join-Path -Path "$script:RootFolder" -ChildPath "IntegrationRuntime"
                 if (Test-Path $folder) { $cnt = ($folder | Get-ChildItem -Recurse:$false -Filter "*.json" | Measure-Object).Count }
                 $script:result.IntegrationRuntimes.Count | Should -Be $cnt
             }

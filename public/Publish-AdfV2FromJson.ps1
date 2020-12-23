@@ -124,7 +124,7 @@ function Publish-AdfV2FromJson {
         Write-Host "Publish options are not provided."
         $opt = New-AdfPublishOption
     }
-
+    
     Write-Host "STEP: Verifying whether ADF exists..."
     $targetAdf = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -ErrorAction:Ignore
     if ($targetAdf) {
@@ -142,22 +142,29 @@ function Publish-AdfV2FromJson {
         }
     }
 
+    if ($null -eq $targetAdf) {
+        Write-Host "The process is exiting the function. Do fix the issue and run again."
+        return 
+    }
+
     Write-Host "===================================================================================";
     Write-Host "STEP: Reading Azure Data Factory from JSON files..."
     $adf = Import-AdfFromFolder -FactoryName $DataFactoryName -RootFolder "$RootFolder"
     $adf.ResourceGroupName = "$ResourceGroupName";
     $adf.Region = "$Location";
+    $adf.PublishOptions = $opt
+    
     Write-Debug ($adf | Format-List | Out-String)
 
     # Apply Deployment Options if applicable
     if ($null -ne $Option) {
-        ApplyExclusionOptions -adf $adf -option $opt
+        ApplyExclusionOptions -adf $adf
     }
 
     Write-Host "===================================================================================";
     Write-Host "STEP: Replacing all properties environment-related..."
     if (![string]::IsNullOrEmpty($Stage)) {
-        Update-PropertiesFromFile -adf $adf -stage $Stage -option $opt
+        Update-PropertiesFromFile -adf $adf -stage $Stage
     } else {
         Write-Host "Stage parameter was not provided - action skipped."
     }

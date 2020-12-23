@@ -6,10 +6,10 @@ function Remove-AdfObject {
     )
 
     $name = $obj.Name
-    Write-Host "Removing object: [$($obj.Name)]"
     $err = $null
     $ErrorMessage = $null
     $simtype = Get-SimplifiedType -Type $obj.GetType().Name
+    Write-Host "Removing object: [$simtype].[$($obj.Name)]"
 
     Try 
     {
@@ -68,13 +68,25 @@ function Remove-AdfObject {
         $ErrorMessage = $_.Exception.Message
     }
 
+    if ($ErrorMessage -match 'Error Code: TriggerEnabledCannotUpdate')
+    {
+        Write-host "Disabling trigger: $name..." 
+        Stop-AzDataFactoryV2Trigger `
+        -ResourceGroupName $ResourceGroupName `
+        -DataFactoryName $DataFactoryName `
+        -Name $name `
+        -Force | Out-Null
+        Remove-AdfObject -obj $obj -adfInstance $adfInstance
+    }
+
     if ($ErrorMessage -match 'deleted since it is referenced by (?<RefName>.+)\.')
     {
-        #$Matches
         Write-Verbose "The document cannot be deleted since it is referenced by $($Matches.RefName)."
         #$Matches.RefName
         $refobj = $adfInstance.AllObjects() | Where-Object { $_.Name -eq $Matches.RefName }
-        Remove-AdfObject -obj $refobj -adfInstance $adfInstance
+        $refobj | ForEach-Object {
+            Remove-AdfObject -obj $_ -adfInstance $adfInstance
+        }
         Remove-AdfObject -obj $obj -adfInstance $adfInstance
     } 
 

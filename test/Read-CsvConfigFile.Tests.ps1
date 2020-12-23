@@ -1,19 +1,17 @@
-[System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
-[CmdletBinding()]
-param
-(
-    [Parameter()]
-    [System.String]
-    $ModuleRootPath = (Get-Location)
-)
+BeforeDiscovery {
+    $ModuleRootPath = $PSScriptRoot | Split-Path -Parent
+    $moduleManifestName = 'azure.datafactory.tools.psd1'
+    $moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
 
-$moduleManifestName = 'azure.datafactory.tools.psd1'
-$moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
-
-Import-Module -Name $moduleManifestPath -Force -Verbose:$false
+    Import-Module -Name $moduleManifestPath -Force -Verbose:$false
+}
 
 InModuleScope azure.datafactory.tools {
-    $script:SrcFolder = $env:ADF_ExampleCode
+    $testHelperPath = $PSScriptRoot | Join-Path -ChildPath 'TestHelper'
+    Import-Module -Name $testHelperPath -Force
+
+    # Variables for use in tests
+    $script:SrcFolder = ".\BigFactorySample2"
     $script:ConfigFolder = Join-Path -Path $script:SrcFolder -ChildPath "deployment"
 
     Describe 'Read-CsvConfigFile' -Tag 'Unit','private' {

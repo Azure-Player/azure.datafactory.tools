@@ -17,6 +17,7 @@ class Adf {
     [System.Collections.ArrayList] $Factories = @{}
     [string] $Location = ""
     [AdfGlobalProp] $GlobalFactory = [AdfGlobalProp]::new()
+    [AdfPublishOption] $PublishOptions
 
     [System.Collections.ArrayList] AllObjects()
     {
@@ -48,6 +49,30 @@ class Adf {
         }
         return $r
     }
+
+    [System.Collections.ArrayList] GetUnusedDatasets()
+    {
+        [System.Collections.ArrayList] $dataset_list = @{}
+        $this.DataSets | ForEach-Object { $null = $dataset_list.Add("$($_.Type.ToLower()).$($_.Name)") }
+
+        # Collect all objects used by pipelines and dataflows
+        $list = $this.Pipelines + $this.DataFlows
+        if ($list.Count -gt 0) { 
+            $list = $list.DependsOn
+
+            # Filter list to datasets only
+            $used = $list | Where-Object { $_.StartsWith('dataset.', "CurrentCultureIgnoreCase") } | `
+                            ForEach-Object { $_.Substring(8).Insert(0, 'dataset.') } | `
+                            Select-Object -Unique
+
+            # Remove all used datasets from $dataset_list
+            $used | ForEach-Object { $dataset_list.Remove($_) }
+        }
+
+        # datasets not removed from the list are the ones not being used
+        return $dataset_list
+    }   
+
 
 }
 

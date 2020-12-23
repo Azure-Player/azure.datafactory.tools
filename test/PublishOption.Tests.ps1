@@ -1,20 +1,14 @@
-[System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
-[CmdletBinding()]
-param
-(
-    [Parameter()]
-    [System.String]
-    $ModuleRootPath = (Get-Location)
-)
+BeforeDiscovery {
+    $ModuleRootPath = $PSScriptRoot | Split-Path -Parent
+    $moduleManifestName = 'azure.datafactory.tools.psd1'
+    $moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
 
-$moduleManifestName = 'azure.datafactory.tools.psd1'
-$moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
-
-Import-Module -Name $moduleManifestPath -Force -Verbose:$false
+    Import-Module -Name $moduleManifestPath -Force -Verbose:$false
+}
 
 InModuleScope azure.datafactory.tools {
-    #$testHelperPath = $PSScriptRoot | Split-Path -Parent | Join-Path -ChildPath 'TestHelper'
-    #Import-Module -Name $testHelperPath -Force
+    $testHelperPath = $PSScriptRoot | Join-Path -ChildPath 'TestHelper'
+    Import-Module -Name $testHelperPath -Force
 
     # Variables for use in tests
 
@@ -55,7 +49,7 @@ InModuleScope azure.datafactory.tools {
         Context 'When called with correct FilterFilePath' {
             It 'Should not throw exception' {
                 {
-                    $script:opt = New-AdfPublishOption -FilterFilePath ".\test\BigFactorySample2\deployment\filter.option1.txt"
+                    $script:opt = New-AdfPublishOption -FilterFilePath ".\BigFactorySample2\deployment\filter.option1.txt"
                 } | Should -Not -Throw 
             }
             It 'Should contains 2 rules added to Includes with appropriate values' {

@@ -1,0 +1,3 @@
+type,name,path,value
+#linkedService,LSBLOBHDFDEV,typeProperties.servicePrincipalCredentialType,$($Env:HDFCREDENTIALTYPE)
+linkedService,BlobSampleData,typeProperties.servicePrincipalCredentialType,$($Env:HDFCREDENTIALTYPE)

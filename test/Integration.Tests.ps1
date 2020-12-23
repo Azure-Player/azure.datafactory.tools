@@ -1,30 +1,23 @@
-[System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
-[CmdletBinding()]
-param
-(
-    [Parameter()]
-    [System.String]
-    $ModuleRootPath = (Get-Location)
-)
+BeforeDiscovery {
+    $ModuleRootPath = $PSScriptRoot | Split-Path -Parent
+    $moduleManifestName = 'azure.datafactory.tools.psd1'
+    $moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
 
-$moduleManifestName = 'azure.datafactory.tools.psd1'
-$moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
-
-Import-Module -Name $moduleManifestPath -Force -Verbose:$false
+    Import-Module -Name $moduleManifestPath -Force -Verbose:$false
+}
 
 InModuleScope azure.datafactory.tools {
-    #$testHelperPath = $PSScriptRoot | Split-Path -Parent | Join-Path -ChildPath 'TestHelper'
-    #Import-Module -Name $testHelperPath -Force
-    . ".\test\New-TempDirectory.ps1"
+    $testHelperPath = $PSScriptRoot | Join-Path -ChildPath 'TestHelper'
+    Import-Module -Name $testHelperPath -Force
 
     # Variables for use in tests
     $script:ResourceGroupName = 'rg-devops-factory'
     $script:Stage = 'UAT'
     $script:guid =  (New-Guid).ToString().Substring(0,8)
     $script:guid = '5889b15h'
-    $script:DataFactoryOrigName = (Split-Path -Path $env:ADF_ExampleCode -Leaf)
+    $script:DataFactoryOrigName = 'BigFactorySample2'
     $script:DataFactoryName = $script:DataFactoryOrigName + "-$guid"
-    $script:SrcFolder = $env:ADF_ExampleCode
+    $script:SrcFolder = ".\$($script:DataFactoryOrigName)"
     $script:Location = "NorthEurope"
     $script:AllExcluded = (New-AdfPublishOption)
     $script:AllExcluded.Excludes.Add('*','')
@@ -163,6 +156,17 @@ InModuleScope azure.datafactory.tools {
             }
         }
 
+        Context 'ADF fully published and redeploy deleting all with DeleteNotInSource=true' {
+            It 'Should complete successfully' {
+                Remove-Item -Path "$RootFolder\*" -Recurse:$true -Force
+                $script:AllExcluded.DeleteNotInSource = $true
+                { Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                    -ResourceGroupName "$ResourceGroupName" `
+                    -DataFactoryName "$DataFactoryName" -Option $script:AllExcluded
+                } | Should -Not -Throw
+
+            }
+        }
 
     } 
 

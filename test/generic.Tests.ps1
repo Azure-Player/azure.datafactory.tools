@@ -1,19 +1,14 @@
-[System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
-[CmdletBinding()]
-param
-(
-    [Parameter()]
-    [System.String]
-    $ModuleRootPath = (Get-Location)
-)
+BeforeDiscovery {
+    $ModuleRootPath = $PSScriptRoot | Split-Path -Parent
+    $script:moduleManifestName = 'azure.datafactory.tools.psd1'
+    $script:moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
 
-$script:moduleManifestName = 'azure.datafactory.tools.psd1'
-$script:moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
+    Import-Module -Name 'PSScriptAnalyzer'
+}
 
 Describe 'azure.datafactory.tools Module'{
 
     Context 'PSScriptAnalyzer' {
-        Import-Module -Name 'PSScriptAnalyzer'
 
         # Perform PSScriptAnalyzer scan
         $s = @{ 
@@ -26,12 +21,12 @@ Describe 'azure.datafactory.tools Module'{
             -ErrorAction SilentlyContinue `
             -Verbose:$false
 
-        $PSScriptAnalyzerErrors = $PSScriptAnalyzerResult | Where-Object {
+        $script:PSScriptAnalyzerErrors = $PSScriptAnalyzerResult | Where-Object {
             $_.Severity -eq 'Error'
         }
 
         It 'Should have no Error level PowerShell Script Analyzer violations' {
-            if ($PSScriptAnalyzerErrors -ne $null)
+            if ($script:PSScriptAnalyzerErrors -ne $null)
             {
                 Write-Warning -Message 'There are Error level PowerShell Script Analyzer violations that must be fixed:'
 
