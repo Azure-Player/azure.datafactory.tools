@@ -1,11 +1,11 @@
 function ApplyExclusionOptions {
     param(
-        [Parameter(Mandatory=$True)] [Adf] $adf,
-        [Parameter(Mandatory=$True)] [AdfPublishOption] $option
+        [Parameter(Mandatory=$True)] [Adf] $adf
     )
 
     Write-Debug "BEGIN: ApplyExclusionOptions()"
     
+    $option = $adf.PublishOptions
     if ($option.Excludes.Keys.Count -gt 0 -and $option.Includes.Keys.Count -eq 0)
     {
         Write-Debug "ENTRY: ApplyExclusionOptions()::Excludes"
@@ -17,8 +17,7 @@ function ApplyExclusionOptions {
             $key = $_
             $adf.AllObjects() | ForEach-Object {
                 [AdfObject] $o = $_
-                $nonDeployable = ($o.FullName($false) -like $key)
-                #Write-Debug "$($o.FullName($false)) -like $key"
+                $nonDeployable = $o.IsNameMatch($key)
                 if ($nonDeployable) { $o.ToBeDeployed = $false }
                 #Write-Verbose "- $($o.FullName($true)).ToBeDeployed = $($o.ToBeDeployed)"
             }
@@ -36,8 +35,7 @@ function ApplyExclusionOptions {
             $key = $_
             $adf.AllObjects() | ForEach-Object {
                 [AdfObject] $o = $_
-                $deployable = ($o.FullName($false) -like $key)
-                #Write-Debug "$($o.FullName($false)) -like $key"
+                $deployable = $o.IsNameMatch($key)
                 if ($deployable) { $o.ToBeDeployed = $true }
                 #Write-Verbose "- $($o.FullName($true)).ToBeDeployed = $($o.ToBeDeployed)"
             }
