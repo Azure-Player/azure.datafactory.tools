@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.19.0] - 2020-12-22
+## [0.19.0] - 2020-12-23
 ### Added
 * Support wildcard when specifying object(s) name in config file (#58)
 * Added option $IgnoreLackOfReferencedObject (#64)
