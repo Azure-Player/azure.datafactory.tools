@@ -12,7 +12,8 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
 * Built-in mechanism to replace, remove or add the properties with the indicated values (CSV and JSON file formats supported)
 * Stopping/starting triggers
 * Dropping objects when not exist in the source (code)
-* Filtering (include or exclude) objects to be deployed by name and/or type
+* Filtering (include or exclude) objects to be deployed by name and/or type and/or folder
+* Filtering supports wildcards
 * Publish options allow you to control:
   * Whether stop and restarting triggers
   * Whether delete or not objects not in the source
@@ -324,6 +325,10 @@ Column `type` accepts one of the following values only:
 - trigger
 - factory *(for Global Parameters)*
 
+### Column NAME
+
+This column defines an object. Since version 0.19, you can speficy the **name** using wildcards. That means rather than duplicating lines for the same configuration (path&value) for multiple files, you can define only one line in config.
+
 ### Column PATH
 
 Unless otherwise stated, mechanism always **replace (update)** the value for property. Location for those Properties are specified by `Path` column in Config file.  
@@ -342,6 +347,8 @@ linkedService,BlobSampleData,-typeProperties.encryptedCredential,
 # PLUS means the desired action is to ADD new property with associated value:
 linkedService,BlobSampleData,+typeProperties.accountKey,"$($Env:VARIABLE)"
 factory,BigFactorySample2,"$.properties.globalParameters.'Env-Code'.value","PROD"
+# Multiple following configurations for many files:
+dataset,DS_SQL_*,properties.xyz,ABC
 ```
 
 
