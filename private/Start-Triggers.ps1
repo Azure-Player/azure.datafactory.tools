@@ -11,12 +11,18 @@ function Start-Triggers {
 
     #Start active triggers - after cleanup efforts
     $activeTrigger | ForEach-Object { 
-        Write-host "- Enabling trigger: $($_.Name)"
-        Start-AzDataFactoryV2Trigger `
-        -ResourceGroupName $adf.ResourceGroupName `
-        -DataFactoryName $adf.Name `
-        -Name $_.Name `
-        -Force | Out-Null
+        Write-Host "- Enabling trigger: $($_.Name)"
+        try {
+            Start-AzDataFactoryV2Trigger `
+                -ResourceGroupName $adf.ResourceGroupName `
+                -DataFactoryName $adf.Name `
+                -Name $_.Name `
+                -Force | Out-Null
+        }
+        catch {
+            Write-Host "Failed starting trigger."
+            Write-Warning -Message $_.Exception.Message
+        }
     }
 
     Write-Debug "END: Start-Triggers()"
