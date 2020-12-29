@@ -19,12 +19,11 @@ function Stop-Triggers {
         {
             Write-Host "Stopping deployed triggers:"
             $triggersToStop | ForEach-Object { 
-                Write-host "- Disabling trigger: $($_.Name)" 
-                Stop-AzDataFactoryV2Trigger `
+                Stop-Trigger `
                 -ResourceGroupName $adf.ResourceGroupName `
                 -DataFactoryName $adf.Name `
                 -Name $_.Name `
-                -Force | Out-Null
+                | Out-Null
             }
             Write-Host "Complete stopping deployed triggers"
         }

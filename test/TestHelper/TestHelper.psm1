@@ -46,9 +46,85 @@ function New-AdfObjectFromFile {
     return $o
 }
 
+function Remove-TargetTrigger {
+    param (
+        $Name,
+        $ResourceGroupName,
+        $DataFactoryName
+    )
+
+    Stop-AzDataFactoryV2Trigger `
+    -ResourceGroupName $ResourceGroupName `
+    -DataFactoryName $DataFactoryName `
+    -Name $Name `
+    -Force -ErrorAction:SilentlyContinue
+
+    Remove-AzDataFactoryV2Trigger `
+    -ResourceGroupName $ResourceGroupName `
+    -DataFactoryName $DataFactoryName `
+    -Name $Name `
+    -Force -ErrorAction:SilentlyContinue
+}
+
+function Stop-TargetTrigger {
+    param (
+        $Name,
+        $ResourceGroupName,
+        $DataFactoryName
+    )
+
+    Stop-AzDataFactoryV2Trigger `
+    -ResourceGroupName $ResourceGroupName `
+    -DataFactoryName $DataFactoryName `
+    -Name $Name `
+    -Force -ErrorAction:SilentlyContinue
+}
+
+function Start-TargetTrigger {
+    param (
+        $Name,
+        $ResourceGroupName,
+        $DataFactoryName
+    )
+
+    Start-AzDataFactoryV2Trigger `
+    -ResourceGroupName $ResourceGroupName `
+    -DataFactoryName $DataFactoryName `
+    -Name $Name `
+    -Force -ErrorAction:SilentlyContinue
+}
+
+function ConvertTo-RuntimeState {
+    param ($state)
+
+    if ($state -eq 'Enabled' ) { return 'Started' }
+    if ($state -eq 'Disabled' ) { return 'Stopped' }
+    return $state
+}
+
+function Publish-TriggerIfNotExist {
+    param (
+        $Name,
+        $FileName,
+        $ResourceGroupName,
+        $DataFactoryName
+    )
+
+    $tr = Get-AzDataFactoryV2Trigger -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Name $Name -ErrorAction:SilentlyContinue
+    if ($null -eq $tr) {
+        Set-AzDataFactoryV2Trigger `
+        -ResourceGroupName $ResourceGroupName `
+        -DataFactoryName $DataFactoryName `
+        -Name $Name `
+        -DefinitionFile $FileName `
+        -Force
+    }
+}
+
+
 
 Export-ModuleMember -Function `
     Convert-SecureStringToString, `
     New-TemporaryDirectory, `
-    New-AdfObjectFromFile
-    
+    New-AdfObjectFromFile, `
+    Remove-TargetTrigger, ConvertTo-RuntimeState, Stop-TargetTrigger, Start-TargetTrigger, Publish-TriggerIfNotExist
