@@ -12,16 +12,22 @@ function Start-Triggers {
     #Start active triggers - after cleanup efforts
     $activeTrigger | ForEach-Object { 
         Write-Host "- Enabling trigger: $($_.Name)"
-        try {
-            Start-AzDataFactoryV2Trigger `
-                -ResourceGroupName $adf.ResourceGroupName `
-                -DataFactoryName $adf.Name `
-                -Name $_.Name `
-                -Force | Out-Null
-        }
-        catch {
-            Write-Host "Failed starting trigger."
-            Write-Warning -Message $_.Exception.Message
+        [AdfObjectName] $oname = [AdfObjectName]::new("trigger.$($_.Name)")
+        $IsMatchExcluded = $oname.IsNameMatch($adf.PublishOptions.Excludes.Keys)
+        if ($IsMatchExcluded -and $adf.PublishOptions.DoNotStopStartExcludedTriggers) {
+            Write-host "- Excluded trigger: $($_.Name)" 
+        } else {
+            try {
+                Start-AzDataFactoryV2Trigger `
+                    -ResourceGroupName $adf.ResourceGroupName `
+                    -DataFactoryName $adf.Name `
+                    -Name $_.Name `
+                    -Force | Out-Null
+            }
+            catch {
+                Write-Host "Failed starting trigger."
+                Write-Warning -Message $_.Exception.Message
+            }
         }
     }
 

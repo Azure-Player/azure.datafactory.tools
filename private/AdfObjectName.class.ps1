@@ -21,5 +21,30 @@ class AdfObjectName {
         $this.Name = $parts[1]
     }
 
-}
+    [String] FullName ([boolean] $quoted)
+    {
+        if ($quoted) {
+            return "[$($this.Type)].[$($this.Name)]"
+        } else {
+            return "$($this.Type).$($this.Name)"
+        }
+    }
 
+    [String] FullName ()
+    {
+        return $this.FullName($false)
+    }
+
+    [String] FullNameQuoted ()
+    {
+        return $this.FullName($true)
+    }
+
+    [Boolean] IsNameMatch ([array]$wildcardPatterns)
+    {
+        $fullname = $this.FullName()
+        $r = $wildcardPatterns | Where-Object { $fullname -like $_ }
+        return $null -ne $r
+    }
+
+}

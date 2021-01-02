@@ -1,6 +1,7 @@
 function Remove-AdfObject {
     [CmdletBinding()]
     param (
+        [parameter(Mandatory = $true)] [Adf] $adfSource,
         [parameter(Mandatory = $true)] $obj,
         [parameter(Mandatory = $true)] $adfInstance
     )
@@ -9,11 +10,20 @@ function Remove-AdfObject {
     $err = $null
     $ErrorMessage = $null
     $simtype = Get-SimplifiedType -Type $obj.GetType().Name
-    Write-Host "Removing object: [$simtype].[$($obj.Name)]"
+
+    [AdfObjectName] $oname = [AdfObjectName]::new("$simType.$name")
+    $IsExcluded = $oname.IsNameMatch($adfSource.PublishOptions.Excludes.Keys)
+    if (-not $IsExcluded) {
+        Write-Host "Removing object: [$simtype].[$name]"
+        $action = $simtype
+    } else {
+        $action = "DoNothing"
+        Write-Verbose "Object [$simtype].[$name] won't be deleted as publish option 'DoNotDeleteExcludedObjects' = true."
+    }
 
     Try 
     {
-        switch -Exact ($simtype)
+        switch -Exact ($action)
         {
             "Dataset" {
                 Remove-AzDataFactoryV2Dataset `
@@ -57,6 +67,9 @@ function Remove-AdfObject {
                     -Name $name `
                     -Force -ErrorVariable err | Out-Null
             }
+            "DoNothing" {
+
+            }
             default
             {
                 Write-Error "Type $($obj.GetType().Name) is not supported."
@@ -85,9 +98,9 @@ function Remove-AdfObject {
         #$Matches.RefName
         $refobj = $adfInstance.AllObjects() | Where-Object { $_.Name -eq $Matches.RefName }
         $refobj | ForEach-Object {
-            Remove-AdfObject -obj $_ -adfInstance $adfInstance
+            Remove-AdfObject -adfSource $adfSource -obj $_ -adfInstance $adfInstance
         }
-        Remove-AdfObject -obj $obj -adfInstance $adfInstance
+        Remove-AdfObject -adfSource $adfSource -obj $obj -adfInstance $adfInstance
     } elseif ($null -ne $ErrorMessage) {
         #Rethrow exception
         throw $ErrorMessage

@@ -19,11 +19,17 @@ function Stop-Triggers {
         {
             Write-Host "Stopping deployed triggers:"
             $triggersToStop | ForEach-Object { 
-                Stop-Trigger `
-                -ResourceGroupName $adf.ResourceGroupName `
-                -DataFactoryName $adf.Name `
-                -Name $_.Name `
-                | Out-Null
+                [AdfObjectName] $oname = [AdfObjectName]::new("trigger.$($_.Name)")
+                $IsMatchExcluded = $oname.IsNameMatch($adf.PublishOptions.Excludes.Keys)
+                if ($IsMatchExcluded -and $adf.PublishOptions.DoNotStopStartExcludedTriggers) {
+                    Write-host "- Excluded trigger: $($_.Name)" 
+                } else {
+                    Stop-Trigger `
+                    -ResourceGroupName $adf.ResourceGroupName `
+                    -DataFactoryName $adf.Name `
+                    -Name $_.Name `
+                    | Out-Null
+                }
             }
             Write-Host "Complete stopping deployed triggers"
         }
