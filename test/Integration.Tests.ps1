@@ -2,7 +2,7 @@ BeforeDiscovery {
     $ModuleRootPath = $PSScriptRoot | Split-Path -Parent
     $moduleManifestName = 'azure.datafactory.tools.psd1'
     $moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
-
+    
     Import-Module -Name $moduleManifestPath -Force -Verbose:$false
 }
 
@@ -17,7 +17,7 @@ InModuleScope azure.datafactory.tools {
     $script:guid = '5889b15h'
     $script:DataFactoryOrigName = 'BigFactorySample2'
     $script:DataFactoryName = $script:DataFactoryOrigName + "-$guid"
-    $script:SrcFolder = ".\$($script:DataFactoryOrigName)"
+    $script:SrcFolder = "$PSScriptRoot\$($script:DataFactoryOrigName)"
     $script:Location = "NorthEurope"
     $script:AllExcluded = (New-AdfPublishOption)
     $script:AllExcluded.Excludes.Add('*','')
@@ -275,6 +275,7 @@ InModuleScope azure.datafactory.tools {
             It 'All triggers in service should be stopped afterwards' {
                 $adf = Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder "$RootFolder"
                 $adf.ResourceGroupName = "$ResourceGroupName";
+                $adf.PublishOptions = New-AdfPublishOption
                 Stop-Triggers -adf $adf
                 $tr = Get-AzDataFactoryV2Trigger -DataFactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
                 $notstopped = ($tr | Where-Object { $_.RuntimeState -ne "Stopped" } | ToArray)
@@ -289,6 +290,7 @@ InModuleScope azure.datafactory.tools {
                 $script:TriggersOnDiskCount -= 2
                 $adf = Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder "$RootFolder"
                 $adf.ResourceGroupName = "$ResourceGroupName";
+                $adf.PublishOptions = New-AdfPublishOption
                 Stop-Triggers -adf $adf
                 $tr = Get-AzDataFactoryV2Trigger -DataFactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
                 $notstopped = ($tr | Where-Object { $_.RuntimeState -ne "Stopped" } | ToArray)

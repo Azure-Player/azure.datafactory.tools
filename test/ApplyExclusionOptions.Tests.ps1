@@ -12,7 +12,7 @@ InModuleScope azure.datafactory.tools {
 
     # Variables for use in tests
     $script:DataFactoryName = "BigFactorySample2"
-    $script:RootFolder = Join-Path -Path (Get-Location) -ChildPath $DataFactoryName
+    $script:RootFolder = Join-Path -Path $PSScriptRoot -ChildPath $DataFactoryName
 
     Describe 'ApplyExclusionOptions' -Tag 'class' {
 

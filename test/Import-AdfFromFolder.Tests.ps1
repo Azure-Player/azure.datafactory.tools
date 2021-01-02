@@ -14,7 +14,7 @@ InModuleScope azure.datafactory.tools {
     $script:ResourceGroupName = 'rg-devops-factory'
     $script:Stage = 'UAT'
     $script:DataFactoryName = "SQLPlayerDemo-$Stage"
-    $script:RootFolder = ".\BigFactorySample2"
+    $script:RootFolder = "$PSScriptRoot\BigFactorySample2"
     $script:WrongRootFolder = Join-Path -Path $script:RootFolder -ChildPath "dfij393gfu0AJQ3"
     $script:Location = "NorthEurope"
     
