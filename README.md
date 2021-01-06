@@ -476,7 +476,7 @@ All these factors:
 * Is an object on `Excludes` list?  
 
 had to be considered thoroughly, hence the following table arose:
-![](.\matrix-of-behaviour-logic.png)
+![Matrix of behaviour logic](./matrix-of-behaviour-logic.png)
 
 ## Assumptions
 
