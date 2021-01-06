@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.30.0] - 2021-01-xx
+* No restart all triggers (#51)
+### Added
+* Better control of which: (see new publish flags below)
+  * triggers could be stop/start
+  * objects could be removed (if apply)
+* Publish flag: `DoNotDeleteExcludedObjects` ([#47](https://github.com/SQLPlayer/azure.datafactory.tools/issues/47))
+* Publish flag: `DoNotStopStartExcludedTriggers` allows stopping selected triggers ([#51](https://github.com/SQLPlayer/azure.datafactory.tools/issues/51))
+
 ## [0.20.0] - 2020-12-28
 ### Fixed
 * Do not start trigger which has not been deployed and thus does not exist (#51)
@@ -11,7 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [0.19.0] - 2020-12-23
 ### Added
 * Support wildcard when specifying object(s) name in config file (#58)
-* Added option $IgnoreLackOfReferencedObject (#64)
+* Added option `$IgnoreLackOfReferencedObject` (#64)
 * Add object name to the msg before action (#49)
 * Exit publish cmd when ADF name is already in use (#43)
 * Allow selecting objects in given folder (#68)
