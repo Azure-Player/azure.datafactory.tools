@@ -20,7 +20,7 @@ function Stop-Triggers {
             Write-Host "Stopping deployed triggers:"
             $triggersToStop | ForEach-Object { 
                 [AdfObjectName] $oname = [AdfObjectName]::new("trigger.$($_.Name)")
-                $IsMatchExcluded = $oname.IsNameMatch($adf.PublishOptions.Excludes.Keys)
+                $IsMatchExcluded = $oname.IsNameExcluded($adf.PublishOptions)
                 if ($IsMatchExcluded -and $adf.PublishOptions.DoNotStopStartExcludedTriggers) {
                     Write-host "- Excluded trigger: $($_.Name)" 
                 } else {

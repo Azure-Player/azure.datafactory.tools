@@ -12,7 +12,7 @@ function Remove-AdfObject {
     $simtype = Get-SimplifiedType -Type $obj.GetType().Name
 
     [AdfObjectName] $oname = [AdfObjectName]::new("$simType.$name")
-    $IsExcluded = $oname.IsNameMatch($adfSource.PublishOptions.Excludes.Keys)
+    $IsExcluded = $oname.IsNameExcluded($adfSource.PublishOptions)
     if (-not $IsExcluded) {
         Write-Host "Removing object: [$simtype].[$name]"
         $action = $simtype
