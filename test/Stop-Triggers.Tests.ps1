@@ -15,7 +15,7 @@ InModuleScope azure.datafactory.tools {
     $script:Stage = 'UAT'
     $script:guid =  (New-Guid).ToString().Substring(0,8)
     $script:guid = '5889b15h'
-    $script:SrcFolder = ".\BigFactorySample2"
+    $script:SrcFolder = "$PSScriptRoot\BigFactorySample2"
     $script:DataFactoryName = (Split-Path -Path $script:SrcFolder -Leaf) + "-$guid"
     $script:Location = "NorthEurope"
     $script:TmpFolder = (New-TemporaryDirectory).FullName

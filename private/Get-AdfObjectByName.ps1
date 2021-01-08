@@ -41,7 +41,7 @@ function Get-AdfObjectByName {
         }
         default
         {
-            Write-Error "Type [$type] is not supported."
+            Write-Error "ADFT0014: Type [$type] is not supported."
         }
     }
 

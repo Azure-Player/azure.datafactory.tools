@@ -18,7 +18,7 @@ function Get-AzureResourceType {
         'linkedService'         { $resType = 'Microsoft.DataFactory/factories/linkedservices' }
         'trigger'               { $resType = 'Microsoft.DataFactory/factories/triggers' }
         'factory'               { $resType = 'Microsoft.DataFactory/factories' }
-        default                 { Write-Error "Type '$Type' is not supported." }
+        default                 { Write-Error "ADFT0016: Type '$Type' is not supported." }
     }
 
     return $resType
