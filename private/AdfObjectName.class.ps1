@@ -18,7 +18,7 @@ class AdfObjectName {
 
     AdfObjectName ([string] $FullName) 
     {
-        $m = [regex]::matches($FullName, '([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)@?(.*)')
+        $m = [regex]::matches($FullName, '([a-zA-Z]+)\.([a-zA-Z 0-9\-_]+)@?(.*)')
         if ($m.Success -eq $false) {
             throw "ADFT0028: Expected format of name for 'FullName' input parameter is: objectType.objectName[@folderName]"
         }
