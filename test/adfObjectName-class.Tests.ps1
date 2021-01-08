@@ -49,9 +49,9 @@ InModuleScope azure.datafactory.tools {
 
     Describe 'ctor' -Tag 'class' {
         It 'Should have type, name and folder after load' {
-            $name = 'PL_Wait_Dynamic'
+            $name = 'PL_Wait Dyna-mic'
             $type = 'pipeline'
-            $folder = 'ExternalError'
+            $folder = 'External @ Error'
             $o = [AdfObjectName]::new($name, $type, $folder)
             $o.name | Should -Be $name
             $o.type | Should -Be $type
