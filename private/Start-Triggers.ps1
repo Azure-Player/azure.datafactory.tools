@@ -13,7 +13,7 @@ function Start-Triggers {
     $activeTrigger | ForEach-Object { 
         Write-Host "- Enabling trigger: $($_.Name)"
         [AdfObjectName] $oname = [AdfObjectName]::new("trigger.$($_.Name)")
-        $IsMatchExcluded = $oname.IsNameMatch($adf.PublishOptions.Excludes.Keys)
+        $IsMatchExcluded = $oname.IsNameExcluded($adf.PublishOptions)
         if ($IsMatchExcluded -and $adf.PublishOptions.DoNotStopStartExcludedTriggers) {
             Write-host "- Excluded trigger: $($_.Name)" 
         } else {

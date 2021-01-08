@@ -1,6 +1,7 @@
 class AdfObjectName {
     [string] $Name
     [string] $Type
+    [string] $Folder
 
     AdfObjectName ([string] $Name, [string] $Type) 
     {
@@ -8,23 +9,40 @@ class AdfObjectName {
         $this.Type = $Type
     }
 
+    AdfObjectName ([string] $Name, [string] $Type, [string] $Folder) 
+    {
+        $this.Name = $Name
+        $this.Type = $Type
+        $this.Folder = $Folder
+    }
+
     AdfObjectName ([string] $FullName) 
     {
-        if ($FullName.IndexOf('.') -lt 1) {
-            Write-Error "Expected format of name for 'FullName' input parameter is: objectType.objectName"
+        $m = [regex]::matches($FullName, '([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)@?(.*)')
+        if ($m.Success -eq $false) {
+            throw "Expected format of name for 'FullName' input parameter is: objectType.objectName[@folderName]"
         }
-        $parts = $FullName.Split('.')
-        if ($parts[0] -notin [AdfObject]::allowedTypes ) { 
-            Write-Error -Message "Unknown object type: $parts[0]."
+        if ($m.Groups[1].Value -notin [AdfObject]::allowedTypes ) { 
+            throw "Unknown object type: $($m.Groups[1].Value)."
         }
-        $this.Type = $parts[0]
-        $this.Name = $parts[1]
+        $this.Type = $m.Groups[1].Value
+        $this.Name = $m.Groups[2].Value
+        $this.Folder = $m.Groups[3].Value
     }
 
     [String] FullName ([boolean] $quoted)
     {
         if ($quoted) {
             return "[$($this.Type)].[$($this.Name)]"
+        } else {
+            return "$($this.Type).$($this.Name)"
+        }
+    }
+
+    [String] FullNameWithFolder ()
+    {
+        if ($this.Folder.Length -gt 0) {
+            return "$($this.Type).$($this.Name)@$($this.Folder)"
         } else {
             return "$($this.Type).$($this.Name)"
         }
@@ -45,6 +63,31 @@ class AdfObjectName {
         $fullname = $this.FullName()
         $r = $wildcardPatterns | Where-Object { $fullname -like $_ }
         return $null -ne $r
+    }
+
+    [Boolean] IsNameExcluded ([AdfPublishOption] $opt)
+    {
+        $fullname = $this.FullNameWithFolder()
+
+        # One can exclude objects by listing them explicitly in Excludes collection, ...
+        $excPatterns = $opt.Excludes.Keys
+        $r = $excPatterns | Where-Object { $fullname -like $_ }
+        if ($null -ne $r) 
+        { 
+            # Means: object is excluded if matches any item in (Excludes) collection
+            return $true    
+        }
+        
+        # ... or by listing them implicitly in Includes collection:
+        $incPatterns = $opt.Includes.Keys
+        if ($incPatterns.Count -eq 0) 
+        { 
+            # If no items = all objects match => object is not excluded
+            return $false 
+        }
+        $r = $incPatterns | Where-Object { $fullname -like $_ }
+        # Means: object is excluded if not match any item in (Includes) collection
+        return ($null -eq $r)   
     }
 
 }
