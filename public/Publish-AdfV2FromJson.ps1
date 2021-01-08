@@ -138,7 +138,7 @@ function Publish-AdfV2FromJson {
             $targetAdf | Format-List | Out-String
         } else {
             Write-Host "Creation operation skipped as publish option 'CreateNewInstance' = false"
-            Write-Error "$msg"
+            Write-Error "ADFT0027: $msg"
         }
     }
 

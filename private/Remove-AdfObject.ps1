@@ -72,7 +72,7 @@ function Remove-AdfObject {
             }
             default
             {
-                Write-Error "Type $($obj.GetType().Name) is not supported."
+                Write-Error "ADFT0018: Type $($obj.GetType().Name) is not supported."
             }
         }
     }

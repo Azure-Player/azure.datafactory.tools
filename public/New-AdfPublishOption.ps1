@@ -42,7 +42,7 @@ function New-AdfPublishOption {
     if (![string]::IsNullOrWhitespace($FilterFilePath)) {
         Write-Verbose "Loading rules for selective deployment from file '$FilterFilePath'..."
         if ($false -eq (Test-Path -Path $FilterFilePath)) {
-            Write-Error "File does not exist: $FilterFilePath"
+            Write-Error "ADFT0026: File does not exist: $FilterFilePath"
         }
         $FilterText = Get-Content -Path $FilterFilePath -Encoding "UTF8"
 

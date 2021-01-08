@@ -4,14 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.30.0] - 2021-01-xx
-* No restart all triggers (#51)
+## [0.30.0] - 2021-01-08
 ### Added
 * Better control of which: (see new publish flags below)
   * triggers could be stop/start
   * objects could be removed (if apply)
 * Publish flag: `DoNotDeleteExcludedObjects` ([#47](https://github.com/SQLPlayer/azure.datafactory.tools/issues/47))
 * Publish flag: `DoNotStopStartExcludedTriggers` allows stopping selected triggers ([#51](https://github.com/SQLPlayer/azure.datafactory.tools/issues/51))
+* Numbers to all error messages ([full list](./en-us/messages_index.md))
 
 ## [0.20.0] - 2020-12-28
 ### Fixed

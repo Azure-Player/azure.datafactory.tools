@@ -20,10 +20,10 @@ class AdfObjectName {
     {
         $m = [regex]::matches($FullName, '([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)@?(.*)')
         if ($m.Success -eq $false) {
-            throw "Expected format of name for 'FullName' input parameter is: objectType.objectName[@folderName]"
+            throw "ADFT0028: Expected format of name for 'FullName' input parameter is: objectType.objectName[@folderName]"
         }
         if ($m.Groups[1].Value -notin [AdfObject]::allowedTypes ) { 
-            throw "Unknown object type: $($m.Groups[1].Value)."
+            throw "ADFT0029: Unknown object type: $($m.Groups[1].Value)."
         }
         $this.Type = $m.Groups[1].Value
         $this.Name = $m.Groups[2].Value
@@ -77,7 +77,7 @@ class AdfObjectName {
             # Means: object is excluded if matches any item in (Excludes) collection
             return $true    
         }
-        
+
         # ... or by listing them implicitly in Includes collection:
         $incPatterns = $opt.Includes.Keys
         if ($incPatterns.Count -eq 0) 
