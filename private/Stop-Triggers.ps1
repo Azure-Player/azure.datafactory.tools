@@ -19,12 +19,17 @@ function Stop-Triggers {
         {
             Write-Host "Stopping deployed triggers:"
             $triggersToStop | ForEach-Object { 
-                Write-host "- Disabling trigger: $($_.Name)" 
-                Stop-AzDataFactoryV2Trigger `
-                -ResourceGroupName $adf.ResourceGroupName `
-                -DataFactoryName $adf.Name `
-                -Name $_.Name `
-                -Force | Out-Null
+                [AdfObjectName] $oname = [AdfObjectName]::new("trigger.$($_.Name)")
+                $IsMatchExcluded = $oname.IsNameExcluded($adf.PublishOptions)
+                if ($IsMatchExcluded -and $adf.PublishOptions.DoNotStopStartExcludedTriggers) {
+                    Write-host "- Excluded trigger: $($_.Name)" 
+                } else {
+                    Stop-Trigger `
+                    -ResourceGroupName $adf.ResourceGroupName `
+                    -DataFactoryName $adf.Name `
+                    -Name $_.Name `
+                    | Out-Null
+                }
             }
             Write-Host "Complete stopping deployed triggers"
         }

@@ -17,7 +17,7 @@ function Read-CsvConfigFile {
     $proc_header = "type","name","path","value","empty"
     $csv = ConvertFrom-Csv $configtxt -Header $proc_header
     if ($csv[0].type + $csv[0].name + $csv[0].path + $csv[0].value + $csv[0].empty + ";" -ne "typenamepathvalue;") {
-        Write-Error -Message "The header of config file is wrong. The header must have only 4 columns named: type, name, path, value." -Category "InvalidData"
+        Write-Error -Message "ADFT0020: The header of config file is wrong. The header must have only 4 columns named: type, name, path, value." -Category "InvalidData"
     }
     if ($csv.Count -eq 1) {
         Write-Warning "Config file is empty."
@@ -26,16 +26,16 @@ function Read-CsvConfigFile {
     $csv | ForEach-Object {
         if ($i -gt 0 -and !$_.type.StartsWith("#") ) {
             $exc = ([System.Data.DataException]::new())
-            if ($_.type -eq "" -or $null -eq $_.type) { Write-Error -Message "Config file, row $i : Value in column 'Type' is empty." -Exception $exc }
-            if ($_.type -notin $ADF_FOLDERS) { Write-Error -Message "Config file, row $i : Type ($($_.type)) is not supported." -Exception $exc }
-            if ($_.name -eq "" -or $null -eq $_.name) { Write-Error -Message "Config file, row $i : Value in column 'Name' is empty." -Exception $exc }
-            if ($_.path -eq "" -or $null -eq $_.path) { Write-Error -Message "Config file, row $i : Value in column 'Path' is empty." -Exception $exc }
+            if ($_.type -eq "" -or $null -eq $_.type) { Write-Error -Message "ADFT0021: Config file, row $i : Value in column 'Type' is empty." -Exception $exc }
+            if ($_.type -notin $ADF_FOLDERS)          { Write-Error -Message "ADFT0022: Config file, row $i : Type ($($_.type)) is not supported." -Exception $exc }
+            if ($_.name -eq "" -or $null -eq $_.name) { Write-Error -Message "ADFT0023: Config file, row $i : Value in column 'Name' is empty." -Exception $exc }
+            if ($_.path -eq "" -or $null -eq $_.path) { Write-Error -Message "ADFT0024: Config file, row $i : Value in column 'Path' is empty." -Exception $exc }
             if ($_.value -eq "" -or $null -eq $_.value) { 
                 if (!$_.path.StartsWith('-')) {
                     Write-Warning -Message "Config file, row $i : Value in column 'Value' is empty." 
                 }
             }
-            if ($null -ne $_.empty) { Write-Error -Message "Config file, row $i has too many columns." -Exception $exc }
+            if ($null -ne $_.empty) { Write-Error -Message "ADFT0025: Config file, row $i has too many columns." -Exception $exc }
         }
         $i++
     }

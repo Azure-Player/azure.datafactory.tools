@@ -41,7 +41,7 @@ function Get-AdfObjectByPattern {
         }
         default
         {
-            Write-Error "Type [$type] is not supported."
+            Write-Error "ADFT0015: Type [$type] is not supported."
         }
     }
 

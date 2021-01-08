@@ -11,14 +11,16 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
 * Finding the **right order** for deploying objects (no more worrying about object names)
 * Built-in mechanism to replace, remove or add the properties with the indicated values (CSV and JSON file formats supported)
 * Stopping/starting triggers
-* Dropping objects when not exist in the source (code)
-* Filtering (include or exclude) objects to be deployed by name and/or type and/or folder
+* Dropping objects when not exist in the source (code)  
+  * (new!) Optionally can skip deletion of excluded objects
+* Filtering (include or exclude) objects to be deployed by name and/or type **and/or folder** (new!)
 * Filtering supports wildcards
 * Publish options allow you to control:
   * Whether stop and restarting triggers
   * Whether delete or not objects not in the source
   * Whether create or not a new instance of ADF if it not exist
 * Tokenisation in config file allows replace any value by Environment Variable or Variable from DevOps Pipeline
+  * (new!) Allows to define multiple file (objects) by wildcarding
 * Global Parameters
 
 The following features coming in the future:
@@ -131,6 +133,9 @@ $opt = New-AdfPublishOption
 * [Boolean] **DeployGlobalParams** - indicates whether deploy Global Parameters of ADF. Nothing happens when parameters are not defined. (default: *true*)
 * [Boolean] **FailsWhenConfigItemNotFound** - indicates whether configuration items not found fails the script. (default: *true*)
 * [Boolean] **FailsWhenPathNotFound** - indicates whether missing paths fails the script. (default: *true*)
+* [Boolean] **DoNotStopStartExcludedTriggers** - specifies whether excluded triggers will be stopped before deployment (default: *false*)
+* [Boolean] **DoNotDeleteExcludedObjects** - specifies whether excluded objects can be removed. Applies when `DeleteNotInSource` is set to *True* only. (default: *true*) 
+
 
 Subsequently, you can define the needed options:
 
@@ -191,11 +196,13 @@ Therefore, an extra character should be provided before the name/pattern:
 trigger.*
 -*.SharedIR*
 -*.LS_SqlServer_DEV19_AW2017
+-*.*@testFolder
 ```
 
 The above file (if used) adds:
 - 2 items to *Includes* list (line 1-2)
 - 2 items to *Excludes* list (line 3-4)
+- all items located in `testFolder` to *Excludes* list (line 5)
 
 > The file should use UTF-8 encoding.
 
@@ -435,8 +442,10 @@ If you prefer using JSON rather than CSV for setting up configuration - JSON fil
 
 
 ## Step: Stoping triggers
-This block stops all triggers which must be stopped due to deployment.
-> Operation might be skipped when `StopStartTriggers = false` in *Publish Options*
+This block stops all triggers which must be stopped due to deployment.  
+Since version 0.30 you can better control which triggers you want to omit from stopping. Only need to add such triggers to `Excludes` list and set flag `DoNotStopStartExcludedTriggers` to *true*.
+
+> The step might be skipped when `StopStartTriggers = false` in *Publish Options*
 
 ## Step: Deployment of ADF objects
 This step is actually responsible for doing all the stuff.
@@ -445,13 +454,61 @@ The mechanism is smart enough to publish all objects in the right order, thence 
 
 ## Step: Deleting objects not in source
 This process removes all objects from ADF service whom couldn't be found in the source (ADF code).  
-The mechanism is smart enough to dropping the objects in right order.
+The mechanism is smart enough to dropping the objects in right order.  
+Since version 0.30 you can better control which objects you want to omit from removing. Only need to add such objects to `Excludes` list and set flag `DoNotDeleteExcludedObjects` to *true*. 
 
-> Operation might be skipped when `DeleteNotInSource = false` in *Publish Options*
+> The step might be skipped when `DeleteNotInSource = false` in *Publish Options*
 
 ## Step: Restarting all triggers
 Restarting all triggers that should be enabled.
-> Operation might be skipped when `StopStartTriggers = false` in *Publish Options*
+> The step might be skipped when `StopStartTriggers = false` in *Publish Options*
+
+# Selective deployment, triggers and logic
+
+Publishing only selected objects of ADF is not an easy thing. If you add dependencies between objects and a need of stopping triggers before deploying on top of that - the situation becomes even more difficult. Therefore, not always it might be obvious what would happen during the deployment while you have flags set up, an object exist (or not) in the source and/or a trigger is Enabled (or Disabled) on target ADF service where you deploy to.  
+All these factors:
+* Does object exist in the source?
+* Is trigger is Enabled in the target?
+* What is the value for `DeleteNotInSource` flag?
+* What is the value for `StopStartTriggers` flag?
+* What is the value for `DoNotStopStartExcludedTriggers` flag?
+* What is the value for `DoNotDeleteExcludedObjects` flag?
+* Is an object on `Excludes` list?  
+
+had to be considered thoroughly, hence the following table arose:
+![Matrix of behaviour logic](./matrix-of-behaviour-logic.png)
+
+## Assumptions
+
+It's worth to explain a bit why the behaviour looks as above.
+
+### StopStartTriggers 
+It allows you to decide. It stops ALL existing and `Started` (Enabled) triggers.  
+Generally you should use TRUE (default) if you want to avoid troubles.  
+However, if you choose FALSE - you must accept that process WILL NOT touch triggers. You can still do it for yourself in pre or post-deployment script.
+
+### DoNotStopStartExcludedTriggers
+In some scenarios, people still want to let process to manage of triggers, but with some exceptions.
+Usage of this flag make sense along with `StopStartTriggers` only and some objects are excluded from deployment.
+It guarantees that no objects (excluded) will be even touched in target service during the deployment.
+
+### Excluded (collection) 
+This option should allow to completely separate group of objects from other group.
+In that way you can keep all files in the source but control behaviour with flags.
+Exclusion can be defined in two ways:
+1) Explicitly in 'Excludes' collection
+2) Implicitly by not adding an item in 'Includes' collection
+
+**Important:** Both collections can use wildcards as the name of objects.  
+It simplify defining multiple objects by one line, or defining objects which does not exist yet.
+These collections are very useful while you want to do a selective deployment.
+
+### DoNotDeleteExcludedObjects
+Excluded object can be deleted only if flag `DoNotDeleteExcludedObjects` = false.
+This situation could cause error when trigger has not been deleted prior.
+Otherwise, nothing will happen.  
+This option gives you a flexibility of deleting objects in the target, but still not touching objects from 'other' group.
+
 
 # Publish from Azure DevOps
 

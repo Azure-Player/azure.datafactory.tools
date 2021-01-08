@@ -35,7 +35,7 @@ function Import-AdfFromFolder {
     $adf = New-Object -TypeName Adf 
     $adf.Name = $FactoryName
 
-    if ( !(Test-Path -Path $RootFolder) ) { Write-Error "Folder '$RootFolder' doesn't exist." }
+    if ( !(Test-Path -Path $RootFolder) ) { Write-Error "ADFT0019: Folder '$RootFolder' doesn't exist." }
     
     $adf.Location = $RootFolder
 

@@ -38,7 +38,7 @@ function Read-JsonConfigFile {
                 if ($option.FailsWhenConfigItemNotFound -eq $false) {
                     Write-Warning "Object [$name] could not be found, skipping..."
                 } else {
-                    Write-Error "Object [$name] could not be found."
+                    Write-Error "ADFT0017: Object [$name] could not be found."
                 }
             }
         }

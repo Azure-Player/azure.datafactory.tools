@@ -11,7 +11,7 @@ InModuleScope azure.datafactory.tools {
     Import-Module -Name $testHelperPath -Force
 
     # Variables for use in tests
-    $script:SrcFolder = ".\BigFactorySample2"
+    $script:SrcFolder = "$PSScriptRoot\BigFactorySample2"
     $script:ConfigFolder = Join-Path -Path $script:SrcFolder -ChildPath "deployment"
 
     Describe 'Read-CsvConfigFile' -Tag 'Unit','private' {
