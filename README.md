@@ -475,8 +475,13 @@ All these factors:
 * What is the value for `DoNotDeleteExcludedObjects` flag?
 * Is an object on `Excludes` list?  
 
-had to be considered thoroughly, hence the following table arose:
-![Matrix of behaviour logic](./matrix-of-behaviour-logic.png)
+had to be considered thoroughly, hence the following tables arose:
+![Matrix of behaviour logic part 1](./media/matrix-of-behaviour-logic-1.png)
+The above table shows behaviour for different input parameter variations for all version before 0.30, or for newest version when option `DoNotStopStartExcludedTriggers` is set to *False*.
+![Matrix of behaviour logic part 2](./media/matrix-of-behaviour-logic-2.png)
+
+The above table shows behaviour for different input parameter variations for newest version (since v0.30) when option `DoNotStopStartExcludedTriggers` is set to *True*.  
+One can spot some small differences in particular cases, which should offer you enough flexibility to manage all your scenarios.
 
 ## Assumptions
 
@@ -489,7 +494,7 @@ However, if you choose FALSE - you must accept that process WILL NOT touch trigg
 
 ### DoNotStopStartExcludedTriggers
 In some scenarios, people still want to let process to manage of triggers, but with some exceptions.
-Usage of this flag make sense along with `StopStartTriggers` only and some objects are excluded from deployment.
+Usage of this flag make sense along with `StopStartTriggers` only and when some objects are excluded from deployment.
 It guarantees that no objects (excluded) will be even touched in target service during the deployment.
 
 ### Excluded (collection) 
@@ -497,7 +502,7 @@ This option should allow to completely separate group of objects from other grou
 In that way you can keep all files in the source but control behaviour with flags.
 Exclusion can be defined in two ways:
 1) Explicitly in 'Excludes' collection
-2) Implicitly by not adding an item in 'Includes' collection
+2) Implicitly by not adding an item to 'Includes' collection
 
 **Important:** Both collections can use wildcards as the name of objects.  
 It simplify defining multiple objects by one line, or defining objects which does not exist yet.
