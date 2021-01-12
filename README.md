@@ -515,6 +515,26 @@ Otherwise, nothing will happen.
 This option gives you a flexibility of deleting objects in the target, but still not touching objects from 'other' group.
 
 
+# Build Azure Data Factory code
+
+Another very helpful function is `Build-AdfCode`. Use it to validate the code of your Azure Data Factory before you publish it onto target ADF service.
+The function validates files of ADF in a given location, returning warnings or errors.  
+The following validation will be perform:
+- Reads all files and validates its json format
+- Checks whether all dependant objects exist
+- Checks whether file name equals object name
+- (more soon...)
+
+```PowerShell
+# Example 1
+Build-AdfCode -RootFolder "$RootFolder"
+```
+
+Parameters:  
+- `RootFolder` - Source folder where all ADF objects are kept. The folder should contain subfolders like pipeline, linkedservice, etc.
+
+
+
 # Publish from Azure DevOps
 
 There are two ways you can deploy Azure Data Factory with this approach (directly from code) within Azure DevOps Pipeline using:  
