@@ -515,9 +515,9 @@ Otherwise, nothing will happen.
 This option gives you a flexibility of deleting objects in the target, but still not touching objects from 'other' group.
 
 
-# Build Azure Data Factory code
+# Build/Test Azure Data Factory code
 
-Another very helpful function is `Build-AdfCode`. Use it to validate the code of your Azure Data Factory before you publish it onto target ADF service.
+Another very helpful function is `Test-AdfCode`. Use it to validate the code of your Azure Data Factory before you publish it onto target ADF service.
 The function validates files of ADF in a given location, returning warnings or errors.  
 The following validation will be perform:
 - Reads all files and validates its json format
@@ -527,7 +527,7 @@ The following validation will be perform:
 
 ```PowerShell
 # Example 1
-Build-AdfCode -RootFolder "$RootFolder"
+Test-AdfCode -RootFolder "$RootFolder"
 ```
 
 Parameters:  
@@ -558,7 +558,7 @@ Having this as a PowerShell module, it is very easy to configure a Release Pipel
 Both steps you can be found here:  
 ```powershell
 # Step 1
-Install-Module Az.DataFactory -MinimumVersion "1.10.0" -Force
+Install-Module Az.DataFactory -MinimumVersion "1.11.0" -Force
 Install-Module -Name "azure.datafactory.tools" -Force
 Import-Module -Name "azure.datafactory.tools" -Force
 
@@ -573,7 +573,7 @@ variables:
   DataFactoryName: 'SQLPlayerDemo'
 steps:
 - powershell: |
-   Install-Module Az.DataFactory -MinimumVersion "1.10.0" -Force
+   Install-Module Az.DataFactory -MinimumVersion "1.11.0" -Force
    Install-Module -Name "azure.datafactory.tools" -Force
    Import-Module -Name "azure.datafactory.tools" -Force
   displayName: 'PowerShell Script'

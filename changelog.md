@@ -4,9 +4,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.40.0] - 2021-01-12
+## [0.40.0] - 2021-01-13
 ### Added
-* New function: Build-AdfCode [#62](https://github.com/SQLPlayer/azure.datafactory.tools/issues/62)]
+* New function: Test-AdfCode [#62](https://github.com/SQLPlayer/azure.datafactory.tools/issues/62)]
 
 ## [0.30.0] - 2021-01-08
 ### Added
