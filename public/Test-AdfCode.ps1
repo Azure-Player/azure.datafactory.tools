@@ -12,10 +12,10 @@ Validates files of ADF in a given location. The following validation will be per
 Source folder where all ADF objects are kept. The folder should contain subfolders like pipeline, linkedservice, etc.
 
 .EXAMPLE
-Build-AdfCode -RootFolder "$RootFolder"
+Test-AdfCode -RootFolder "$RootFolder"
 
 #>
-function Build-AdfCode {
+function Test-AdfCode {
     [CmdletBinding()]
     param (
         [parameter(Mandatory = $true)] 
@@ -64,8 +64,8 @@ function Build-AdfCode {
 
     }
 
-    $msg = "Build completed ($ObjectsCount objects)."
-    if ($ErrorCount -gt 0) { $msg = "Build failed." }
+    $msg = "Test code completed ($ObjectsCount objects)."
+    if ($ErrorCount -gt 0) { $msg = "Test code failed." }
     $line1 = $adf.Name.PadRight(63) + "  # of Errors: $ErrorCount".PadLeft(28)
     $line2 = $msg.PadRight(63)      + "# of Warnings: $WarningCount".PadLeft(28)
     Write-Host "============================================================================================="
