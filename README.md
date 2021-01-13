@@ -515,6 +515,26 @@ Otherwise, nothing will happen.
 This option gives you a flexibility of deleting objects in the target, but still not touching objects from 'other' group.
 
 
+# Build/Test Azure Data Factory code
+
+Another very helpful function is `Test-AdfCode`. Use it to validate the code of your Azure Data Factory before you publish it onto target ADF service.
+The function validates files of ADF in a given location, returning warnings or errors.  
+The following validation will be perform:
+- Reads all files and validates its json format
+- Checks whether all dependant objects exist
+- Checks whether file name equals object name
+- (more soon...)
+
+```PowerShell
+# Example 1
+Test-AdfCode -RootFolder "$RootFolder"
+```
+
+Parameters:  
+- `RootFolder` - Source folder where all ADF objects are kept. The folder should contain subfolders like pipeline, linkedservice, etc.
+
+
+
 # Publish from Azure DevOps
 
 There are two ways you can deploy Azure Data Factory with this approach (directly from code) within Azure DevOps Pipeline using:  
@@ -538,7 +558,7 @@ Having this as a PowerShell module, it is very easy to configure a Release Pipel
 Both steps you can be found here:  
 ```powershell
 # Step 1
-Install-Module Az.DataFactory -MinimumVersion "1.10.0" -Force
+Install-Module Az.DataFactory -MinimumVersion "1.11.0" -Force
 Install-Module -Name "azure.datafactory.tools" -Force
 Import-Module -Name "azure.datafactory.tools" -Force
 
@@ -553,7 +573,7 @@ variables:
   DataFactoryName: 'SQLPlayerDemo'
 steps:
 - powershell: |
-   Install-Module Az.DataFactory -MinimumVersion "1.10.0" -Force
+   Install-Module Az.DataFactory -MinimumVersion "1.11.0" -Force
    Install-Module -Name "azure.datafactory.tools" -Force
    Import-Module -Name "azure.datafactory.tools" -Force
   displayName: 'PowerShell Script'
