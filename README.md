@@ -558,7 +558,7 @@ Having this as a PowerShell module, it is very easy to configure a Release Pipel
 Both steps you can be found here:  
 ```powershell
 # Step 1
-Install-Module Az.DataFactory -MinimumVersion "1.11.0" -Force
+Install-Module Az.DataFactory -MinimumVersion "1.10.0" -Force
 Install-Module -Name "azure.datafactory.tools" -Force
 Import-Module -Name "azure.datafactory.tools" -Force
 
@@ -573,7 +573,7 @@ variables:
   DataFactoryName: 'SQLPlayerDemo'
 steps:
 - powershell: |
-   Install-Module Az.DataFactory -MinimumVersion "1.11.0" -Force
+   Install-Module Az.DataFactory -MinimumVersion "1.10.0" -Force
    Install-Module -Name "azure.datafactory.tools" -Force
    Import-Module -Name "azure.datafactory.tools" -Force
   displayName: 'PowerShell Script'
