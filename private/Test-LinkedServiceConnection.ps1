@@ -28,9 +28,9 @@ function Get-Bearer([string]$TenantID, [string]$ClientID, [string]$ClientSecret)
 }
 
 
-function Get-LinkedService([string]$LinkedServiceName, [string]$DataFactoryName, [string]$ResourceGroup)
+function Get-LinkedServiceBody([string]$LinkedServiceName, [string]$DataFactoryName, [string]$ResourceGroupName, [string]$BearerToken)
 {
-  $ADFEndpoint = "https://management.azure.com/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroup/providers/Microsoft.DataFactory/factories/$DataFactoryName/linkedservices/$($LinkedServiceName)?api-version=2018-06-01"
+  $ADFEndpoint = "https://management.azure.com/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.DataFactory/factories/$DataFactoryName/linkedservices/$($LinkedServiceName)?api-version=2018-06-01"
 
   $params = @{
       ContentType = 'application/json'
@@ -44,18 +44,26 @@ function Get-LinkedService([string]$LinkedServiceName, [string]$DataFactoryName,
 }
 
 
-function Test-LinkedServiceConnection([string]$Body, [string]$DataFactoryName, [string]$ResourceGroup)
+function Test-LinkedServiceConnection([string]$LinkedServiceName, [string]$DataFactoryName, [string]$ResourceGroupName, [string]$BearerToken)
 {
-  $AzureEndpoint = "https://management.azure.com/subscriptions/$SubscriptionID/resourcegroups/$ResourceGroup/providers/Microsoft.DataFactory/factories/$DataFactoryName/testConnectivity?api-version=2017-09-01-preview"
+
+  $body = Get-LinkedServiceBody -LinkedServiceName $LinkedServiceName -DataFactoryName $DataFactoryName -ResourceGroupName $ResourceGroupName -BearerToken $bearerToken
+
+  $AzureEndpoint = "https://management.azure.com/subscriptions/$SubscriptionID/resourcegroups/$ResourceGroupName/providers/Microsoft.DataFactory/factories/$DataFactoryName/testConnectivity?api-version=2018-06-01"
 
   $params = @{
       ContentType = 'application/json'
       Headers = @{'accept'='application/json';'Authorization'=$BearerToken}
       Body = $Body
       Method = 'Post'
-      URI = $AzureEndpoint
+      Uri = $AzureEndpoint
   }
 
-  $response = Invoke-RestMethod @params
+  try {
+    $response = Invoke-RestMethod @params
+  }
+  catch {
+    Write-Error -Exception $_.Exception
+  }
   return $response
 }

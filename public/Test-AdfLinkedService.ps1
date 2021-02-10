@@ -17,17 +17,16 @@ function Test-AdfLinkedService {
         [String] $ClientSecret
     )
 
-    #connect $SubscriptionID
     $bearerToken = Get-Bearer -TenantID $TenantID -ClientID $ClientID -ClientSecret $ClientSecret
 
     $all = 0
     $ok = 0
     $LinkedServiceName.Split(',') | ForEach-Object { 
         $all += 1
-        $body = Get-LinkedService -LinkedServiceName $_ -DataFactoryName $DataFactoryName -ResourceGroup $ResourceGroupName
+        $ls = $_
         Write-Host "Testing ADF Linked Service connection: [$_] ..." 
-        $r = Test-LinkedServiceConnection -Body $body -DataFactoryName $DataFactoryName -ResourceGroup $ResourceGroupName
-        if ($r.succeeded) {
+        $r = Test-LinkedServiceConnection -LinkedServiceName $ls -DataFactoryName $DataFactoryName -ResourceGroup $ResourceGroupName -BearerToken $bearerToken
+        if ($null -ne $r -and $r.succeeded) {
             Write-Host "[$_] : Connection successful."
             $ok += 1
         } else {
