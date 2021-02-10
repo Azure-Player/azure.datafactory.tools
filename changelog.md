@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.60.0] - 2021-02-10
+### Added
+* Add Test method for Linked Services ([#48](https://github.com/SQLPlayer/azure.datafactory.tools/issues/48)) Preview
+
 ## [0.50.0] - 2021-01-20
 ### Fixed
 * JSON file corrupted when contained object is located deeper than 15 nodes ([[#80](https://github.com/SQLPlayer/azure.datafactory.tools/issues/80)])

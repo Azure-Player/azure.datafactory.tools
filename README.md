@@ -533,6 +533,47 @@ Test-AdfCode -RootFolder "$RootFolder"
 Parameters:  
 - `RootFolder` - Source folder where all ADF objects are kept. The folder should contain subfolders like pipeline, linkedservice, etc.
 
+# Test connection of Linked Service (preview)
+
+This allows you to automate test connections, which normally you can only do via browser in ADF UX by clicking `Test connection` button:
+![](media/linked-service-test-connection.gif)  
+It required Service Principal (Reg App) registered in AAD.
+
+```PowerShell
+# Prep
+$params = @{
+    DataFactoryName   = 'adf-example-uat'
+    ResourceGroupName = 'rg-example-uat' 
+    SubscriptionID    = "{Your-subscriptionId-here}" 
+    TenantID          = "{Your-tenantId-here}"
+    ClientID          = "SPN-ApplicationId"
+    ClientSecret      = "SPN-Pas$word"
+}
+
+# Example 1
+$LinkedServiceName = 'AzureSqlDatabase1'      
+Test-AdfLinkedService @params -LinkedServiceName $LinkedServiceName
+
+# Example 2
+$LinkedServiceNames = 'AzureSqlDatabase1,LS_ADLS'   # Comma-separated list   
+Test-AdfLinkedService @params -LinkedServiceName $LinkedServiceNames
+```
+
+Parameters:  
+- `LinkedServiceName` - ADF Linked Service to be tested
+- `DataFactoryName`   - ADF you want to test
+- `ResourceGroupName` - Azure Resource Group which ADF belongs to
+- `SubscriptionID`    - Subscription (Guid)
+- `TenantID`          - Tenant ID
+- `ClientID`          - ApplicationId of Service Principal (SPN)
+- `ClientSecret`      - Password of Service Principal (SPN)
+
+More about Service Principal Objects in Microsoft Doc: [Application and service principal objects in Azure Active Directory](https://docs.microsoft.com/en-us/azure/active-directory/develop/app-objects-and-service-principals)
+
+> Note that the function uses undocumented API call (testConnectivity).
+
+
+
 
 
 # Publish from Azure DevOps
