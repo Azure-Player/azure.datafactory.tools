@@ -48,7 +48,7 @@ $configuration.TestResult.Enabled = $true
 $configuration.Output.Verbosity = 'Detailed'
 #$configuration.Filter.ExcludeTag = 'Integration'
 $configuration.Run.Path = "$folder"
-$configuration.Run.TestExtension = "Integration.Tests.ps1"
+$configuration.Run.TestExtension = "*.Tests.ps1"
 $configuration.Run.PassThru = $true
 $r = Invoke-Pester -Configuration $configuration
 $r.Result
