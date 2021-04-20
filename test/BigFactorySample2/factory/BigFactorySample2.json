@@ -32,6 +32,13 @@
 					6,
 					1050
 				]
+			},
+			"GlobalParam2": {
+				"type": "object",
+				"value": {
+					"env": "Prod",
+					"name": "target"
+				}
 			}
 		}
 	}
