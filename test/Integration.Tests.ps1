@@ -187,7 +187,7 @@ InModuleScope azure.datafactory.tools {
             }
         }
         Context 'factory folder exists and some global params exist' {
-            It 'Should run and deploy 6 global properties' {
+            It 'Should run and deploy 7 global properties' {
                 Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "$($script:DataFactoryOrigName).json" -Recurse:$true -Force 
                 $adf = Import-AdfFromFolder -FactoryName "$($script:DataFactoryName)" -RootFolder "$RootFolder"
                 $gp = $adf.Factories[0].Body.properties.globalParameters
@@ -195,7 +195,7 @@ InModuleScope azure.datafactory.tools {
                     -ResourceGroupName "$ResourceGroupName" `
                     -DataFactoryName "$DataFactoryName" -Location "$Location" -Option $script:opt 
                 $adfi = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName"
-                $adfi.GlobalParameters.Count | Should -Be 6
+                $adfi.GlobalParameters.Count | Should -Be 7
                 $adfi.GlobalParameters.'GP-String'.Type | Should -Be $gp.'GP-String'.type
                 $adfi.GlobalParameters.'GP-String'.Value | Should -Be $gp.'GP-String'.value
                 $adfi.GlobalParameters.'GP-Int'.Type | Should -Be $gp.'GP-Int'.type
@@ -208,6 +208,8 @@ InModuleScope azure.datafactory.tools {
                 $adfi.GlobalParameters.'GP-Object'.Value | Should -Be $gp.'GP-Object'.value
                 $adfi.GlobalParameters.'GP-Array'.Type | Should -Be $gp.'GP-Array'.type
                 #$adfi.GlobalParameters.'GP-Array'.Value | Should -Be $gp.'GP-Array'.value # This is known bug
+                $adfi.GlobalParameters.'GlobalParam2'.Type | Should -Be $gp.'GlobalParam2'.type
+                ConvertTo-Json $adfi.GlobalParameters.'GlobalParam2'.Value | Should -Be (ConvertTo-Json $gp.'GlobalParam2'.value)
             }
         }
         Context 'factory folder exists but no global params exist' {
