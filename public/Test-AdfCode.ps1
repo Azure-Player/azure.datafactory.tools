@@ -73,4 +73,5 @@ function Test-AdfCode {
     Write-Host " $line2"
     Write-Host "============================================================================================="
 
+    return $ErrorCount;
 }
