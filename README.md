@@ -534,6 +534,8 @@ Test-AdfCode -RootFolder "$RootFolder"
 Parameters:  
 - `RootFolder` - Source folder where all ADF objects are kept. The folder should contain subfolders like pipeline, linkedservice, etc.
 
+The cmdlet returns number of found errors, 0 (zero) = all good.
+
 # Test connection of Linked Service (preview)
 
 This allows you to automate test connections, which normally you can only do via browser in ADF UX by clicking `Test connection` button:
