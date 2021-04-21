@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.61.0] - 2021-04-21
+### Fixed
+* Deploy global Parameter type object ([#92](https://github.com/SQLPlayer/azure.datafactory.tools/issues/92))
+### Added
+* Cmdlet `Test-AdfCode` returns number of found errors.
+
 ## [0.60.0] - 2021-02-10
 ### Added
 * Add Test method for Linked Services ([#48](https://github.com/SQLPlayer/azure.datafactory.tools/issues/48)) Preview

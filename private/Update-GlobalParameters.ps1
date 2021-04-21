@@ -13,23 +13,17 @@ param
         $newGlobalParameters = New-Object 'system.collections.generic.dictionary[string,Microsoft.Azure.Management.DataFactory.Models.GlobalParameterSpecification]'
         Write-Verbose "Parsing JSON..."
         $globalFactoryObject = [Newtonsoft.Json.Linq.JObject]::Parse($adf.GlobalFactory.body)
-        #$globalParametersObject = $globalFactoryObject.properties.globalParameters
 
         $gpExist = Get-Member -InputObject $adf.GlobalFactory.GlobalParameters -name "properties" -Membertype "Properties"
         if ($null -ne $gpExist)
         {
+            $globalParametersObject = $globalFactoryObject.properties.globalParameters
 
             Write-Host "Adding global parameter..."
-            foreach ($p in $adf.GlobalFactory.GlobalParameters.properties.globalParameters.PSObject.Properties)
-            {
-                # $p.Name
-                # $p.Value.type
-                # $p.Value.value
-                $gpspec = New-Object 'Microsoft.Azure.Management.DataFactory.Models.GlobalParameterSpecification'
-                $gpspec.Type = $p.Value.type
-                $gpspec.Value = $p.Value.value
-                $globalParameterValue = $gpspec
-                $newGlobalParameters.Add($p.Name, $globalParameterValue)
+            foreach ($gp in $globalParametersObject.GetEnumerator()) {
+                Write-Host "- " $gp.Key
+                $globalParameterValue = $gp.Value.ToObject([Microsoft.Azure.Management.DataFactory.Models.GlobalParameterSpecification])
+                $newGlobalParameters.Add($gp.Key, $globalParameterValue)
             }
             $targetAdf.GlobalParameters = $newGlobalParameters
 
