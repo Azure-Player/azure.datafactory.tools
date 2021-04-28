@@ -151,7 +151,6 @@ $opt = New-AdfPublishOption
 $opt.Excludes.Add("linkedService.*", "")
 $opt.Excludes.Add("integrationruntime.*", "")
 $opt.Excludes.Add("trigger.*", "")
-$opt = New-AdfPublishOption
 
 # Example 3: Excluding all objects from deployment
 $opt = New-AdfPublishOption
