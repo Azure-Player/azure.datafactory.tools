@@ -3,6 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# azure.datafactory.tools specific items
+**/TEST-Results.xml
+
 # User-specific files
 *.suo
 *.user

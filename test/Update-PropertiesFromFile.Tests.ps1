@@ -27,7 +27,7 @@ InModuleScope azure.datafactory.tools {
 
         Context 'When called without parameters' {
             It 'Should throw an error' {
-                { Update-PropertiesFromFile } | Should -Throw 
+                { Update-PropertiesFromFile -Force } | Should -Throw 
             }
         }
 
