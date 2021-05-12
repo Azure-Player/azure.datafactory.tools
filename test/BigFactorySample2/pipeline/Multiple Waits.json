@@ -1,0 +1,79 @@
+{
+    "name": "Multiple Waits",
+    "properties": {
+        "activities": [
+            {
+                "name": "Wait 1",
+                "type": "Wait",
+                "dependsOn": [],
+                "userProperties": [],
+                "typeProperties": {
+                    "waitTimeInSeconds": 1
+                }
+            },
+            {
+                "name": "If Condition",
+                "type": "IfCondition",
+                "dependsOn": [
+                    {
+                        "activity": "Wait 1",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "expression": {
+                        "value": "@equals(1, 1)",
+                        "type": "Expression"
+                    },
+                    "ifTrueActivities": [
+                        {
+                            "name": "Wait 2",
+                            "type": "Wait",
+                            "dependsOn": [],
+                            "userProperties": [],
+                            "typeProperties": {
+                                "waitTimeInSeconds": 2
+                            }
+                        },
+                        {
+                            "name": "Wait 3",
+                            "type": "Wait",
+                            "dependsOn": [
+                                {
+                                    "activity": "Wait 2",
+                                    "dependencyConditions": [
+                                        "Succeeded"
+                                    ]
+                                }
+                            ],
+                            "userProperties": [],
+                            "typeProperties": {
+                                "waitTimeInSeconds": 3
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "Wait 4",
+                "type": "Wait",
+                "dependsOn": [
+                    {
+                        "activity": "If Condition1",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "waitTimeInSeconds": 4
+                }
+            }
+        ],
+        "annotations": []
+    }
+}
