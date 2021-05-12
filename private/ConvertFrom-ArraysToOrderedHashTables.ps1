@@ -17,6 +17,10 @@ function ConvertFrom-ArraysToOrderedHashTables {
         # Loop through the properties, changing arrays and processing PSCustomObject's
         foreach ($prop in $Item.PSObject.Properties.Name) {
 
+            if ($Item.$prop -eq $null){
+                Write-Verbose "Skipping property '$prop' as type cannot be determined for null";
+                continue;
+            }
             Write-Verbose "Processing property '$prop' of type  $($Item.$prop.GetType().Name)";
 
             # If the current property is a non-empty array
@@ -24,11 +28,10 @@ function ConvertFrom-ArraysToOrderedHashTables {
             
                 $itemCount = $Item.$prop.Count;
                 foreach ($idProp in $arrayIdProps) {
-                    $matchedItemCount = $Item.$prop.Where({$_.PSobject.Properties.Name -contains $idProp}, 'Default').Count;
+                    # If the item in the array is a primitive type, calling PSobject.Properties.Name will throw...
+                    $matchedItemCount = $Item.$prop.Where({ (-not $_.GetType().IsPrimitive) -and $_.PSobject.Properties.Name -contains $idProp }, 'Default').Count;
 
                     if ( $matchedItemCount -eq $itemCount ) {
-                    #if ( $Item.$prop[0].$idProp -notcontains $null ) {
-                    #if ( $Item.$prop.PSobject.Properties.Name -contains $idProp) {
                         Write-Verbose "Extracting ordered hash table from array using property $idProp as the key";
                         
                         # First convert each item in the array to have ordered hashtables instead of arrays if required
