@@ -13,6 +13,10 @@ function ConvertFrom-OrderedHashTablesToArrays {
 
         # Loop through the properties, changing arrays and processing PSCustomObject's
         foreach ($prop in $Item.PSObject.Properties.Name) {
+            if ($Item.$prop -eq $null){
+                Write-Verbose "Skipping property '$prop' as type cannot be determined for null";
+                continue;
+            }
 
             Write-Verbose "Processing property '$prop' of type  $($Item.$prop.GetType().Name)";
 
