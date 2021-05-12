@@ -1,0 +1,12 @@
+type,name,path,value
+pipeline,"Multiple Waits",activities[0].name,"Wait Number 1"
+
+# If we change the activity name before other nested properties, it changes the indexer, so we have to use the new name from then on...
+pipeline,"Multiple Waits",activities[1].typeProperties.ifTrueActivities[0].name,"Wait Number 2"
+pipeline,"Multiple Waits",activities["If Condition"].typeProperties.ifTrueActivities["Wait Number 2"].typeProperties.waitTimeInSeconds,22
+
+# If we change the activity name after the other nested properties we can just use the original name...
+pipeline,"Multiple Waits",activities["If Condition"].typeProperties.ifTrueActivities["Wait 3"].typeProperties.waitTimeInSeconds,33
+pipeline,"Multiple Waits",activities["If Condition"].typeProperties.ifTrueActivities["Wait 3"].name,"Wait Number 3"
+
+pipeline,"Multiple Waits",activities["Wait 4"].name,"Wait Number 4"
