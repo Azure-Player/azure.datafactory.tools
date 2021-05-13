@@ -33,7 +33,7 @@ function Get-AdfFromService {
     $adf.ResourceGroupName = $ResourceGroupName
 
     $adfi = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$FactoryName"
-    Write-Host ("Azure Data Factory (instance) loaded." -f $adf.DataSets.Count)
+    Write-Host "Azure Data Factory (instance) loaded."
     $adf.Id = $adfi.DataFactoryId
     $adf.Location = $adfi.Location
 
