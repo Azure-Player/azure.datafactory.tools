@@ -42,6 +42,6 @@ function Deploy-AdfObject {
 
     Deploy-AdfObjectOnly -obj $obj
 
-    Write-Host "Finished deploying object [$($obj.Name)]."
+    Write-Host "Finished deploying object: $($obj.FullName($true))"
 
 }
