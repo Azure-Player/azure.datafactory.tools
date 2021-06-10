@@ -51,6 +51,10 @@ function Import-AdfFromFolder {
     Write-Host ("DataFlows: {0} object(s) loaded." -f $adf.DataFlows.Count)
     Import-AdfObjects -Adf $adf -All $adf.Triggers -RootFolder $RootFolder -SubFolder "trigger" | Out-Null
     Write-Host ("Triggers: {0} object(s) loaded." -f $adf.Triggers.Count)
+    Import-AdfObjects -Adf $adf -All $adf.ManagedVirtualNetwork -RootFolder $RootFolder -SubFolder "managedVirtualNetwork" | Out-Null
+    Write-Host ("Managed VNet: {0} object(s) loaded." -f $adf.ManagedVirtualNetwork.Count)
+    Import-AdfObjects -Adf $adf -All $adf.ManagedPrivateEndpoints -RootFolder $RootFolder -SubFolder "managedVirtualNetwork\default\managedPrivateEndpoint" | Out-Null
+    Write-Host ("Managed Private Endpoints: {0} object(s) loaded." -f $adf.ManagedPrivateEndpoints.Count)
     Import-AdfObjects -Adf $adf -All $adf.Factories -RootFolder $RootFolder -SubFolder "factory" | Out-Null
     Write-Host ("Factories: {0} object(s) loaded." -f $adf.Factories.Count)
 

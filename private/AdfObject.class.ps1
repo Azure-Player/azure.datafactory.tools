@@ -28,6 +28,17 @@ class AdfObject {
         }
     }
 
+    [String] AzureResourceName ()
+    {
+        $resType = Get-AzureResourceType $this.Type
+        $DataFactoryName = $this.Adf.Name
+        if ($resType -like '*managedPrivateEndpoints') {
+            return "$DataFactoryName/default/$($this.Name)"
+        } else {
+            return "$DataFactoryName/$($this.Name)"
+        }
+    }
+
     [String] FullName ()
     {
         return $this.FullName($false)
@@ -68,7 +79,7 @@ class AdfObject {
         return $ofn
     }
 
-    static $AllowedTypes = @('integrationRuntime', 'pipeline', 'dataset', 'dataflow', 'linkedService', 'trigger', 'factory')
+    static $AllowedTypes = @('integrationRuntime', 'pipeline', 'dataset', 'dataflow', 'linkedService', 'trigger', 'factory', 'managedVirtualNetwork', 'managedPrivateEndpoints')
 
 }
 
