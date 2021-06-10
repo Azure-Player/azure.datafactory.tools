@@ -15,6 +15,7 @@ class Adf {
     [System.Collections.ArrayList] $Triggers = @{}
     [System.Collections.ArrayList] $IntegrationRuntimes = @{}
     [System.Collections.ArrayList] $Factories = @{}
+    [System.Collections.ArrayList] $ManagedVirtualNetwork = @{}
     [string] $Location = ""
     [AdfGlobalProp] $GlobalFactory = [AdfGlobalProp]::new()
     [AdfPublishOption] $PublishOptions
