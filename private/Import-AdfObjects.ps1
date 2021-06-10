@@ -30,6 +30,10 @@ function Import-AdfObjects {
         $m | ForEach-Object {
             $o.AddDependant( $_.Groups['r'].Value, $_.Groups['t'].Value ) | Out-Null
         }
+        $m = [regex]::matches($txt,'"type":\s*?"(?<t>.+?)",[\n\r\s]+"referenceName":\s*?"(?<r>.+?)"')
+        $m | ForEach-Object {
+            $o.AddDependant( $_.Groups['r'].Value, $_.Groups['t'].Value ) | Out-Null
+        }
         $o.Adf = $Adf
         $All.Add($o)
         Write-Verbose ("- {0} : found {1} dependencies." -f $_.BaseName, $o.DependsOn.Count)
