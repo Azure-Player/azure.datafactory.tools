@@ -1,0 +1,21 @@
+{
+	"name": "movie_dataflow_source",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "BlobSampleData",
+			"type": "LinkedServiceReference"
+		},
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "movies.csv",
+				"folderPath": "adfdataflowdocs",
+				"container": "adfv2"
+			},
+			"columnDelimiter": ",",
+			"firstRowAsHeader": true
+		},
+		"schema": []
+	}
+}
