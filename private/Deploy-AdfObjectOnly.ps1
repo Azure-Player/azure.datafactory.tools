@@ -124,10 +124,12 @@ function Deploy-AdfObjectOnly {
         'AzResource'
         {
             $resType = Get-AzureResourceType $obj.Type
+            $resName = $obj.AzureResourceName()
+
             New-AzResource `
             -ResourceType $resType `
             -ResourceGroupName $resourceGroupName `
-            -Name "$DataFactoryName/$($obj.Name)" `
+            -Name "$resName" `
             -ApiVersion "2018-06-01" `
             -Properties $json `
             -IsFullObject -Force | Out-Null
