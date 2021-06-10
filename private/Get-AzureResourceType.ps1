@@ -18,6 +18,7 @@ function Get-AzureResourceType {
         'linkedService'         { $resType = 'Microsoft.DataFactory/factories/linkedservices' }
         'trigger'               { $resType = 'Microsoft.DataFactory/factories/triggers' }
         'managedVirtualNetwork' { $resType = 'Microsoft.DataFactory/factories/managedVirtualNetworks' }
+        'managedVirtualNetwork\default\managedPrivateEndpoint' { $resType = 'Microsoft.DataFactory/factories/managedVirtualNetworks/managedPrivateEndpoints' }
         'factory'               { $resType = 'Microsoft.DataFactory/factories' }
         default                 { Write-Error "ADFT0016: Type '$Type' is not supported." }
     }
