@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.71.0] - 2021-06-12
+### Fixed
+* Removing excluded ADF objects when option $DoNotDeleteExcludedObjects = $false ([#108](https://github.com/SQLPlayer/azure.datafactory.tools/issues/108))
+
 ## [0.70.0] - 2021-06-10
 ### Added
 * Support for ADF Managed Virtual Network & Managed Private Endpoint (preview)
