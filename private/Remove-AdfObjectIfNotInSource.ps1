@@ -6,7 +6,7 @@ function Remove-AdfObjectIfNotInSource {
         [parameter(Mandatory = $true)] $adfInstance
     )
     
-    Write-Debug "BEGIN: Get-AdfObjectIfNotInSource()"
+    Write-Debug "BEGIN: Remove-AdfObjectIfNotInSource()"
     
     $name = $adfTargetObj.Name
     $type = $adfTargetObj.GetType().Name
@@ -21,5 +21,5 @@ function Remove-AdfObjectIfNotInSource {
         Write-Verbose "Object [$simtype].[$name] is in the source - won't be delete."
     }
 
-    Write-Debug "END: Get-AdfObjectIfNotInSource()"
+    Write-Debug "END: Remove-AdfObjectIfNotInSource()"
 }
