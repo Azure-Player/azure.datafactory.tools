@@ -96,6 +96,10 @@ InModuleScope azure.datafactory.tools {
                 $char | Should -Be ([CHAR][BYTE]166)
                 $char.Length | Should -Be 1
             }
+            It 'Should discover 4 dependant objects in dataflow' {
+                $o = Get-AdfObjectByName -adf $script:result -name "Currency Converter" -Type "dataflow"
+                $o.DependsOn.Count | Should -Be 4
+            }
         }
         
         Context 'when GetObjectsByFolderName function called' {
