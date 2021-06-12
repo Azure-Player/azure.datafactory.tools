@@ -1,0 +1,38 @@
+{
+	"name": "BigFactorySample2",
+	"properties": {
+		"globalParameters": {
+			"GP-String": {
+				"type": "string",
+				"value": "This is text"
+			},
+			"GP-Int": {
+				"type": "int",
+				"value": 2000000
+			},
+			"GP-Float": {
+				"type": "float",
+				"value": 3.141592653589793
+			},
+			"GP-Bool": {
+				"type": "bool",
+				"value": true
+			},
+			"GP-Object": {
+				"type": "object",
+				"value": "{ This is object }"
+			},
+			"GP-Array": {
+				"type": "array",
+				"value": [
+					1,
+					2,
+					"xyz",
+					4,
+					6,
+					1050
+				]
+			}
+		}
+	}
+}
