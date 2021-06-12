@@ -6,6 +6,8 @@ function Remove-AdfObject {
         [parameter(Mandatory = $true)] $adfInstance
     )
 
+    Write-Debug "BEGIN: Remove-AdfObject()"
+
     $name = $obj.Name
     $err = $null
     $ErrorMessage = $null
@@ -17,8 +19,13 @@ function Remove-AdfObject {
         Write-Host "Removing object: [$simtype].[$name]"
         $action = $simtype
     } else {
-        $action = "DoNothing"
-        Write-Verbose "Object [$simtype].[$name] won't be deleted as publish option 'DoNotDeleteExcludedObjects' = true."
+        if ($adfSource.PublishOptions.DoNotDeleteExcludedObjects) {
+            Write-Verbose "Object [$simtype].[$name] won't be deleted as publish option 'DoNotDeleteExcludedObjects' = true."
+            $action = "DoNothing"
+        } else {
+            Write-Host "Removing excluded object: [$simtype].[$name] as publish option 'DoNotDeleteExcludedObjects' = false."
+            $action = $simtype
+        }
     }
 
     Try 
@@ -30,42 +37,42 @@ function Remove-AdfObject {
                     -ResourceGroupName $ResourceGroupName `
                     -DataFactoryName $DataFactoryName `
                     -Name $name `
-                    -Force -ErrorVariable err | Out-Null
+                    -Force -ErrorVariable err -ErrorAction Stop | Out-Null
             }
             "DataFlow" {
                 Remove-AzDataFactoryV2DataFlow `
                     -ResourceGroupName $ResourceGroupName `
                     -DataFactoryName $DataFactoryName `
                     -Name $name `
-                    -Force -ErrorVariable err | Out-Null
+                    -Force -ErrorVariable err -ErrorAction Stop | Out-Null
             }
             "Pipeline" {
                 Remove-AzDataFactoryV2Pipeline `
                     -ResourceGroupName $ResourceGroupName `
                     -DataFactoryName $DataFactoryName `
                     -Name $name `
-                    -Force -ErrorVariable err | Out-Null
+                    -Force -ErrorVariable err -ErrorAction Stop | Out-Null
             }
             "LinkedService" {
                 Remove-AzDataFactoryV2LinkedService `
                     -ResourceGroupName $ResourceGroupName `
                     -DataFactoryName $DataFactoryName `
                     -Name $name `
-                    -Force -ErrorVariable err | Out-Null
+                    -Force -ErrorVariable err -ErrorAction Stop | Out-Null
             }
             "IntegrationRuntime" {
                 Remove-AzDataFactoryV2IntegrationRuntime `
                     -ResourceGroupName $ResourceGroupName `
                     -DataFactoryName $DataFactoryName `
                     -Name $name `
-                    -Force -ErrorVariable err | Out-Null
+                    -Force -ErrorVariable err -ErrorAction Stop | Out-Null
             }
             "Trigger" {
                 Remove-AzDataFactoryV2Trigger `
                     -ResourceGroupName $ResourceGroupName `
                     -DataFactoryName $DataFactoryName `
                     -Name $name `
-                    -Force -ErrorVariable err | Out-Null
+                    -Force -ErrorVariable err -ErrorAction Stop | Out-Null
             }
             "DoNothing" {
 
@@ -77,9 +84,14 @@ function Remove-AdfObject {
         }
     }
     Catch {
-        Write-Debug "$err"
+        Write-Debug "Error caught when deleting:`n$err"
         $ErrorMessage = $_.Exception.Message
     }
+    # Finally {
+    #     if ($null -eq $ErrorMessage -and $null -ne $err) {
+    #         if ($err.Count -gt 0) { $ErrorMessage = $err[0] }
+    #     }
+    # }
 
     # if ($ErrorMessage -match 'Error Code: TriggerEnabledCannotUpdate')
     # {
@@ -105,5 +117,7 @@ function Remove-AdfObject {
         #Rethrow exception
         throw $ErrorMessage
     }
+
+    Write-Debug "END: Remove-AdfObject()"
 
 }
