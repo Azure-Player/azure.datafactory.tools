@@ -1,0 +1,14 @@
+{
+	"name": "LS_AzureSqlDb_AW2014_viaMVN_MI",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=sqlplayer.database.windows.net;Initial Catalog=AdventureWorks2014"
+		},
+		"connectVia": {
+			"referenceName": "AzureIR-VnetEnabled",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

@@ -1,0 +1,7 @@
+{
+	"name": "MPE_SQLPlayer_srv2",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/7d6cdb5f-be97-4907-a34c-66635a3f607d/resourceGroups/rg-sqlserver/providers/Microsoft.Sql/servers/sqlplayer",
+		"groupId": "sqlServer"
+	}
+}

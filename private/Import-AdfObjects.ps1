@@ -26,14 +26,14 @@ function Import-AdfObjects {
         $o.Type = $SubFolder
         $o.FileName = $_.FullName
         $o.Body = $txt | ConvertFrom-Json
-        $m = [regex]::matches($txt,'"referenceName":\s*?"(?<r>.+?)",[\n\r\s]+"type":\s*?"(?<t>.+?)"')
-        $m | ForEach-Object {
-            $o.AddDependant( $_.Groups['r'].Value, $_.Groups['t'].Value ) | Out-Null
+
+        # Discover all referenced objects
+        $refs = Get-ReferencedObjects -obj $o
+        foreach ($r in $refs) {
+            $oname = [AdfObjectName]::new($r)
+            $o.AddDependant( $oname.Name, $oname.Type )
         }
-        $m = [regex]::matches($txt,'"type":\s*?"(?<t>.+?)",[\n\r\s]+"referenceName":\s*?"(?<r>.+?)"')
-        $m | ForEach-Object {
-            $o.AddDependant( $_.Groups['r'].Value, $_.Groups['t'].Value ) | Out-Null
-        }
+
         $o.Adf = $Adf
         $All.Add($o)
         Write-Verbose ("- {0} : found {1} dependencies." -f $_.BaseName, $o.DependsOn.Count)
