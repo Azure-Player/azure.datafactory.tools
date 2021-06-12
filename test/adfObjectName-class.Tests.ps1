@@ -15,8 +15,11 @@ InModuleScope azure.datafactory.tools {
     #Invoke-Expression "explorer.exe '$TmpFolder'"
 
     Describe 'AdfObjectName class' -Tag 'class' {
+        It 'Should throw error when type is unknown' {
+            { $script:obj = New-Object -TypeName AdfObjectName 'name', 'type' } | Should -Throw
+        }
         It 'Should exist' {
-            { $script:obj = New-Object -TypeName AdfObjectName 'name', 'type' } | Should -Not -Throw
+            { $script:obj = New-Object -TypeName AdfObjectName 'name', 'dataset' } | Should -Not -Throw
         }
         It 'Should fails when no params passed' {
             { New-Object -TypeName AdfObjectName } | Should -Throw
