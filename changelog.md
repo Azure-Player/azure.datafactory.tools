@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [0.71.0] - 2021-06-12
 ### Fixed
 * Removing excluded ADF objects when option $DoNotDeleteExcludedObjects = $false ([#108](https://github.com/SQLPlayer/azure.datafactory.tools/issues/108))
+* Changed method of discovering referenced objects (Get-ReferencedObjects) #95
 
 ## [0.70.0] - 2021-06-10
 ### Added

@@ -10,7 +10,11 @@ class AdfObject {
 
     [Boolean] AddDependant ([string]$name, [string]$refType)
     {
-        $objType = $refType.Replace('Reference', '')
+        $objType = $refType
+        if ($refType.EndsWith('Reference')) {
+            $objType = $refType.Substring(0, $refType.Length-9)
+        }
+        [AdfObject]::AssertType($objType)
         $fullName = "$objType.$name"
         if (!$this.DependsOn.Contains($fullName)) {
             $this.DependsOn.Add( $fullName ) | Out-Null
@@ -80,6 +84,13 @@ class AdfObject {
     }
 
     static $AllowedTypes = @('integrationRuntime', 'pipeline', 'dataset', 'dataflow', 'linkedService', 'trigger', 'factory', 'managedVirtualNetwork', 'managedPrivateEndpoints')
+
+    static AssertType ([string] $Type)
+    {
+        if ($Type -notin [AdfObject]::allowedTypes ) { 
+            throw "ADFT0029: Unknown object type: $Type."
+        }
+    }
 
 }
 
