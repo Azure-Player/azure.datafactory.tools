@@ -5,12 +5,14 @@ class AdfObjectName {
 
     AdfObjectName ([string] $Name, [string] $Type) 
     {
+        [AdfObject]::AssertType($Type)
         $this.Name = $Name
         $this.Type = $Type
     }
 
     AdfObjectName ([string] $Name, [string] $Type, [string] $Folder) 
     {
+        [AdfObject]::AssertType($Type)
         $this.Name = $Name
         $this.Type = $Type
         $this.Folder = $Folder
@@ -22,9 +24,7 @@ class AdfObjectName {
         if ($m.Success -eq $false) {
             throw "ADFT0028: Expected format of name for 'FullName' input parameter is: objectType.objectName[@folderName]"
         }
-        if ($m.Groups[1].Value -notin [AdfObject]::allowedTypes ) { 
-            throw "ADFT0029: Unknown object type: $($m.Groups[1].Value)."
-        }
+        [AdfObject]::AssertType($m.Groups[1].Value)
         $this.Type = $m.Groups[1].Value
         $this.Name = $m.Groups[2].Value
         $this.Folder = $m.Groups[3].Value
