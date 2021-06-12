@@ -61,8 +61,19 @@ function Test-AdfCode {
                 }
             }
         }
-
     }
+
+    Write-Host "=== Validating other rules ..."
+
+    $adf.AllObjects().Name | Sort-Object -Unique | ForEach-Object {
+        $r = $adf.GetObjectsByFullName("*." + $_)
+        if ($r.Count -gt 1) {
+            Write-Warning "Duplication of object name: $_"
+            $WarningCount += 1
+        }
+    }
+    
+
 
     $msg = "Test code completed ($ObjectsCount objects)."
     if ($ErrorCount -gt 0) { $msg = "Test code failed." }
