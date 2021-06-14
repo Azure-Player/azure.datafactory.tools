@@ -451,7 +451,7 @@ If you prefer using JSON rather than CSV for setting up configuration - JSON fil
       "action": "update"
     },
     {
-      "name": "$.activities["Copy Data"].typeProperties.waitTimeInSeconds",
+      "name": "$.activities['Copy Data'].typeProperties.waitTimeInSeconds",
       "value": "30",
       "action": "update"
     }
