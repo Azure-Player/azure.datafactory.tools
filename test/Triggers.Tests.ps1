@@ -27,11 +27,12 @@ InModuleScope azure.datafactory.tools {
     }
     $script:triggerName = 'TR_AlwaysDisabled'
     $script:DoNotStopStartExcludedTriggers = $true
-
-    Remove-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -Force
     Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.csv" -Recurse:$true -Force 
-    #Invoke-Expression "explorer.exe '$TmpFolder'"
 
+    BeforeAll {
+        Remove-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -Force
+        #Invoke-Expression "explorer.exe '$TmpFolder'"
+    }
     
 
 

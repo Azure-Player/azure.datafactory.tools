@@ -344,6 +344,10 @@ Additionally, you can **remove** selected property altogether or **create (add)*
 * `+` (plus) - Add new property with defined value
 * `-` (minus) - Remove existing property  
 
+When using paths that reference items within an array, you have two options for keying into the array:
+* Integer key (0 based)
+* If all items in the array have the property ```name```, we can use that value as the key, eg for pipeline activities.
+
 See example below:
 ```
 type,name,path,value
@@ -356,6 +360,9 @@ linkedService,BlobSampleData,+typeProperties.accountKey,"$($Env:VARIABLE)"
 factory,BigFactorySample2,"$.properties.globalParameters.'Env-Code'.value","PROD"
 # Multiple following configurations for many files:
 dataset,DS_SQL_*,properties.xyz,ABC
+# Change a pipeline activity timeout using integer and name based indexers
+pipeline,PL_Demo,activities[1].typeProperties.waitTimeInSeconds,30
+pipeline,PL_Demo,activities["Copy Data"].typeProperties.waitTimeInSeconds,30
 ```
 
 
@@ -434,6 +441,18 @@ If you prefer using JSON rather than CSV for setting up configuration - JSON fil
     {
       "name": "$.properties.typeProperties.baseUrl",
       "value": "https://kv-$($Env:Environment).vault.azure.net/",
+      "action": "update"
+    }
+  ],
+  "PL_Demo": [
+    {
+      "name": "$.activities[1].typeProperties.waitTimeInSeconds",
+      "value": "30",
+      "action": "update"
+    },
+    {
+      "name": "$.activities['Copy Data'].typeProperties.waitTimeInSeconds",
+      "value": "30",
       "action": "update"
     }
   ]
