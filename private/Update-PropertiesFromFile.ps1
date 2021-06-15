@@ -100,7 +100,7 @@ function Update-PropertiesForObject {
     # if ($null -eq $o -and $action -ne "add") {
     #     Write-Error "ADFT0008: Could not find object: $type.$name"
     # }
-    $json = $o.Body
+    $json = $o.Body | ConvertFrom-ArraysToOrderedHashTables
     if ($null -eq $json) {
         Write-Error "ADFT0009: Body of the object is empty!"
     }
@@ -148,6 +148,8 @@ function Update-PropertiesForObject {
             }
         }
     }
+
+    $o.Body = $json | ConvertFrom-OrderedHashTablesToArrays
 
     # Save new file for deployment purposes and change pointer in object instance
     $f = (Save-AdfObjectAsFile -obj $o)

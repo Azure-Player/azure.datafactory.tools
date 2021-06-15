@@ -27,7 +27,7 @@ InModuleScope azure.datafactory.tools {
 
         Context 'When called without parameters' {
             It 'Should throw an error' {
-                { Update-PropertiesFromFile } | Should -Throw 
+                { Update-PropertiesFromFile -Force } | Should -Throw 
             }
         }
 
@@ -194,6 +194,46 @@ InModuleScope azure.datafactory.tools {
             It 'Should execute Update-PropertiesForObject 3 times' {
                 Update-PropertiesFromFile -adf $script:adf -stage "multiple"
                 Assert-MockCalled Update-PropertiesForObject -Times 3
+            }
+        }
+
+        Context 'When called and CSV has array indexers in object name column' {
+            It 'Should complete' {
+                # Changing activity names means we can index into it if another test already ran, so reload the files
+                Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.*" -Recurse:$true -Force
+                $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
+                $script:option = New-AdfPublishOption
+                $script:adf.PublishOptions = $option
+                {
+                    Update-PropertiesFromFile -adf $script:adf -stage "array"
+                } | Should -Not -Throw
+            }
+        }
+        Context 'When called and CSV has array indexers in object name column' {
+            BeforeEach {
+                Mock Update-PropertiesForObject { return 0; }
+            }
+            It 'Should execute Update-PropertiesForObject 4 times' {
+                Update-PropertiesFromFile -adf $script:adf -stage "array"
+                Assert-MockCalled Update-PropertiesForObject -Times 4
+            }
+        }
+        Context 'When called and CSV has array indexers in object name column' {
+            It 'Should update properties of correct activities' {
+                # Changing activity names means we can index into it if another test already ran, so reload the files
+                Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.*" -Recurse:$true -Force
+                $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
+                $script:option = New-AdfPublishOption
+                $script:adf.PublishOptions = $option
+
+                Update-PropertiesFromFile -adf $script:adf -stage "array"
+                $t = Get-AdfObjectByName -adf $script:adf -name "Multiple Waits" -type "Pipeline"
+                $t.Body.properties.activities[0].name | Should -Be "Wait Number 1"
+                $t.Body.properties.activities[1].typeProperties.ifTrueActivities[0].name | Should -Be "Wait Number 2"
+                $t.Body.properties.activities[1].typeProperties.ifTrueActivities[0].typeProperties.waitTimeInSeconds | Should -Be 22
+                $t.Body.properties.activities[1].typeProperties.ifTrueActivities[1].name | Should -Be "Wait Number 3"
+                $t.Body.properties.activities[1].typeProperties.ifTrueActivities[1].typeProperties.waitTimeInSeconds | Should -Be 33
+                $t.Body.properties.activities[2].name | Should -Be "Wait Number 4"
             }
         }
 

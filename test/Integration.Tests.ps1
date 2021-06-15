@@ -27,10 +27,12 @@ InModuleScope azure.datafactory.tools {
     $script:RootFolder = Join-Path -Path $script:TmpFolder -ChildPath (Split-Path -Path $script:SrcFolder -Leaf)
     $script:FinalOpt = New-AdfPublishOption
     # $RootFolder = "c:\Users\kamil\AppData\Local\Temp\24zet2bv.qvg\BigFactorySample2"
-
-    Remove-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -Force
     Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.csv" -Recurse:$true -Force 
-    #Invoke-Expression "explorer.exe '$TmpFolder'"
+
+    BeforeAll {
+        Remove-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -Force
+        #Invoke-Expression "explorer.exe '$TmpFolder'"
+    }
 
     Describe 'Publish-AdfV2FromJson' -Tag 'Integration', 'adf' {
         # It 'Folder should exist' {
@@ -324,10 +326,11 @@ InModuleScope azure.datafactory.tools {
             }
         }
         Context 'When called and 3 triggers are in service' {
-            Mock Stop-AzDataFactoryV2Trigger { }
-            $script:adf = Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder "$RootFolder"
-            $script:adf.ResourceGroupName = "$ResourceGroupName";
-
+            BeforeAll {
+                Mock Stop-AzDataFactoryV2Trigger { }
+                $script:adf = Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder "$RootFolder"
+                $script:adf.ResourceGroupName = "$ResourceGroupName";
+            }
             It 'Should disable only those active' {
                 Stop-Triggers -adf $script:adf
                 $allTriggers = Get-AzDataFactoryV2Trigger -DataFactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
@@ -335,7 +338,5 @@ InModuleScope azure.datafactory.tools {
                 Assert-MockCalled Stop-AzDataFactoryV2Trigger -Times $activeTriggers.Count
             }
         }
-
-
     }
 }
