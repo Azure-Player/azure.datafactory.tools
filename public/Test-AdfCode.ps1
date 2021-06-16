@@ -72,7 +72,25 @@ function Test-AdfCode {
             $WarningCount += 1
         }
     }
-    
+
+    $adf.LinkedServices + $adf.DataSets + $adf.Pipelines + $adf.DataFlows | ForEach-Object {
+        [string] $name = $_.Name
+        if ($name.Contains('-')) {
+            Write-Warning "Dashes ('-') are not allowed in the names of linked services, data flows, and datasets ($name)."
+            $WarningCount += 1
+        }
+    }
+
+    if ($adf.Factories.Count -gt 0) {
+    {
+        Get-Member -InputObject $adf.Factories[0].Body.properties.globalParameters -Membertype "NoteProperty" | ForEach-Object {
+            [string] $name = $_.Name
+            if ($name.Contains('-')) {
+                Write-Warning "Dashes ('-') are not allowed in the names of global parameters ($name)."
+                $WarningCount += 1
+            }
+        }
+    }
 
 
     $msg = "Test code completed ($ObjectsCount objects)."
