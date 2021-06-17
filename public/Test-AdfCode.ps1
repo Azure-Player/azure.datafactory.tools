@@ -82,7 +82,6 @@ function Test-AdfCode {
     }
 
     if ($adf.Factories.Count -gt 0) {
-    {
         Get-Member -InputObject $adf.Factories[0].Body.properties.globalParameters -Membertype "NoteProperty" | ForEach-Object {
             [string] $name = $_.Name
             if ($name.Contains('-')) {
@@ -91,6 +90,25 @@ function Test-AdfCode {
             }
         }
     }
+
+
+    Write-Host "=== Validating config files ..."
+    $filePattern = Join-Path -Path $adf.Location -ChildPath 'deployment' 
+    $files = Get-ChildItem -Path $filePattern -Filter '*.csv'
+    $err = $null
+    $files | ForEach-Object { 
+        try {
+            $csv = Read-CsvConfigFile -Path $_ -ErrorVariable err -ErrorAction 'Stop'
+        }
+        catch {
+            $_.Exception
+        }
+    }
+
+
+
+
+
 
 
     $msg = "Test code completed ($ObjectsCount objects)."
