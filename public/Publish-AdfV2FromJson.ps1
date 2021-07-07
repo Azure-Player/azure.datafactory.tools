@@ -31,6 +31,10 @@ This objects allows to define certain behaviour of deployment process. Use cmdle
 Optional parameter. Currently this cmdlet contains two method of publishing: AzDataFactory, AzResource (default).
 AzResource method has been introduced due to bugs in Az.DataFactory PS module.
 
+.PARAMETER DryRun
+Optional switch parameter. When provided, process will not make any changes to target data factory but instead return the ADF object
+that would be used in deployment.
+
 .EXAMPLE
 # Publish entire ADF
 $ResourceGroupName = 'rg-devops-factory'
@@ -65,6 +69,10 @@ Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGro
 .EXAMPLE
 # Publish entire ADF via Az.DataFactory module instead of Az.Resources
 Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName" -Location "$Location" -Method "AzDataFactory"
+
+.EXAMPLE
+# Execute dry run of intended publishing changes
+Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName" -Location "$Location" -Stage "UAT" -DryRun
 
 .LINK
 Online version: https://github.com/SQLPlayer/azure.datafactory.tools/
