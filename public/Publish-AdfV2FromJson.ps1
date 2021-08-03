@@ -122,7 +122,7 @@ function Publish-AdfV2FromJson {
     Write-Host "Stage:              $Stage";
     Write-Host "Options provided:   $($null -ne $Option)";
     Write-Host "Publishing method:  $Method";
-    Write-Host "Is Dry Run?:        $($DryRun.IsPresent ? $true : $false)";
+    Write-Host "Is Dry Run?:        $($DryRun.IsPresent)";
     Write-Host "======================================================================================";
 
     $script:StartTime = Get-Date
