@@ -2,7 +2,8 @@ function Update-PropertiesFromFile {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)] [Adf] $adf,
-        [Parameter(Mandatory)] [string] $stage
+        [Parameter(Mandatory)] [string] $stage,
+        [switch] $dryRun = $false
         )
 
     Write-Debug "BEGIN: Update-PropertiesFromFile(adf=$adf, stage=$stage)"
@@ -32,7 +33,7 @@ function Update-PropertiesFromFile {
     } else {
         $config = Read-JsonConfigFile -Path $configFileName -adf $adf
     }
-    # $config | Out-Host 
+    #$config | Out-Host 
 
     $report = @{ Updated = 0; Added = 0; Removed = 0}
     $config | ForEach-Object {
@@ -71,7 +72,7 @@ function Update-PropertiesFromFile {
         } else {
             Write-Verbose "- Performing: $action for object(path): $type.$name(properties.$path)"
             $objArr | ForEach-Object {
-                $null = Update-PropertiesForObject -o $_ -action $action -path $path -value $value -name $name -type $type -report $report
+                $null = Update-PropertiesForObject -o $_ -action $action -path $path -value $value -name $name -type $type -report $report -dryRun:$dryRun
             }
         }
     }
@@ -92,7 +93,8 @@ function Update-PropertiesForObject {
         [Parameter(Mandatory = $false)] [string] $value,
         [Parameter(Mandatory)]          [string] $name,
         [Parameter(Mandatory)]          [string] $type,
-        [Parameter(Mandatory)]          $report
+        [Parameter(Mandatory)]          $report,
+                                        [switch] $dryRun = $false
     )
 
     Write-Debug "BEGIN: Update-PropertiesForObject"
@@ -123,11 +125,12 @@ function Update-PropertiesForObject {
         if ($option.FailsWhenPathNotFound -eq $false) {
             Write-Warning "Wrong path defined in config for object(path): $type.$name(properties.$path), skipping..."
         } else {
-            $exc = ([System.Data.DataException]::new())
-            Write-Error -Message "ADFT0010: Wrong path defined in config for object(path): $type.$name(properties.$path)" -Exception $exc
+            $exc = ([System.Data.DataException]::new("ADFT0010: Wrong path defined in config for object(path): $type.$name(properties.$path)"))
+            Write-Error -Exception $exc
         }
     }
 
+    if ($dryRun) { $value = 123 }
     if ($validPath) {
         switch -Exact ($action)
         {
@@ -152,9 +155,12 @@ function Update-PropertiesForObject {
     $o.Body = $json | ConvertFrom-OrderedHashTablesToArrays
 
     # Save new file for deployment purposes and change pointer in object instance
-    $f = (Save-AdfObjectAsFile -obj $o)
-    $o.FileName = $f
-
+    if ($dryRun -eq $False) 
+    {
+        $f = (Save-AdfObjectAsFile -obj $o)
+        $o.FileName = $f
+    }
+    
     Write-Debug "END: Update-PropertiesForObject"
 
 }    

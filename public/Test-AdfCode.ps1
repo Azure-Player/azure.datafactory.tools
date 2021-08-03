@@ -19,7 +19,9 @@ function Test-AdfCode {
     [CmdletBinding()]
     param (
         [parameter(Mandatory = $true)] 
-        [String] $RootFolder
+        [String] $RootFolder,
+        [parameter(Mandatory = $false)] 
+        [String] $ConfigPath
     )
 
     $ErrorCount = 0
@@ -28,6 +30,7 @@ function Test-AdfCode {
 
     Write-Host "=== Loading files from location: $RootFolder ..."
     $adf = Import-AdfFromFolder -FactoryName "$adfName" -RootFolder "$RootFolder" -ErrorAction "SilentlyContinue"
+    $adf.PublishOptions = New-AdfPublishOption
     $ObjectsCount = $adf.AllObjects().Count
 
     Write-Host "=== Validating files ..."
@@ -61,9 +64,62 @@ function Test-AdfCode {
                 }
             }
         }
-
     }
 
+    Write-Host "=== Validating other rules ..."
+
+    $adf.AllObjects().Name | Sort-Object -Unique | ForEach-Object {
+        $r = $adf.GetObjectsByFullName("*." + $_)
+        if ($r.Count -gt 1) {
+            Write-Warning "Duplication of object name: $_"
+            $WarningCount += 1
+        }
+    }
+
+    $adf.LinkedServices + $adf.DataSets + $adf.Pipelines + $adf.DataFlows | ForEach-Object {
+        [string] $name = $_.Name
+        if ($name.Contains('-')) {
+            Write-Warning "Dashes ('-') are not allowed in the names of linked services, data flows, and datasets ($name)."
+            $WarningCount += 1
+        }
+    }
+
+    if ($adf.Factories.Count -gt 0) {
+        Get-Member -InputObject $adf.Factories[0].Body.properties.globalParameters -Membertype "NoteProperty" | ForEach-Object {
+            [string] $name = $_.Name
+            if ($name.Contains('-')) {
+                Write-Warning "Dashes ('-') are not allowed in the names of global parameters ($name)."
+                $WarningCount += 1
+            }
+        }
+    }
+
+
+    Write-Host "=== Validating config files ..."
+    if (!$ConfigPath) {
+        $filePattern = Join-Path -Path $adf.Location -ChildPath 'deployment\*' 
+    } else {
+        $filePattern = $ConfigPath -split ','
+    }
+    $files = Get-ChildItem -Path $filePattern -Include '*.csv','*.json'
+    $err = $null
+    $adf.PublishOptions.FailsWhenConfigItemNotFound = $True
+    $adf.PublishOptions.FailsWhenPathNotFound = $True
+    $files | ForEach-Object { 
+        try {
+            $FileName = $_.FullName
+            Update-PropertiesFromFile -adf $adf -stage $FileName -ErrorVariable err -ErrorAction 'Stop' -dryRun:$True
+        }
+        catch {
+            $ErrorCount += 1
+            Write-Host "ERROR: $($_.Exception.Message)" -ForegroundColor 'Red'
+            Write-Debug -Message $_.Exception
+            #$_.Exception
+        }
+    }
+
+
+    
     $msg = "Test code completed ($ObjectsCount objects)."
     if ($ErrorCount -gt 0) { $msg = "Test code failed." }
     $line1 = $adf.Name.PadRight(63) + "  # of Errors: $ErrorCount".PadLeft(28)
