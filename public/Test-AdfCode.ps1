@@ -19,7 +19,9 @@ function Test-AdfCode {
     [CmdletBinding()]
     param (
         [parameter(Mandatory = $true)] 
-        [String] $RootFolder
+        [String] $RootFolder,
+        [parameter(Mandatory = $false)] 
+        [String] $ConfigPath
     )
 
     $ErrorCount = 0
@@ -28,6 +30,7 @@ function Test-AdfCode {
 
     Write-Host "=== Loading files from location: $RootFolder ..."
     $adf = Import-AdfFromFolder -FactoryName "$adfName" -RootFolder "$RootFolder" -ErrorAction "SilentlyContinue"
+    $adf.PublishOptions = New-AdfPublishOption
     $ObjectsCount = $adf.AllObjects().Count
 
     Write-Host "=== Validating files ..."
@@ -93,24 +96,30 @@ function Test-AdfCode {
 
 
     Write-Host "=== Validating config files ..."
-    $filePattern = Join-Path -Path $adf.Location -ChildPath 'deployment' 
-    $files = Get-ChildItem -Path $filePattern -Filter '*.csv'
+    if (!$ConfigPath) {
+        $filePattern = Join-Path -Path $adf.Location -ChildPath 'deployment\*' 
+    } else {
+        $filePattern = $ConfigPath -split ','
+    }
+    $files = Get-ChildItem -Path $filePattern -Include '*.csv','*.json'
     $err = $null
+    $adf.PublishOptions.FailsWhenConfigItemNotFound = $True
+    $adf.PublishOptions.FailsWhenPathNotFound = $True
     $files | ForEach-Object { 
         try {
-            $csv = Read-CsvConfigFile -Path $_ -ErrorVariable err -ErrorAction 'Stop'
+            $FileName = $_.FullName
+            Update-PropertiesFromFile -adf $adf -stage $FileName -ErrorVariable err -ErrorAction 'Stop' -dryRun:$True
         }
         catch {
-            $_.Exception
+            $ErrorCount += 1
+            Write-Host "ERROR: $($_.Exception.Message)" -ForegroundColor 'Red'
+            Write-Debug -Message $_.Exception
+            #$_.Exception
         }
     }
 
 
-
-
-
-
-
+    
     $msg = "Test code completed ($ObjectsCount objects)."
     if ($ErrorCount -gt 0) { $msg = "Test code failed." }
     $line1 = $adf.Name.PadRight(63) + "  # of Errors: $ErrorCount".PadLeft(28)
