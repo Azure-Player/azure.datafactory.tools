@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [0.74.0] - 2021-08-03
 * Cmdlet `Test-AdfCode` validates config files #62
 * Support configuration for Managed Private Endpoint #95
+* Implement Dry Run Functionality for Publishing #120 (Thanks [Liam](https://github.com/liamejdunphy)!)
 
 ## [0.73.0] - 2021-06-15
 * Added option to index into arrays by element name #98 (Thanks [Neil](https://github.com/NJLangley)!)
