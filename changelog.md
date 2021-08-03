@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.74.0] - 2021-08-03
+* Cmdlet `Test-AdfCode` validates config files #62
+* Support configuration for Managed Private Endpoint #95
+
+## [0.73.0] - 2021-06-15
+* Added option to index into arrays by element name #98 (Thanks [Neil](https://github.com/NJLangley)!)
+
 ## [0.72.0] - 2021-06-12
 ### Fixed
 * Removing excluded ADF objects when option $DoNotDeleteExcludedObjects = $false ([#108](https://github.com/SQLPlayer/azure.datafactory.tools/issues/108))
