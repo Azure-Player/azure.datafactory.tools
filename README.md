@@ -23,7 +23,8 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
 * Tokenisation in config file allows replace any value by Environment Variable or Variable from DevOps Pipeline
   * (new!) Allows to define multiple file (objects) by wildcarding
 * Global Parameters
-
+* Support for Managed VNET and Managed Private Endpoint (new!)
+  
 The following features coming in the future:
 * Build function to support validation of files, dependencies and config
 * Unit Tests of selected Pipelines and Linked Services
