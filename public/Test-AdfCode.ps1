@@ -84,7 +84,7 @@ function Test-AdfCode {
         }
     }
 
-    if ($adf.Factories.Count -gt 0) {
+    if ($adf.Factories.Count -gt 0 -and (Get-Member -InputObject $adf.Factories[0].Body -name "properties" -Membertype "Properties")) {
         Get-Member -InputObject $adf.Factories[0].Body.properties.globalParameters -Membertype "NoteProperty" | ForEach-Object {
             [string] $name = $_.Name
             if ($name.Contains('-')) {
@@ -98,9 +98,11 @@ function Test-AdfCode {
     Write-Host "=== Validating config files ..."
     if (!$ConfigPath) {
         $filePattern = Join-Path -Path $adf.Location -ChildPath 'deployment\*' 
+        if (!(Test-Path $filePattern)) { $filePattern = $null }
     } else {
         $filePattern = $ConfigPath -split ','
     }
+
     $files = Get-ChildItem -Path $filePattern -Include '*.csv','*.json'
     $err = $null
     $adf.PublishOptions.FailsWhenConfigItemNotFound = $True
