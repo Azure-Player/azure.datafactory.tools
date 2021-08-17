@@ -4,7 +4,10 @@ function Find-RefObject($node, $list) {
     $script:ind++
     if ($null -eq $node) { $script:ind--; return }
     if ($node.GetType().Name -notin ('Object[]','PSCustomObject')) { $script:ind--; return }
-    if ($null -ne $node.PSobject -and $node.PSobject.Properties.Name -contains 'referenceName' -and $node.PSobject.Properties.Name -contains 'type') {
+    if ($null -ne $node.PSobject -and @($node.PSobject.Properties).Count -gt 0 `
+        -and $node.PSobject.Properties.Name -contains 'referenceName' `
+        -and $node.PSobject.Properties.Name -contains 'type') 
+    {
         [string] $type = $node.type
         if ($type.EndsWith('Reference')) {
             $type = $type.Substring(0, $type.Length-9)
