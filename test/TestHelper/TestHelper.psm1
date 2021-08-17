@@ -121,10 +121,22 @@ function Publish-TriggerIfNotExist {
     }
 }
 
+function Get-AdfObjectFromFile {
+    param ($FullPath)
+
+    $txt = Get-Content $FullPath -Encoding "UTF8"
+    $o = $o = [AdfObject]::new()
+    $o.Name = (Split-Path -Path $FullPath -Leaf)
+    $o.FileName = $FullPath
+    $o.Body = $txt | ConvertFrom-Json
+    return $o
+}
+
 
 
 Export-ModuleMember -Function `
     Convert-SecureStringToString, `
     New-TemporaryDirectory, `
     New-AdfObjectFromFile, `
-    Remove-TargetTrigger, ConvertTo-RuntimeState, Stop-TargetTrigger, Start-TargetTrigger, Publish-TriggerIfNotExist
+    Remove-TargetTrigger, ConvertTo-RuntimeState, Stop-TargetTrigger, Start-TargetTrigger, Publish-TriggerIfNotExist, `
+    Get-AdfObjectFromFile

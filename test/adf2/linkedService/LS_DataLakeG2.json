@@ -1,0 +1,12 @@
+{
+	"name": "LS_DataLakeG2",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://xxxxxxxxxxxx.dfs.core.windows.net",
+			"encryptedCredential": "xxxxxxxxxxxx"
+		}
+	}
+}

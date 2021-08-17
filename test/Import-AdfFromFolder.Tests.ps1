@@ -121,7 +121,21 @@ InModuleScope azure.datafactory.tools {
                 $list.Count | Should -Be 2
             }
         }
+
         
+        Describe 'Import-AdfFromFolder' -Tag 'Unit' {
+            
+            BeforeEach {
+                $script:RootFolder = "$PSScriptRoot\adf2"
+            }
+
+            Context 'of adf2' {
+                It 'Should completed successfully' {
+                    { Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder $script:RootFolder -ErrorAction Stop } | Should -Not -Throw
+                }
+            }
+        }
+    
 
     } 
 }
