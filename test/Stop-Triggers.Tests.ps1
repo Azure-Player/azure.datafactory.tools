@@ -13,8 +13,8 @@ InModuleScope azure.datafactory.tools {
     # Variables for use in tests
     $script:ResourceGroupName = 'rg-devops-factory'
     $script:Stage = 'UAT'
-    $script:guid =  (New-Guid).ToString().Substring(0,8)
-    $script:guid = '5889b15h'
+    $c = Get-AzContext
+    $script:guid = $c.Subscription.Id.Substring(0,8)
     $script:SrcFolder = "$PSScriptRoot\BigFactorySample2"
     $script:DataFactoryName = (Split-Path -Path $script:SrcFolder -Leaf) + "-$guid"
     $script:Location = "NorthEurope"

@@ -9,12 +9,13 @@ BeforeDiscovery {
 InModuleScope azure.datafactory.tools {
     $testHelperPath = $PSScriptRoot | Join-Path -ChildPath 'TestHelper'
     Import-Module -Name $testHelperPath -Force
-
     # Variables for use in tests
     $script:ResourceGroupName = 'rg-devops-factory'
     $script:Stage = 'UAT'
-    $script:guid =  (New-Guid).ToString().Substring(0,8)
-    $script:guid = '5889b15h'
+    # $script:guid =  (New-Guid).ToString().Substring(0,8)
+    # $script:guid = '5889b15h'
+    $c = Get-AzContext
+    $script:guid = $c.Subscription.Id.Substring(0,8)
     $script:DataFactoryOrigName = 'BigFactorySample2'
     $script:DataFactoryName = $script:DataFactoryOrigName + "-$guid"
     $script:SrcFolder = "$PSScriptRoot\$($script:DataFactoryOrigName)"
@@ -48,14 +49,15 @@ InModuleScope azure.datafactory.tools {
         }
 
         Context 'when does not exist and called with option CreateNewInstance=false' {
-            It 'Throw error #2' {
-                { 
-                    $opt = New-AdfPublishOption
-                    $opt.CreateNewInstance = $false
-                    Publish-AdfV2FromJson -RootFolder "$RootFolder" `
-                    -ResourceGroupName "$ResourceGroupName" `
-                    -DataFactoryName "$DataFactoryName" `
-                    -Location "$Location" -Option $opt } | Should -Throw
+            It 'return ADFT0027 error' {
+                $err = ''
+                $opt = New-AdfPublishOption
+                $opt.CreateNewInstance = $false
+                Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                -ResourceGroupName "$ResourceGroupName" `
+                -DataFactoryName "$DataFactoryName" `
+                -Location "$Location" -Option $opt -ErrorVariable err 
+                $err[0].ToString().Substring(0,8) | Should -Be 'ADFT0027'
             }
         }
 
