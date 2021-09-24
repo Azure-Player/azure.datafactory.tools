@@ -17,17 +17,11 @@ function Start-Triggers {
         if ($IsMatchExcluded -and $adf.PublishOptions.DoNotStopStartExcludedTriggers) {
             Write-host "- Excluded trigger: $($_.Name)" 
         } else {
-            try {
-                Start-AzDataFactoryV2Trigger `
-                    -ResourceGroupName $adf.ResourceGroupName `
-                    -DataFactoryName $adf.Name `
-                    -Name $_.Name `
-                    -Force | Out-Null
-            }
-            catch {
-                Write-Host "Failed starting trigger."
-                Write-Warning -Message $_.Exception.Message
-            }
+            Start-Trigger `
+            -ResourceGroupName $adf.ResourceGroupName `
+            -DataFactoryName $adf.Name `
+            -Name $_.Name `
+            | Out-Null
         }
     }
 
