@@ -24,9 +24,11 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
   * (new!) Allows to define multiple file (objects) by wildcarding
 * Global Parameters
 * Support for Managed VNET and Managed Private Endpoint (new!)
+* Build function to support validation of files, dependencies and config
+* Test connections (Linked Services)
+* Generates mermaid dependencies diagram to be used in MarkDown type of documents
   
 The following features coming in the future:
-* Build function to support validation of files, dependencies and config
 * Unit Tests of selected Pipelines and Linked Services
 
 > The module publishes code, which is created and maintained by ADF in a code repository, when configured.
@@ -64,7 +66,7 @@ Get-Module -Name azure.datafactory.tools
 Source: https://www.powershellgallery.com/packages/azure.datafactory.tools
 
 
-## Publish Azure Data Factory 
+# Publish Azure Data Factory 
 
 This module publishes all objects from JSON files stored by ADF in a code repository (collaboration branch). Bear in mind we are talking about *master* branch, NOT *adf_publish* branch.  
 If you want to deploy from *adf_publish* branch - read this article: [Deployment of Azure Data Factory with Azure DevOps](https://sqlplayer.net/2019/06/deployment-of-azure-data-factory-with-azure-devops/).
@@ -596,7 +598,26 @@ More about Service Principal Objects in Microsoft Doc: [Application and service 
 > Note that the function uses undocumented API call (testConnectivity).
 
 
+# Generate dependencies diagram
 
+If you want to see all ADF objects and its dependencies on one page - now you can.
+Once you read all objects from JSON files (by using other well-known `Import-AdfFromFolder` cmdlet), just execute cmdlet called `Get-AdfDocDiagram` which return the diagram in [Mermaid format](https://mermaid-js.github.io/mermaid/), used and support in MarkDown (MD) documentation files. Then use the file in [Azure DevOps Wiki page](https://docs.microsoft.com/en-us/azure/devops/project/wiki/wiki-markdown-guidance?view=azure-devops), GitHub, or any other tools that supports MD format.
+
+Example:
+```PowerShell
+# First of all: Load ADF code from given location
+$RootFolder = "c:\GitHub\AdfName\"
+$adf = Import-AdfFromFolder -RootFolder $RootFolder -FactoryName 'whatever'
+
+# Execute the following command to generate diagram as MarkDown text code 
+Get-AdfDocDiagram -adf $adf 
+
+# You can change direction of output diagram:
+Get-AdfDocDiagram -adf $adf -direction 'TD'
+
+# Write output diagram to file:
+Get-AdfDocDiagram -adf $adf | Set-Content -Path 'adf-diagram.md'
+```
 
 
 # Publish from Azure DevOps
