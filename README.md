@@ -619,6 +619,43 @@ Get-AdfDocDiagram -adf $adf -direction 'TD'
 Get-AdfDocDiagram -adf $adf | Set-Content -Path 'adf-diagram.md'
 ```
 
+Result:
+
+::: mermaid
+graph LR
+linkedService.LS_AzureSqlDb_AW2014_SqlAuth --> linkedService.LS_AzureKeyVault
+linkedService.LS_SqlServer_DEV19_AW2017 --> integrationRuntime.SharedIR-DEV2019
+linkedService.LS_SqlServer_DEV19_AW2017 --> linkedService.LS_AzureKeyVault
+pipeline.Currency_Converter --> dataFlow.Currency_Converter
+pipeline.MovieDemoPipeline --> dataFlow.MovieDemo
+pipeline.PL_StoredProc --> linkedService.LS_AzureSqlDb_AW2014_SqlAuth
+pipeline.TaxiDemo --> dataFlow.TaxiDemo
+dataset.CADOutput1 --> linkedService.BlobSampleData
+dataset.CurrencyDatasetCAD --> linkedService.BlobSampleData
+dataset.CurrencyDatasetUSD --> linkedService.BlobSampleData
+dataset.movie_dataflow_sink --> linkedService.BlobSampleData
+dataset.movie_dataflow_source --> linkedService.BlobSampleData
+dataset.taxi_trip_data_input --> linkedService.BlobSampleData
+dataset.taxi_trip_fare_input --> linkedService.BlobSampleData
+dataset.TaxiDemoDayStatsSink --> linkedService.BlobSampleData
+dataset.TaxiDemoTotalByPaymentType --> linkedService.BlobSampleData
+dataset.TaxiDemoVendorStatsSink --> linkedService.BlobSampleData
+dataset.USDOutput --> linkedService.BlobSampleData
+dataflow.Currency_Converter --> dataset.USDOutput
+dataflow.Currency_Converter --> dataset.CADOutput1
+dataflow.Currency_Converter --> dataset.CurrencyDatasetUSD
+dataflow.Currency_Converter --> dataset.CurrencyDatasetCAD
+dataflow.MovieDemo --> dataset.movie_dataflow_sink
+dataflow.MovieDemo --> dataset.movie_dataflow_source
+dataflow.TaxiDemo --> dataset.TaxiDemoVendorStatsSink
+dataflow.TaxiDemo --> dataset.TaxiDemoDayStatsSink
+dataflow.TaxiDemo --> dataset.TaxiDemoTotalByPaymentType
+dataflow.TaxiDemo --> dataset.taxi_trip_data_input
+dataflow.TaxiDemo --> dataset.taxi_trip_fare_input
+trigger.TR_AlwaysDisabled --> pipeline.PL_Wait5sec
+trigger.TR_RunEveryDay --> pipeline.PL_Wait5sec
+:::
+
 
 # Publish from Azure DevOps
 
