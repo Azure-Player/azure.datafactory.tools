@@ -54,6 +54,17 @@
                                 "waitTimeInSeconds": 3
                             }
                         }
+                    ],
+                    "ifFalseActivities": [
+                        {
+                            "name": "Wait 5",
+                            "type": "Wait",
+                            "dependsOn": [],
+                            "userProperties": [],
+                            "typeProperties": {
+                                "waitTimeInSeconds": 2
+                            }
+                        }
                     ]
                 }
             },

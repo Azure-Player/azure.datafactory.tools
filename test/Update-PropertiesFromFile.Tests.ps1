@@ -199,7 +199,7 @@ InModuleScope azure.datafactory.tools {
 
         Context 'When called and CSV has array indexers in object name column' {
             It 'Should complete' {
-                # Changing activity names means we can index into it if another test already ran, so reload the files
+                # Changing activity names means we cant index into it if another test already ran, so reload the files
                 Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.*" -Recurse:$true -Force
                 $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
                 $script:option = New-AdfPublishOption
@@ -220,7 +220,7 @@ InModuleScope azure.datafactory.tools {
         }
         Context 'When called and CSV has array indexers in object name column' {
             It 'Should update properties of correct activities' {
-                # Changing activity names means we can index into it if another test already ran, so reload the files
+                # Changing activity names means we cant index into it if another test already ran, so reload the files
                 Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.*" -Recurse:$true -Force
                 $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
                 $script:option = New-AdfPublishOption
@@ -229,10 +229,18 @@ InModuleScope azure.datafactory.tools {
                 Update-PropertiesFromFile -adf $script:adf -stage "array"
                 $t = Get-AdfObjectByName -adf $script:adf -name "Multiple Waits" -type "Pipeline"
                 $t.Body.properties.activities[0].name | Should -Be "Wait Number 1"
+
+                # New check for correct type on arrays passed back. Make sure arrays with multiple elements are not boxed up again (Issue #147)
+                $t.Body.properties.activities[1].typeProperties.ifTrueActivities.GetType().BaseType.Name | Should -Be "Array"
+                $t.Body.properties.activities[1].typeProperties.ifTrueActivities[0].GetType().BaseType.Name | Should -Be "Object"
+                $t.Body.properties.activities[1].typeProperties.ifFalseActivities.GetType().BaseType.Name | Should -Be "Array"
+                $t.Body.properties.activities[1].typeProperties.ifTrueActivities[0].GetType().BaseType.Name | Should -Be "Object"
+                
                 $t.Body.properties.activities[1].typeProperties.ifTrueActivities[0].name | Should -Be "Wait Number 2"
                 $t.Body.properties.activities[1].typeProperties.ifTrueActivities[0].typeProperties.waitTimeInSeconds | Should -Be 22
                 $t.Body.properties.activities[1].typeProperties.ifTrueActivities[1].name | Should -Be "Wait Number 3"
                 $t.Body.properties.activities[1].typeProperties.ifTrueActivities[1].typeProperties.waitTimeInSeconds | Should -Be 33
+
                 $t.Body.properties.activities[2].name | Should -Be "Wait Number 4"
             }
         }
