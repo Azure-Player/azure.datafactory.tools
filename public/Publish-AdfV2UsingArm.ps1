@@ -12,7 +12,9 @@ function Publish-AdfV2UsingArm {
         [String] $ResourceGroupName,
         
         [parameter(Mandatory = $false)] 
-        [AdfPublishOption] $Option
+        [AdfPublishOption] $Option,
+
+        [switch] $WhatIf = $false
     )
 
     $m = Get-Module -Name "azure.datafactory.tools"
@@ -27,7 +29,7 @@ function Publish-AdfV2UsingArm {
     Write-Host "TemplateParameterFile: $TemplateParameterFile";
     Write-Host "ResourceGroupName:     $ResourceGroupName";
     #Write-Host "Stage:              $Stage";
-    Write-Host "Options provided:   $($null -ne $Option)";
+    Write-Host "Options provided:      $($null -ne $Option)";
     Write-Host "======================================================================================";
 
     $script:StartTime = Get-Date
@@ -43,10 +45,20 @@ function Publish-AdfV2UsingArm {
     
     Write-Host "===================================================================================";
     Write-Host "STEP: Reading Azure Data Factory from ARM Template files..."
+    $adf = New-Object -TypeName 'adf'
     $arm = Get-Content -Path $TemplateFile -Raw | ConvertFrom-Json 
     $armParam = Get-Content -Path $TemplateParameterFile -Raw | ConvertFrom-Json 
-    
-    $adf = New-Object -TypeName 'adf'
+    $arm.resources | ForEach-Object {
+        $ArmType = $_.type
+        $ArmName = $_.name
+        $o = New-Object -TypeName 'AdfObject'
+        $o.name = $ArmName.ToString().Substring(37, $ArmName.ToString().Length - 40)
+        $o.type = ConvertTo-AdfType $ArmType
+        $o.adf = $adf
+        $adf.Pipelines.Add($o)
+    }
+
+
     $adf.Name = $armParam.parameters.factoryName.value
     $adf.ResourceGroupName = $ResourceGroupName
 
@@ -86,13 +98,16 @@ function Publish-AdfV2UsingArm {
 
     $DataFactoryName = $armParam.parameters.factoryName.value
     $location = $armParam.parameters.dataFactory_location.value
+    $adf.Region = $location
     $t = (Get-Date).TOString('MMdd-HHmm')
     $DeploymentName = "DeployADF-$t"
     Write-Host "      Deployment name: $DeploymentName"
-    New-AzResourceGroupDeployment -Name "$DeploymentName" -Mode 'Incremental' `
+    if (!$WhatIf) {
+        New-AzResourceGroupDeployment -Name "$DeploymentName" -Mode 'Incremental' `
         -ResourceGroupName $ResourceGroupName `
         -TemplateFile $TemplateFile `
         -TemplateParameterFile $TemplateParameterFile
+    }
 
     Write-Host "===================================================================================";
     Write-Host "STEP: Deleting objects not in source ..."
@@ -123,5 +138,5 @@ function Publish-AdfV2UsingArm {
     Write-Host ([string]::Format("     Elapsed time:  {0:d1}:{1:d2}:{2:d2}.{3:d3}`n", $elapsedTime.Hours, $elapsedTime.Minutes, $elapsedTime.Seconds, $elapsedTime.Milliseconds))
     Write-Host "==============================================================================";
 
-    #return $adf
+    return $adf
 }
