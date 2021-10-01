@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.91.0] - 2021-10-01
+* Fixed #147: Pipeline could be broken when contains array with 1 item in JSON file and any property was updated
+
 ## [0.90.0] - 2021-09-25
 * Added cmdlet to generate mermaid diagram to be used in MarkDown type of documents
 * Added public command `Start-AdfTriggers`
@@ -21,7 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 * Implement Dry Run Functionality for Publishing #120 (Thanks [Liam](https://github.com/liamejdunphy)!)
 
 ## [0.73.0] - 2021-06-15
-* Added option to index into arrays by element name #98 (Thanks [Neil](https://github.com/NJLangley)!)
+* Added option to index into arrays by element name #98 (Thanks [Niall](https://github.com/NJLangley)!)
 
 ## [0.72.0] - 2021-06-12
 ### Fixed
