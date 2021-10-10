@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.93.0] - 2021-10-10
+* Added cmdlet: `Export-AdfToArmTemplate`
+* Added cmdlet: `Publish-AdfV2UsingArm` (preview)
+
 ## [0.90.0] - 2021-09-25
 * Added cmdlet to generate mermaid diagram to be used in MarkDown type of documents
 * Added public command `Start-AdfTriggers`
