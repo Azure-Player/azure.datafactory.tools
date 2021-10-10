@@ -29,9 +29,17 @@ This objects allows to define certain behaviour of deployment process. Use cmdle
 
 
 .EXAMPLE
-# Publish entire ADF with specified properties (different environment stage name provided)
-Publish-AdfV2UsingArm -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName" -Location "$Location" -Stage "UAT"
-
+$RootFolder = '.\BigFactorySample2'
+$ArmFile = "$RootFolder\ArmTemplate\ARMTemplateForFactory.json"
+$ArmParamFile = "$RootFolder\ArmTemplate\ARMTemplateParametersForFactory.json"
+$rg = 'rg-devops-factory'
+$location = 'northeurope'
+$DataFactoryName = 'BigFactorySample2-test'
+$o = New-AdfPublishOption
+$o.StopStartTriggers = $false
+Publish-AdfV2UsingArm -TemplateFile $ArmFile -TemplateParameterFile $ArmParamFile `
+    -ResourceGroupName $rg -Location $location -Option $o `
+    -DataFactory $DataFactoryName
 
 .LINK
 Online version: https://github.com/SQLPlayer/azure.datafactory.tools/
