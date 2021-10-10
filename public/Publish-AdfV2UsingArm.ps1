@@ -10,7 +10,13 @@ function Publish-AdfV2UsingArm {
         
         [parameter(Mandatory = $true)] 
         [String] $ResourceGroupName,
-        
+
+        [parameter(Mandatory = $true)] 
+        [String] $DataFactoryName,
+
+        [parameter(Mandatory = $false)] 
+        [String] $Location,
+
         [parameter(Mandatory = $false)] 
         [AdfPublishOption] $Option,
 
@@ -28,6 +34,8 @@ function Publish-AdfV2UsingArm {
     Write-Host "TemplateFile:          $TemplateFile";
     Write-Host "TemplateParameterFile: $TemplateParameterFile";
     Write-Host "ResourceGroupName:     $ResourceGroupName";
+    Write-Host "DataFactoryName:       $DataFactoryName";
+    Write-Host "Location:              $Location";
     #Write-Host "Stage:              $Stage";
     Write-Host "Options provided:      $($null -ne $Option)";
     Write-Host "======================================================================================";
@@ -41,6 +49,36 @@ function Publish-AdfV2UsingArm {
     else {
         Write-Host "Publish options are not provided."
         $opt = New-AdfPublishOption
+    }
+
+    if (!$WhatIfPreference) {
+        Write-Host "STEP: Verifying whether ADF exists..."
+
+        $targetAdf = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -ErrorAction:Ignore
+        if ($targetAdf) {
+            Write-Host "Azure Data Factory exists."
+        }
+        else {
+            $msg = "Azure Data Factory instance does not exist."
+            if ($opt.CreateNewInstance) {
+                Write-Host "$msg"
+                Write-Host "Creating a new instance of Azure Data Factory..."
+                $targetAdf = Set-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -Location "$Location"
+                $targetAdf | Format-List | Out-String
+            }
+            else {
+                Write-Host "Creation operation skipped as publish option 'CreateNewInstance' = false"
+                Write-Error "ADFT0027: $msg"
+            }
+        }
+
+        if ($null -eq $targetAdf) {
+            Write-Host "The process is exiting the function. Do fix the issue and run again."
+            return 
+        }
+    }
+    else {
+        Write-Host "DRY RUN: Skipping ADF existence verification..."
     }
     
     Write-Host "===================================================================================";
@@ -86,18 +124,12 @@ function Publish-AdfV2UsingArm {
         Write-Host "Operation skipped as publish option 'StopStartTriggers' = false"
     }
 
+
     Write-Host "===================================================================================";
     Write-Host "STEP: Deployment of ARM Template of ADF..."
-    if ($opt.DeployGlobalParams -eq $false) {
-        Write-Host "Deployment of Global Parameters will be skipped as publish option 'DeployGlobalParams' = false"
-        # if ($adf.Factories.Count -gt 0) {
-        #     $adf.Factories[0].ToBeDeployed = $false
-        # }
-        Write-Warning 'The feature is not supported for this method yet.'
-    }
-
-    $DataFactoryName = $armParam.parameters.factoryName.value
-    $location = $armParam.parameters.dataFactory_location.value
+    #$DataFactoryName = $armParam.parameters.factoryName.value
+    #$location = $armParam.parameters.dataFactory_location.value
+    #todo: Replace parameters: DF, Location
     $adf.Region = $location
     $t = (Get-Date).TOString('MMdd-HHmm')
     $DeploymentName = "DeployADF-$t"
@@ -108,6 +140,22 @@ function Publish-AdfV2UsingArm {
         -TemplateFile $TemplateFile `
         -TemplateParameterFile $TemplateParameterFile
     }
+
+
+    Write-Host "===================================================================================";
+    Write-Host "STEP: Deployment of Global Parameters..."
+    if ($opt.DeployGlobalParams -eq $true) {
+        #Write-Warning 'The feature is not supported for this method yet.'
+        $folder = Split-Path -Path $TemplateFile -Parent
+        Write-Verbose "Source folder for global params and script: $folder"
+        $script = Join-Path -Path $folder -ChildPath 'GlobalParametersUpdateScript.ps1'
+        $globjson = (Get-ChildItem -Path $folder -Filter '*_GlobalParameters.json')[0]
+        Write-Verbose "Global Param file: $($globjson.FullName)"
+        . $script -globalParametersFilePath $globjson.FullName -resourceGroupName $ResourceGroupName -dataFactoryName $DataFactoryName
+    } else {
+        Write-Host "Deployment of Global Parameters will be skipped as publish option 'DeployGlobalParams' = false"
+    }
+
 
     Write-Host "===================================================================================";
     Write-Host "STEP: Deleting objects not in source ..."
