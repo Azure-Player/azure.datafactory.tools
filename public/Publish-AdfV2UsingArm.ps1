@@ -1,3 +1,42 @@
+<#
+.SYNOPSIS
+Publishes Azure Data Factory from ARM Template files into target ADF service.
+
+.DESCRIPTION
+Publishes Azure Data Factory from ARM Template files into target ADF service.
+Additionaly, creates a data factory with the specified resource group name and location, if that doesn't exist.
+Uses standard New-AzResourceGroupDeployment method in order to create new deployment in a given Resource Group.
+
+.PARAMETER TemplateFile
+Path to ARM template file
+
+.PARAMETER TemplateParameterFile
+Path to ARM template parameter file
+
+.PARAMETER ResourceGroupName
+Resource Group Name of target instance of ADF
+
+.PARAMETER DataFactoryName
+Name of target ADF instance
+
+.PARAMETER Location
+Azure Region for target ADF. Used only for create new ADF instance.
+
+.PARAMETER Option
+This objects allows to define certain behaviour of deployment process. Use cmdlet "New-AdfPublishOption" to create new instance of the object and set required properties.
+
+.PARAMETER WhatIf
+
+
+.EXAMPLE
+# Publish entire ADF with specified properties (different environment stage name provided)
+Publish-AdfV2UsingArm -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName" -Location "$Location" -Stage "UAT"
+
+
+.LINK
+Online version: https://github.com/SQLPlayer/azure.datafactory.tools/
+#>
+
 function Publish-AdfV2UsingArm {
     [CmdletBinding()]
     param
@@ -85,7 +124,8 @@ function Publish-AdfV2UsingArm {
     Write-Host "STEP: Reading Azure Data Factory from ARM Template files..."
     $adf = New-Object -TypeName 'adf'
     $arm = Get-Content -Path $TemplateFile -Raw | ConvertFrom-Json 
-    $armParam = Get-Content -Path $TemplateParameterFile -Raw | ConvertFrom-Json 
+    $armParamBody = Get-Content -Path $TemplateParameterFile -Raw
+    $armParam = $armParamBody | ConvertFrom-Json -AsHashtable
     $arm.resources | ForEach-Object {
         $ArmType = $_.type
         $ArmName = $_.name
@@ -95,10 +135,14 @@ function Publish-AdfV2UsingArm {
         $o.adf = $adf
         $adf.Pipelines.Add($o)
     }
-
-
-    $adf.Name = $armParam.parameters.factoryName.value
+    if ($armParam.parameters.factoryName.value -ne $DataFactoryName) {
+        Write-Error "Given factory name does not match name in ARMTemplate parameter file. The deployment stopped."
+        return
+    }
+    $adf.Name = $DataFactoryName
     $adf.ResourceGroupName = $ResourceGroupName
+    $adf.Region = $location
+    $folder = Split-Path -Path $TemplateFile -Parent
 
     # Apply Deployment Options if applicable
     if ($null -ne $Option) {
@@ -116,24 +160,24 @@ function Publish-AdfV2UsingArm {
     # }
 
     Write-Host "===================================================================================";
-    Write-Host "STEP: Stopping triggers..."
-    if ($opt.StopStartTriggers -eq $true) {
+    Write-Host "STEP: Microsoft PreDeployment script..."
+    if ($opt.StopStartTriggers -eq $true -and !$WhatIf) {
         #Stop-Triggers -adf $adf
-        Write-Warning 'The feature is not supported for this method yet.'
+        $script = Join-Path -Path $folder -ChildPath 'PrePostDeploymentScript.ps1'
+        Write-Verbose "Running script: $script"
+        . $script -armTemplate $TemplateFile -resourceGroupName $ResourceGroupName -dataFactoryName $DataFactoryName -predeployment $true
     } else {
-        Write-Host "Operation skipped as publish option 'StopStartTriggers' = false"
+        Write-Host "Operation skipped as WhatIf is enabled or publish option 'StopStartTriggers' = false"
     }
 
 
     Write-Host "===================================================================================";
     Write-Host "STEP: Deployment of ARM Template of ADF..."
-    #$DataFactoryName = $armParam.parameters.factoryName.value
-    #$location = $armParam.parameters.dataFactory_location.value
-    #todo: Replace parameters: DF, Location
-    $adf.Region = $location
-    $t = (Get-Date).TOString('MMdd-HHmm')
-    $DeploymentName = "DeployADF-$t"
+    #$armParam = Get-Content -Path $TemplateParameterFile | ConvertFrom-Json #-AsHashtable
+    #$t = (Get-Date).TOString('ddMM-HHmm')
+    $DeploymentName = "ADFtools.deploy.$DataFactoryName"
     Write-Host "      Deployment name: $DeploymentName"
+
     if (!$WhatIf) {
         New-AzResourceGroupDeployment -Name "$DeploymentName" -Mode 'Incremental' `
         -ResourceGroupName $ResourceGroupName `
@@ -141,41 +185,36 @@ function Publish-AdfV2UsingArm {
         -TemplateParameterFile $TemplateParameterFile
     }
 
-
     Write-Host "===================================================================================";
     Write-Host "STEP: Deployment of Global Parameters..."
-    if ($opt.DeployGlobalParams -eq $true) {
-        #Write-Warning 'The feature is not supported for this method yet.'
-        $folder = Split-Path -Path $TemplateFile -Parent
+    if ($opt.DeployGlobalParams -eq $true -and !$WhatIf) {
         Write-Verbose "Source folder for global params and script: $folder"
-        $script = Join-Path -Path $folder -ChildPath 'GlobalParametersUpdateScript.ps1'
+        #$script = Join-Path -Path $folder -ChildPath 'GlobalParametersUpdateScript.ps1'
         $globjson = (Get-ChildItem -Path $folder -Filter '*_GlobalParameters.json')[0]
         Write-Verbose "Global Param file: $($globjson.FullName)"
-        . $script -globalParametersFilePath $globjson.FullName -resourceGroupName $ResourceGroupName -dataFactoryName $DataFactoryName
+        #. $script -globalParametersFilePath $globjson.FullName -resourceGroupName $ResourceGroupName -dataFactoryName $DataFactoryName
+        Microsoft-GlobalParametersUpdateScript -globalParametersFilePath $globjson.FullName -resourceGroupName $ResourceGroupName -dataFactoryName $DataFactoryName
     } else {
-        Write-Host "Deployment of Global Parameters will be skipped as publish option 'DeployGlobalParams' = false"
-    }
-
-
-    Write-Host "===================================================================================";
-    Write-Host "STEP: Deleting objects not in source ..."
-    if ($opt.DeleteNotInSource -eq $true) {
-        # $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
-        # $adfIns.AllObjects() | ForEach-Object {
-        #     Remove-AdfObjectIfNotInSource -adfSource $adf -adfTargetObj $_ -adfInstance $adfIns
-        # }
-        Write-Warning 'The feature is not supported for this method yet.'
-    } else {
-        Write-Host "Operation skipped as publish option 'DeleteNotInSource' = false"
+        Write-Host "Deployment of Global Parameters will be skipped as WhatIf is enabled or publish option 'DeployGlobalParams' = false"
     }
 
     Write-Host "===================================================================================";
-    Write-Host "STEP: Starting all triggers..."
-    if ($opt.StopStartTriggers -eq $true) {
+    Write-Host "STEP: Microsoft PostDeployment script:"
+    Write-Host "      Deleting objects not in source = $($opt.DeleteNotInSource)"
+    Write-Host "      Starting triggers = $($opt.StopStartTriggers)"
+    if (($opt.StopStartTriggers -eq $true -or $opt.DeleteNotInSource -eq $true) -and !$WhatIf) {
         #Start-Triggers -adf $adf
-        Write-Warning 'The feature is not supported for this method yet.'
+        #$script = Join-Path -Path $folder -ChildPath 'PrePostDeploymentScript.ps1'
+        #Write-Verbose "Running script: $script"
+        #. $script -armTemplate $TemplateFile -resourceGroupName $ResourceGroupName -dataFactoryName $DataFactoryName -predeployment $false
+        Microsoft-PrePostDeploymentScript -armTemplate $TemplateFile `
+            -resourceGroupName $ResourceGroupName `
+            -dataFactoryName $DataFactoryName `
+            -predeployment $false `
+            -DeleteNotInSource $opt.DeleteNotInSource `
+            -StartActiveTriggers $opt.StopStartTriggers
     } else {
-        Write-Host "Operation skipped as publish option 'StopStartTriggers' = false"
+        Write-Host "Operation skipped as WhatIf is enabled or publish option 'StopStartTriggers' or 'DeleteNotInSource' = false"
     }
     
     $elapsedTime = new-timespan $script:StartTime $(get-date)
