@@ -24,15 +24,15 @@ function ConvertFrom-OrderedHashTablesToArrays {
             
                 Write-Verbose "Converting ordered hash table to array";
 
-                # First convert each item in the array to have ordered hashtables instead of arrays if required
+                # First convert each item in the array to have arrays instead of ordered hashtables if required
                 for ($i=0; $i -lt $Item.$prop.Count; $i++ ){
                     $Item.$prop[$i] = ConvertFrom-OrderedHashTablesToArrays -Item $Item.$prop[$i];
                 }
-                # Then convert the actual array to a ordered hashtables
+                # Then convert the actual ordered hashtables back to an array
 
                 # Without the ForEach-Object we get a OrderedDictionaryKeyValueCollection back, which is not too useful. We need an array, or the JSON
                 # gets saved using the keys as properties instead of an array. The foreeach unboxes back to an array for us.
-                $Item.$prop = $Item.$prop.Values | ForEach-Object { $_ };
+                $Item.$prop = @($Item.$prop.Values | ForEach-Object { $_ });
             }
             elseif ( $Item.$prop.GetType().Name -eq "PSCustomObject" ) {
                 Write-Verbose "Converting PSCustomObject property using a recursive function call...";
