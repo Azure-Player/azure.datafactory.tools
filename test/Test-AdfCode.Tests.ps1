@@ -23,10 +23,13 @@ InModuleScope azure.datafactory.tools {
 
 
     Describe 'Test-AdfCode' -Tag 'Unit' {
-        It 'Should throw an error due to missing file' {
+        It 'Should not throw error due to missing file' {
             $DataFactoryName = "BigFactorySample2_vnet"
             $RootFolder = Join-Path -Path $PSScriptRoot -ChildPath $DataFactoryName
-            { $script:res = Test-AdfCode -RootFolder $RootFolder } | Should -Throw
+            { 
+                $script:res = Test-AdfCode -RootFolder $RootFolder
+                Write-Verbose $script:res
+            } | Should -Not -Throw
         }
         It 'Should return 1 error' {
             $res | Should -Be 1
