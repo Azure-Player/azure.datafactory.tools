@@ -28,5 +28,5 @@ jobs:
       uses: azure/powershell@v1
       with:
         inlineScript: |
-          test/!RunAllTests.ps1 -folder $(system.defaultworkingdirectory) -TestFilenameFilter "Test-*"
+          test/!RunAllTests.ps1 -folder 'D:/a/azure.datafactory.tools/azure.datafactory.tools/' -TestFilenameFilter "Test-*"
         azPSVersion: "latest"
