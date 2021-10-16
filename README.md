@@ -370,6 +370,13 @@ pipeline,PL_Demo,activities[1].typeProperties.waitTimeInSeconds,30
 pipeline,PL_Demo,activities["Copy Data"].typeProperties.waitTimeInSeconds,30
 ```
 
+> When you use `$` at the beginning of the path it refers to root element of the JSON file. 
+> Otherwise, it applies relative path starting from `properties` node. 
+In other words, these two paths pointing the same element:
+```
+linkedService,LS_AzureKeyVault,typeProperties.baseUrl,"https://kv-sqlplayer.vault.azure.net/"
+linkedService,LS_AzureKeyVault,$.properties.typeProperties.baseUrl,"https://kv-sqlplayer.vault.azure.net/"
+```
 
 ### Column VALUE
 
