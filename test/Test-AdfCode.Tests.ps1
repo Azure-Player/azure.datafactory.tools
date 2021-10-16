@@ -28,7 +28,6 @@ InModuleScope azure.datafactory.tools {
             $RootFolder = Join-Path -Path $PSScriptRoot -ChildPath $DataFactoryName
             { 
                 $script:res = Test-AdfCode -RootFolder $RootFolder
-                Write-Verbose $script:res
             } | Should -Not -Throw
         }
         It 'Should return 1 error' {
