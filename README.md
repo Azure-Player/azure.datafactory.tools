@@ -656,6 +656,31 @@ trigger.TR_AlwaysDisabled --> pipeline.PL_Wait5sec
 trigger.TR_RunEveryDay --> pipeline.PL_Wait5sec
 :::
 
+# Export ADF code to ArmTemplate
+Cmdlet: `Export-AdfToArmTemplate`  
+This cmdlet uses [**ADFUtilities** NPM package](https://www.npmjs.com/package/@microsoft/azure-data-factory-utilities) provided by Microsoft. 
+It does exactly the same actions as you can do with ADF UI by clicking **Validate all** and then **Export ARM Template**.
+
+### Parameters:  
+- `RootFolder` - Source folder where all ADF objects are kept. The folder should contain subfolders like pipeline, linkedservice, etc.
+- `SubscriptionId` - Optional.
+- `ResourceGroup` - Optional.
+- `AdfUtilitiesVersion`- Optional.
+
+
+# Publish ADF using ArmTemplate file(s) *(preview)*
+Cmlet: `Publish-AdfV2UsingArm`  
+Publishes Azure Data Factory from ARM Template files into target ADF service.
+Additionaly, creates a data factory with the specified resource group name and location, if that doesn't exist.
+Uses standard New-AzResourceGroupDeployment method in order to create new deployment in a given Resource Group.
+> **Preview**  
+> Please note that input parameters can change over time and even though the cmdlet uses very well known deployment approach, does not support many features as its deployment from code `Publish-AdfV2FromJson` counterpart.
+
+### Limitations. No support for:
+- Start/Stop triggers applied by Microsoft's pre/post deployment script
+- No support for Selective deployment
+- No parameter substitution
+
 
 # Publish from Azure DevOps
 
