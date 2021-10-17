@@ -1,6 +1,7 @@
 [![Build status](https://dev.azure.com/sqlplayer/azure.datafactory.tools/_apis/build/status/azure.datafactory.tools-CI)](https://dev.azure.com/sqlplayer/azure.datafactory.tools/_build/latest?definitionId=26)
 ![PSGalleryStatus](https://vsrm.dev.azure.com/sqlplayer/_apis/public/Release/badge/ee3bd4b9-1ccf-4a86-89a0-a9d5dcd1918a/1/1)
 [![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/azure.datafactory.tools?label=PowerShell%20Gallery)](https://www.powershellgallery.com/packages/azure.datafactory.tools)
+![PowerShell Gallery](https://img.shields.io/powershellgallery/dt/azure.datafactory.tools?color=blue)
 
 # azure.datafactory.tools
 <img style="float: right;" src="./images/logo512.png" width="200px">
@@ -8,7 +9,15 @@
 PowerShell module to help simplify Azure Data Factory CI/CD processes. This module was created to meet the demand for a quick and trouble-free deployment of an Azure Data Factory instance to another environment.  
 The main advantage of the module is the ability to publish all the Azure Data Factory service code from JSON files by calling one method. The module supports now:  
 * Creation of Azure Data Factory, if it doesn't exist
-* Deployment of all type of objects: pipelines, datasets, linked services, data flows, triggers, integration runtimes
+* Deployment of all type of objects: 
+  - Pipelines, 
+  - DataSets, 
+  - Linked Services, 
+  - (mapping & wrangling) Data Flows, 
+  - Triggers, 
+  - Integration Runtimes
+  - Managed Virtual Network
+  - Managed Private Endpoint
 * Finding the **right order** for deploying objects (no more worrying about object names)
 * Built-in mechanism to replace, remove or add the properties with the indicated values (CSV and JSON file formats supported)
 * Stopping/starting triggers
@@ -369,6 +378,13 @@ pipeline,PL_Demo,activities[1].typeProperties.waitTimeInSeconds,30
 pipeline,PL_Demo,activities["Copy Data"].typeProperties.waitTimeInSeconds,30
 ```
 
+> When you use `$` at the beginning of the path it refers to root element of the JSON file. 
+> Otherwise, it applies relative path starting from `properties` node. 
+In other words, these two paths pointing the same element:
+```
+linkedService,LS_AzureKeyVault,typeProperties.baseUrl,"https://kv-sqlplayer.vault.azure.net/"
+linkedService,LS_AzureKeyVault,$.properties.typeProperties.baseUrl,"https://kv-sqlplayer.vault.azure.net/"
+```
 
 ### Column VALUE
 
@@ -618,6 +634,68 @@ Get-AdfDocDiagram -adf $adf -direction 'TD'
 # Write output diagram to file:
 Get-AdfDocDiagram -adf $adf | Set-Content -Path 'adf-diagram.md'
 ```
+
+Result:
+
+::: mermaid
+graph LR
+linkedService.LS_AzureSqlDb_AW2014_SqlAuth --> linkedService.LS_AzureKeyVault
+linkedService.LS_SqlServer_DEV19_AW2017 --> integrationRuntime.SharedIR-DEV2019
+linkedService.LS_SqlServer_DEV19_AW2017 --> linkedService.LS_AzureKeyVault
+pipeline.Currency_Converter --> dataFlow.Currency_Converter
+pipeline.MovieDemoPipeline --> dataFlow.MovieDemo
+pipeline.PL_StoredProc --> linkedService.LS_AzureSqlDb_AW2014_SqlAuth
+pipeline.TaxiDemo --> dataFlow.TaxiDemo
+dataset.CADOutput1 --> linkedService.BlobSampleData
+dataset.CurrencyDatasetCAD --> linkedService.BlobSampleData
+dataset.CurrencyDatasetUSD --> linkedService.BlobSampleData
+dataset.movie_dataflow_sink --> linkedService.BlobSampleData
+dataset.movie_dataflow_source --> linkedService.BlobSampleData
+dataset.taxi_trip_data_input --> linkedService.BlobSampleData
+dataset.taxi_trip_fare_input --> linkedService.BlobSampleData
+dataset.TaxiDemoDayStatsSink --> linkedService.BlobSampleData
+dataset.TaxiDemoTotalByPaymentType --> linkedService.BlobSampleData
+dataset.TaxiDemoVendorStatsSink --> linkedService.BlobSampleData
+dataset.USDOutput --> linkedService.BlobSampleData
+dataflow.Currency_Converter --> dataset.USDOutput
+dataflow.Currency_Converter --> dataset.CADOutput1
+dataflow.Currency_Converter --> dataset.CurrencyDatasetUSD
+dataflow.Currency_Converter --> dataset.CurrencyDatasetCAD
+dataflow.MovieDemo --> dataset.movie_dataflow_sink
+dataflow.MovieDemo --> dataset.movie_dataflow_source
+dataflow.TaxiDemo --> dataset.TaxiDemoVendorStatsSink
+dataflow.TaxiDemo --> dataset.TaxiDemoDayStatsSink
+dataflow.TaxiDemo --> dataset.TaxiDemoTotalByPaymentType
+dataflow.TaxiDemo --> dataset.taxi_trip_data_input
+dataflow.TaxiDemo --> dataset.taxi_trip_fare_input
+trigger.TR_AlwaysDisabled --> pipeline.PL_Wait5sec
+trigger.TR_RunEveryDay --> pipeline.PL_Wait5sec
+:::
+
+# Export ADF code to ArmTemplate
+Cmdlet: `Export-AdfToArmTemplate`  
+This cmdlet uses [**ADFUtilities** NPM package](https://www.npmjs.com/package/@microsoft/azure-data-factory-utilities) provided by Microsoft. 
+It does exactly the same actions as you can do with ADF UI by clicking **Validate all** and then **Export ARM Template**.
+
+### Parameters:  
+- `RootFolder` - Source folder where all ADF objects are kept. The folder should contain subfolders like pipeline, linkedservice, etc.
+- `SubscriptionId` - Optional.
+- `ResourceGroup` - Optional.
+- `AdfUtilitiesVersion`- Optional.
+
+
+# Publish ADF using ArmTemplate file(s) *(preview)*
+Cmlet: `Publish-AdfV2UsingArm`  
+Publishes Azure Data Factory from ARM Template files into target ADF service.
+Additionaly, creates a data factory with the specified resource group name and location, if that doesn't exist.
+Uses standard New-AzResourceGroupDeployment method in order to create new deployment in a given Resource Group.
+> **Preview**  
+> Please note that input parameters can change over time and even though the cmdlet uses very well known deployment approach, does not support many features as its deployment from code `Publish-AdfV2FromJson` counterpart.
+
+### Limitations. No support for:
+- Start/Stop triggers applied by Microsoft's pre/post deployment script
+- No support for Selective deployment
+- No parameter substitution
 
 
 # Publish from Azure DevOps

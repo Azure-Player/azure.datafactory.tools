@@ -35,6 +35,8 @@ function Test-AdfCode {
 
     Write-Host "=== Validating files ..."
 
+    $ErrorActionPreference = 'Continue'
+
     if ($ObjectsCount -eq 0) {
         $WarningCount += 1
         Write-Warning "No Azure Data Factory files have been found in a given location."

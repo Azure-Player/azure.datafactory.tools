@@ -24,9 +24,15 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
+    - name: Login via Az module
+      uses: azure/login@v1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+        enable-AzPSSession: true 
+
     - name: Run Azure PowerShell script
       uses: azure/powershell@v1
       with:
         inlineScript: |
-          test/!RunAllTests.ps1 -folder 'D:/a/azure.datafactory.tools/azure.datafactory.tools/' -TestFilenameFilter "Test-*"
+          test/!RunAllTests.ps1 -folder 'D:/a/azure.datafactory.tools/azure.datafactory.tools/' -TestFilenameFilter "*"
         azPSVersion: "latest"

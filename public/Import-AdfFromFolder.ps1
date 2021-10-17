@@ -58,6 +58,17 @@ function Import-AdfFromFolder {
     Import-AdfObjects -Adf $adf -All $adf.Factories -RootFolder $RootFolder -SubFolder "factory" | Out-Null
     Write-Host ("Factories: {0} object(s) loaded." -f $adf.Factories.Count)
 
+    # A workaround of Microsoft's bug - no 'properties' in ManagedVirtualNetwork object
+    if ($adf.ManagedVirtualNetwork.Count -eq 1) {
+        $o = $adf.ManagedVirtualNetwork[0]
+        Set-StrictMode -Version 1.0
+        Add-ObjectProperty    -obj $o.Body -path 'properties.preventDataExfiltration' -value $false -ErrorAction 'Continue'
+        Remove-ObjectProperty -obj $o.Body -path 'properties.preventDataExfiltration'               -ErrorAction 'Continue'
+        Write-Verbose 'Workaround: Added empty "properties" node to ManagedVirtualNetwork object.'
+        $f = (Save-AdfObjectAsFile -obj $o)
+        $o.FileName = $f
+    }
+
     Write-Debug "END: Import-AdfFromFolder()"
     return $adf
 }

@@ -50,14 +50,14 @@ InModuleScope azure.datafactory.tools {
 
         Context 'when does not exist and called with option CreateNewInstance=false' {
             It 'return ADFT0027 error' {
-                $err = ''
                 $opt = New-AdfPublishOption
                 $opt.CreateNewInstance = $false
-                Publish-AdfV2FromJson -RootFolder "$RootFolder" `
-                -ResourceGroupName "$ResourceGroupName" `
-                -DataFactoryName "$DataFactoryName" `
-                -Location "$Location" -Option $opt -ErrorVariable err 
-                $err[0].ToString().Substring(0,8) | Should -Be 'ADFT0027'
+                { 
+                    Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                    -ResourceGroupName "$ResourceGroupName" `
+                    -DataFactoryName "$DataFactoryName" `
+                    -Location "$Location" -Option $opt -ErrorAction 'Stop' 
+                } | Should -Throw "ADFT0027: *"
             }
         }
 
