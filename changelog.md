@@ -4,10 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.93.0] - 2021-10-11
+## [0.93.0] - 2021-10-17
 * Added cmdlet: `Export-AdfToArmTemplate`
 * Added cmdlet: `Publish-AdfV2UsingArm` (preview)
 * Fixed `Test-AdfCode` which complete exec even if some issue is found
+* Added workaround for ManagedVirtualNetwork object without 'properties' node #149
 
 ## [0.91.0] - 2021-10-01
 * Fixed #147: Pipeline could be broken when contains array with 1 item in JSON file and any property was updated

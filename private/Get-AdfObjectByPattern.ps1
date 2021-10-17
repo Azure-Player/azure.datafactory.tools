@@ -39,6 +39,10 @@ function Get-AdfObjectByPattern {
         {
             $r = $adf.Factories | Where-Object { $_.Name -like $name }
         }
+        'managedVirtualNetwork'
+        {
+            $r = $adf.ManagedVirtualNetwork | Where-Object { $_.Name -like $name }
+        }
         'managedPrivateEndpoint'
         {
             $r = $adf.ManagedPrivateEndpoints | Where-Object { $_.Name -like $name }
