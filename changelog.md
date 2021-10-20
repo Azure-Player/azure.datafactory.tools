@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.94.0] - 2021-10-20
+* Fixed bug: add 'properties' node to ManagedVirtualNetwork if does not exist in default.json file #157
+
 ## [0.93.0] - 2021-10-17
 * Added cmdlet: `Export-AdfToArmTemplate`
 * Added cmdlet: `Publish-AdfV2UsingArm` (preview)

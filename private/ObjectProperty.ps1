@@ -60,7 +60,7 @@ param (
     $root = $arr[0]
     if ($arr.Count -eq 1) { $path = ""} else { $path = ($arr[1..($arr.Length-1)] -join '.') }
 
-    if ($obj.PSobject.Properties.Name -contains "$root")
+    if ($obj.PSobject.Properties.Name -contains "$root" -and $path)
     {
         Add-ObjectProperty -obj $obj.$root -path $path -value $value
     }
