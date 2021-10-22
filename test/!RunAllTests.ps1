@@ -57,7 +57,7 @@ try{
     $configuration.Should.ErrorAction = 'Continue'
     $configuration.CodeCoverage.Enabled = $false
     $configuration.TestResult.OutputFormat = "NUnitXml"
-    $configuration.TestResult.OutputPath = "TEST-Results.xml"
+    $configuration.TestResult.OutputPath = "$folder\TEST-Results.xml"
     $configuration.TestResult.Enabled = $true
     $configuration.Output.Verbosity = 'Detailed'
     if ($LocalTestsOnly) {
