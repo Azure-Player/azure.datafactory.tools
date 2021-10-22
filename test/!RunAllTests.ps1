@@ -49,7 +49,7 @@ Get-Module | Out-Host
 try{
     $r = $null
     $VerbosePreference = 'SilentlyContinue'
-    $ErrorActionPreference = 'Continue'     #Important!!!
+    $ErrorActionPreference = 'Stop'     #Important!!!
 
     #Set-Location "X:\!WORK\GitHub\!SQLPlayer\azure.datafactory.tools\test"
     $configuration = [PesterConfiguration]::Default
