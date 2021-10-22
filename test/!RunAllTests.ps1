@@ -49,7 +49,7 @@ Get-Module | Out-Host
 try{
     $r = $null
     $VerbosePreference = 'SilentlyContinue'
-    $ErrorActionPreference = 'Stop'     #Important!!!
+    $ErrorActionPreference = 'Continue'     #Important!!!
 
     #Set-Location "X:\!WORK\GitHub\!SQLPlayer\azure.datafactory.tools\test"
     $configuration = [PesterConfiguration]::Default
@@ -72,6 +72,8 @@ try{
     #$r.Failed
     #$r.Passed[0]
     $r.Failed | Format-Table -Property Result, StartLine, Duration, Path
+
+    #Get-ChildItem -Path $folder | Format-Table
 
 } finally {
     Pop-Location
