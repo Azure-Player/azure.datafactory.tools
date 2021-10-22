@@ -48,13 +48,13 @@ function Test-AdfCode {
         $HasBody = $null -ne $_.Body
         if (-not $HasBody) {
             $ErrorCount += 1
-            Write-Error -Message "Object $FullName was not loaded properly."
+            Write-Error -Message "Object $FullName was not loaded properly." -ErrorAction 'Continue'
         }
         if ($HasBody) {
 
             if ($_.name -ne $_.Body.name) {
                 $ErrorCount += 1
-                Write-Error -Message "Object $FullName has mismatch file name."
+                Write-Error -Message "Object $FullName has mismatch file name." -ErrorAction 'Continue'
             }
 
             $_.DependsOn | ForEach-Object {
@@ -62,7 +62,7 @@ function Test-AdfCode {
                 $ref_arr = $adf.GetObjectsByFullName("$_")
                 if ($ref_arr.Count -eq 0) {
                     $ErrorCount += 1
-                    Write-Error -Message "Couldn't find referenced object $_."
+                    Write-Error -Message "Couldn't find referenced object $_." -ErrorAction 'Continue'
                 }
             }
         }
