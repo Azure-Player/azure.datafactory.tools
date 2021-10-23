@@ -24,8 +24,14 @@ function Test-AdfCode {
         [String] $ConfigPath
     )
 
-    $ErrorCount = 0
-    $WarningCount = 0
+    class ReturnClass {
+        [int] $ErrorCount
+        [int] $WarningCount 
+    }
+    $result = New-Object 'ReturnClass'
+
+    $result.ErrorCount = 0
+    $result.WarningCount = 0
     $adfName = Split-Path -Path "$RootFolder" -Leaf
 
     Write-Host "=== Loading files from location: $RootFolder ..."
@@ -38,7 +44,7 @@ function Test-AdfCode {
     $ErrorActionPreference = 'Continue'
 
     if ($ObjectsCount -eq 0) {
-        $WarningCount += 1
+        $result.WarningCount += 1
         Write-Warning "No Azure Data Factory files have been found in a given location."
     }
 
@@ -47,13 +53,13 @@ function Test-AdfCode {
         Write-Host "Checking: $FullName..."
         $HasBody = $null -ne $_.Body
         if (-not $HasBody) {
-            $ErrorCount += 1
+            $result.ErrorCount += 1
             Write-Error -Message "Object $FullName was not loaded properly." -ErrorAction 'Continue'
         }
         if ($HasBody) {
 
             if ($_.name -ne $_.Body.name) {
-                $ErrorCount += 1
+                $result.ErrorCount += 1
                 Write-Error -Message "Object $FullName has mismatch file name." -ErrorAction 'Continue'
             }
 
@@ -61,7 +67,7 @@ function Test-AdfCode {
                 Write-Verbose -Message "  - Checking dependency: [$_]"
                 $ref_arr = $adf.GetObjectsByFullName("$_")
                 if ($ref_arr.Count -eq 0) {
-                    $ErrorCount += 1
+                    $result.ErrorCount += 1
                     Write-Error -Message "Couldn't find referenced object $_." -ErrorAction 'Continue'
                 }
             }
@@ -74,7 +80,7 @@ function Test-AdfCode {
         $r = $adf.GetObjectsByFullName("*." + $_)
         if ($r.Count -gt 1) {
             Write-Warning "Duplication of object name: $_"
-            $WarningCount += 1
+            $result.WarningCount += 1
         }
     }
 
@@ -82,7 +88,7 @@ function Test-AdfCode {
         [string] $name = $_.Name
         if ($name.Contains('-')) {
             Write-Warning "Dashes ('-') are not allowed in the names of linked services, data flows, and datasets ($name)."
-            $WarningCount += 1
+            $result.WarningCount += 1
         }
     }
 
@@ -91,7 +97,7 @@ function Test-AdfCode {
             [string] $name = $_.Name
             if ($name.Contains('-')) {
                 Write-Warning "Dashes ('-') are not allowed in the names of global parameters ($name)."
-                $WarningCount += 1
+                $result.WarningCount += 1
             }
         }
     }
@@ -115,7 +121,7 @@ function Test-AdfCode {
             Update-PropertiesFromFile -adf $adf -stage $FileName -ErrorVariable err -ErrorAction 'Stop' -dryRun:$True
         }
         catch {
-            $ErrorCount += 1
+            $result.ErrorCount += 1
             Write-Host "ERROR: $($_.Exception.Message)" -ForegroundColor 'Red'
             Write-Debug -Message $_.Exception
             #$_.Exception
@@ -125,26 +131,13 @@ function Test-AdfCode {
 
     
     $msg = "Test code completed ($ObjectsCount objects)."
-    if ($ErrorCount -gt 0) { $msg = "Test code failed." }
-    $line1 = $adf.Name.PadRight(63) + "  # of Errors: $ErrorCount".PadLeft(28)
-    $line2 = $msg.PadRight(63)      + "# of Warnings: $WarningCount".PadLeft(28)
+    if ($result.ErrorCount -gt 0) { $msg = "Test code failed." }
+    $line1 = $adf.Name.PadRight(63) + "  # of Errors: $($result.ErrorCount)".PadLeft(28)
+    $line2 = $msg.PadRight(63)      + "# of Warnings: $($result.WarningCount)".PadLeft(28)
     Write-Host "============================================================================================="
     Write-Host " $line1"
     Write-Host " $line2"
     Write-Host "============================================================================================="
 
-    return $ErrorCount;
-}
-
-
-function Test-ErrorNoTermination {
-    Write-Error -Message 'Test error message with no termination' -ErrorAction 'Continue'
-}
-
-function Test-ErrorTermination {
-    Write-Error -Message 'Test error message with termination' -ErrorAction 'Stop'
-}
-
-function Test-Exception {
-    Throw 'Test error message'
+    return $result;
 }

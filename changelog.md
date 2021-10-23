@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.95.0] - 2021-10-23
+* Added structure to return object for Test-AdfCode which allows to check number of warnings too
+* Fixed tests
+
 ## [0.94.0] - 2021-10-20
 * Fixed bug: add 'properties' node to ManagedVirtualNetwork if does not exist in default.json file #157
 
