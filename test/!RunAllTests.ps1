@@ -57,7 +57,7 @@ try{
     $configuration.Should.ErrorAction = 'Continue'
     $configuration.CodeCoverage.Enabled = $false
     $configuration.TestResult.OutputFormat = "NUnitXml"
-    $configuration.TestResult.OutputPath = "TEST-Results.xml"
+    $configuration.TestResult.OutputPath = "$folder\TEST-Results.xml"
     $configuration.TestResult.Enabled = $true
     $configuration.Output.Verbosity = 'Detailed'
     if ($LocalTestsOnly) {
@@ -72,6 +72,8 @@ try{
     #$r.Failed
     #$r.Passed[0]
     $r.Failed | Format-Table -Property Result, StartLine, Duration, Path
+
+    #Get-ChildItem -Path $folder | Format-Table
 
 } finally {
     Pop-Location

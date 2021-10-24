@@ -30,8 +30,10 @@ InModuleScope azure.datafactory.tools {
                 $script:res = Test-AdfCode -RootFolder $RootFolder
             } | Should -Not -Throw
         }
-        It 'Should return 1 error' {
-            $res | Should -Be 1
+        It 'Should return 1 error and 6 warnings in ReturnClass' {
+            $res.GetType() | Should -Be 'Test-AdfCode.ReturnClass'
+            $res.ErrorCount | Should -Be 1
+            $res.WarningCount | Should -Be 6
         }
 
     }
