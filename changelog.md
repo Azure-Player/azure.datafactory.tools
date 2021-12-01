@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.96.0] - 2021-12-01
+* Fixed `Publish-AdfV2UsingArm` cmdlet to make it compatible with PS 5.1
+* Added tests for `Publish-AdfV2UsingArm`
+
 ## [0.95.0] - 2021-10-23
 * Added structure to return object for Test-AdfCode which allows to check number of warnings too
 * Fixed tests

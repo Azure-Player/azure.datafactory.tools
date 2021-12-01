@@ -85,6 +85,7 @@ function Publish-AdfV2UsingArm {
     Write-Host "Location:              $Location";
     #Write-Host "Stage:              $Stage";
     Write-Host "Options provided:      $($null -ne $Option)";
+    Write-Host "WhatIfPreference:      $WhatIfPreference";
     Write-Host "======================================================================================";
 
     $script:StartTime = Get-Date
@@ -133,7 +134,7 @@ function Publish-AdfV2UsingArm {
     $adf = New-Object -TypeName 'adf'
     $arm = Get-Content -Path $TemplateFile -Raw | ConvertFrom-Json 
     $armParamBody = Get-Content -Path $TemplateParameterFile -Raw
-    $armParam = $armParamBody | ConvertFrom-Json -AsHashtable
+    $armParam = $armParamBody | ConvertFrom-Json
     $arm.resources | ForEach-Object {
         $ArmType = $_.type
         $ArmName = $_.name
