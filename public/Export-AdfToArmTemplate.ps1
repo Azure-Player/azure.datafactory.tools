@@ -9,7 +9,9 @@ function Export-AdfToArmTemplate {
         [parameter(Mandatory = $false)] 
         [String] $ResourceGroup = 'abcxyz',
         [parameter(Mandatory = $false)] 
-        [String] $AdfUtilitiesVersion = '0.1.6'
+        [String] $AdfUtilitiesVersion = '0.1.6',
+        [parameter(Mandatory = $false)] 
+        [String] $OutputFolder = 'ArmTemplate'
     )
 
     Set-Location $RootFolder
@@ -39,8 +41,8 @@ function Export-AdfToArmTemplate {
     $adfAzurePath = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroup/providers/Microsoft.DataFactory/factories/$AdfName"
 
     Write-Host "=== Validating & exporting ARM Template..."
-    Write-Verbose "npm run build export $RootFolder $adfAzurePath ""ArmTemplate"""
-    npm run build export $RootFolder $adfAzurePath "ArmTemplate"
+    Write-Verbose "npm run build export $RootFolder $adfAzurePath ""$OutputFolder"""
+    npm run build export $RootFolder $adfAzurePath "$OutputFolder"
     Write-Host "=== Export finished."
 
 }
