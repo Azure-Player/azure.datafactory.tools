@@ -179,9 +179,15 @@ $opt.StopStartTriggers = $false
 $opt = New-AdfPublishOption
 $opt.FailsWhenConfigItemNotFound = $false
 
-# Example 5: Ignore missing paths (will just write warning to standard output instead)
+# Example 6: Ignore missing paths (will just write warning to standard output instead)
 $opt = New-AdfPublishOption
 $opt.FailsWhenPathNotFound = $false
+
+# Example 7: Exclude Infrastructure-type of objects from deployment
+$opt = New-AdfPublishOption
+$opt.CreateNewInstance = $false
+$opt.Excludes.Add("integrationruntime.*", "")
+$opt.Excludes.Add("managedVirtualNetwork*.*", "")
 ```
 
 > Bear in mind that *Includes* and *Excludes* lists are **rules out each other**.  
@@ -242,6 +248,8 @@ dataset.DS_*
 linkedService.???KeyVault*
 pipeline.ScdType[123]
 trigger.*@testFolder
+managedVirtualNetwork*.*
+*managedPrivateEndpoint.*
 ```
 Full name of objects supported by the module is built of: `{Type}.{Name}@{Folder}`  
 All potential combinations can be found in code repository of ADF:  
@@ -343,6 +351,8 @@ Column `type` accepts one of the following values only:
 - dataflow
 - linkedService
 - trigger
+- managedVirtualNetwork
+- managedVirtualNetwork\default\managedPrivateEndpoint
 - factory *(for Global Parameters)*
 
 ### Column NAME
