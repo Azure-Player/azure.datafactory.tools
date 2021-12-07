@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.95.1] - 2021-12-07
+* Bug fixed: Loading ADF from code fails when excluding any object and ManagedVNET exist #171
+
 ## [0.95.0] - 2021-10-23
 * Added structure to return object for Test-AdfCode which allows to check number of warnings too
 * Fixed tests

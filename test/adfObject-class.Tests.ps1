@@ -56,6 +56,13 @@ InModuleScope azure.datafactory.tools {
             }
         }
         
+        Context 'When the object has limited nodes in it' {
+            It 'Should not throw an error' {
+                $o = New-AdfObjectFromFile -fileRelativePath 'BigFactorySample2_vnet\managedVirtualNetwork\default.json' -type 'managedVirtualNetwork' -name 'default'
+                $o.Body.Properties.PSObject.Properties.Remove('preventDataExfiltration')
+                { $o.GetFolderName() } | Should -Not -Throw
+            }
+        }
 
     }
 
