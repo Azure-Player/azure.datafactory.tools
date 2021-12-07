@@ -74,10 +74,10 @@ class AdfObject {
         $ofn = ''
         if ($this.Body.PSObject.Properties.Name -contains "properties")
         {
-            $o = $this.Body.properties
-            if ($o.PSobject.Properties.Name -contains "folder")
+            $o = $this.Body.Properties
+            if ($o.PSobject.Properties -ne $null -and $o.PSobject.Properties.Name -contains "folder")
             {
-                $ofn = $this.Body.properties.folder.name
+                $ofn = $this.Body.Properties.folder.name
             }
         }
         return $ofn
