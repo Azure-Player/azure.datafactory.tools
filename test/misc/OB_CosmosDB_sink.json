@@ -1,0 +1,26 @@
+{
+    "name": "OB_CosmosDB_sink",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "LS_CosmosDbUat",
+            "type": "LinkedServiceReference"
+        },
+        "parameters": {
+            "TargetName": {
+                "type": "string"
+            }
+        },
+        "folder": {
+            "name": "OB"
+        },
+        "annotations": [],
+        "type": "CosmosDbSqlApiCollection",
+        "schema": {},
+        "typeProperties": {
+            "collectionName": {
+                "value": "@dataset().TargetName",
+                "type": "Expression"
+            }
+        }
+    }
+}
