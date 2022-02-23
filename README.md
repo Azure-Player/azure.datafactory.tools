@@ -352,7 +352,7 @@ Column `type` accepts one of the following values only:
 - linkedService
 - trigger
 - managedVirtualNetwork
-- managedVirtualNetwork\default\managedPrivateEndpoint
+- managedPrivateEndpoint
 - factory *(for Global Parameters)*
 
 ### Column NAME

@@ -7,21 +7,27 @@ function ConvertFrom-ArraysToOrderedHashTables {
         [parameter(Mandatory = $false)] [String[]] $ArrayIdProps = @("name", "Name")
     )
 
-    Write-Verbose "Entering Function: ConvertFrom-ArraysToOrderedHashTables";
+    Write-Debug "BEGIN: ConvertFrom-ArraysToOrderedHashTables";
 
     if ( $Item.GetType().Name -eq "PSCustomObject" ) {
 
         Write-Verbose "Processing PSCustomObject...";
-        Write-Verbose "Properties: $($Item.PSObject.Properties.Name)";
+        $cnt = @($Item.PSobject.Properties).Count
+        if ($cnt) {
+            Write-Verbose "Properties: $($Item.PSObject.Properties.Name -join ', ')";
+        } else {
+            Write-Verbose "The object is empty - no further processing";
+        }
 
         # Loop through the properties, changing arrays and processing PSCustomObject's
-        foreach ($prop in $Item.PSObject.Properties.Name) {
+        foreach ($p in $Item.PSObject.Properties) {
 
-            if ($Item.$prop -eq $null){
+            $prop = $p.Name
+            if ($null -eq $Item.$prop) {
                 Write-Verbose "Skipping property '$prop' as type cannot be determined for null";
                 continue;
             }
-            Write-Verbose "Processing property '$prop' of type  $($Item.$prop.GetType().Name)";
+            Write-Verbose "Processing property '$prop' of type '$($Item.$prop.GetType().Name)'";
 
             # If the current property is a non-empty array
             if ( $Item.$prop.GetType().Name -eq "Object[]" -and $Item.$prop.Count -gt 0) {
@@ -78,9 +84,7 @@ function ArrayToOrderedHash {
         [parameter(Mandatory = $true)] [String] $KeyProperty
     )
 
-    Write-Verbose "Entering Function: ArrayToOrderedHash";
-   
-    Write-Verbose "Key property: $keyProperty";
+    Write-Debug "BEGIN: ArrayToOrderedHash(KeyProperty=$KeyProperty)"
 
     $hash = [ordered]@{};
     $array | ForEach-Object { $hash[$_.$keyProperty] = $_ };
