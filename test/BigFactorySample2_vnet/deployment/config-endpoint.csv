@@ -1,3 +1,5 @@
 type,name,path,value
-#"managedVirtualNetwork\default\managedPrivateEndpoint",MPE_SQLPlayer_srv2,$.properties.groupId,"sqlServer2"
+# This one does not work:
+# "managedVirtualNetwork\default\managedPrivateEndpoint",MPE_SQLPlayer_srv2,$.properties.groupId,"sqlServer2"
+# This example is correct:
 managedPrivateEndpoint,MPE_SQLPlayer_srv2,$.properties.groupId,"sqlServer2"

@@ -9,6 +9,7 @@ function Get-AdfObjectByPattern {
     Write-Debug "BEGIN: Get-AdfObjectByPattern(name=$name,type=$type)"
 
     $simtype = Get-SimplifiedType -Type "$type"
+    $r = $null
     switch -Exact ($simtype)
     {
         'IntegrationRuntime'

@@ -1,0 +1,14 @@
+{
+    "MPE_SQLPlayer_srv2": [
+        {
+            "name": "$.properties.privateLinkResourceId",
+            "value": "pe-dlscdwh$Env:env-dfs-adf-datavault-$Env:env",
+            "action": "update"
+        },
+        {
+            "name": "$.properties.groupId",
+            "value": "sqlServer2",
+            "action": "update"
+        }
+    ]
+}
