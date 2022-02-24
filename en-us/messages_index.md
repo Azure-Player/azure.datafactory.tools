@@ -35,5 +35,4 @@ ADFT0026 | File does not exist: *FilterFilePath*
 ADFT0027 | Azure Data Factory instance does not exist.
 ADFT0028 | Expected format of name for 'FullName' input parameter is: objectType.objectName[@folderName]
 ADFT0029 | Unknown object type: *type*.
-
-
+ADFT0030 | AzType '$AzType' is not supported.

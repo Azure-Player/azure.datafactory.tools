@@ -18,7 +18,7 @@ function ConvertTo-AdfType {
         'Microsoft.DataFactory/factories/managedVirtualNetworks' { $resType = 'managedVirtualNetwork' }
         'Microsoft.DataFactory/factories/managedVirtualNetworks/managedPrivateEndpoints' { $resType = 'managedVirtualNetwork\default\managedPrivateEndpoint' }
         'Microsoft.DataFactory/factories'               { $resType = 'factory' }
-        default                 { Write-Error "ADFT00__: AzType '$AzType' is not supported." }
+        default                 { Write-Error "ADFT0030: AzType '$AzType' is not supported." }
     }
 
     return $resType

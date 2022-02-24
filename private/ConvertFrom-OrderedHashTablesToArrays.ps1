@@ -4,16 +4,16 @@ function ConvertFrom-OrderedHashTablesToArrays {
         [parameter(Mandatory = $true, ValueFromPipeline = $true)] $Item
     )
 
-    Write-Verbose "Entering Function: ConvertFrom-OrderedHashTablesToArrays";
+    Write-Debug "BEGIN: ConvertFrom-OrderedHashTablesToArrays";
 
     if ( $Item.GetType().Name -eq "PSCustomObject" ) {
 
         Write-Verbose "Processing PSCustomObject...";
-        Write-Verbose "Properties: $($Item.PSObject.Properties.Name)";
+        Write-Verbose "Properties: $($Item.PSObject.Properties.Name -join ', ')";
 
         # Loop through the properties, changing arrays and processing PSCustomObject's
         foreach ($prop in $Item.PSObject.Properties.Name) {
-            if ($Item.$prop -eq $null){
+            if ($null -eq $Item.$prop) {
                 Write-Verbose "Skipping property '$prop' as type cannot be determined for null";
                 continue;
             }

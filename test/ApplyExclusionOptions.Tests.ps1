@@ -27,4 +27,32 @@ InModuleScope azure.datafactory.tools {
         }
 
     } 
+
+    Describe 'of BigFactorySample2_vnet without properties node and exclude rules' {
+        BeforeEach {
+            $DataFactoryName = "BigFactorySample2_vnet"
+            $RootFolder = Join-Path -Path $PSScriptRoot -ChildPath $DataFactoryName
+            $vnetFile = Join-Path $RootFolder 'managedVirtualNetwork\default.json'
+            $bf = Backup-File -FileName $vnetFile
+        }
+
+        It 'Should completed successfully' {
+            Remove-ObjectPropertyFromFile -FileName $vnetFile -Path 'properties'
+            $adf = Import-AdfFromFolder -FactoryName $DataFactoryName -RootFolder $RootFolder
+            $option = [AdfPublishOption]::new()
+            $option.Excludes.Add('managedVirtualNetwork*.*', '')
+            $adf.PublishOptions = $option
+            { ApplyExclusionOptions -adf $adf } | Should -Not -Throw
+            #$bf
+        }
+
+        AfterEach {
+            if ($bf) {
+                Write-Verbose "Restoring file from backup: $bf"
+                Restore-File -FileName $bf -RemoveBackup $true 
+            }
+        }
+        
+    }
+
 }

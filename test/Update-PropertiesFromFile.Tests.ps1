@@ -344,6 +344,16 @@ InModuleScope azure.datafactory.tools {
 
     }
 
+    Describe 'Publish-AdfV2FromJson with DryRun' -Tag 'Unit','private' {
 
+        $cases =  @( @{ configFile = 'config-endpoint.csv' }, @{ configFile = 'config-endpoint2.json' } )
+
+        It 'should update vnet-related objects from <configFile>' -TestCases $cases {
+            $DataFactoryName = "BigFactorySample2_vnet"
+            $RootFolder = Join-Path -Path $PSScriptRoot -ChildPath $DataFactoryName
+            $cfgFile = Join-Path -Path $RootFolder -ChildPath "deployment\$configFile"
+            { Publish-AdfV2FromJson -RootFolder $RootFolder -DryRun -Stage $cfgFile -ResourceGroupName 'xxx' -DataFactoryName 'abc' } | Should -Not -Throw
+        }
+    }
 
 }
