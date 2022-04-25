@@ -252,7 +252,6 @@ InModuleScope azure.datafactory.tools {
                 $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
                 $script:option = New-AdfPublishOption
                 {
-                    $DebugPreference = 'Continue'
                     $script:adf.PublishOptions = $option
                     Update-PropertiesFromFile -adf $script:adf -stage "globalparam1"
                 } | Should -Not -Throw
