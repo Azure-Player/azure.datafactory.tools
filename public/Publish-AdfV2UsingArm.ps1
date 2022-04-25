@@ -62,6 +62,9 @@ function Publish-AdfV2UsingArm {
         [String] $DataFactoryName,
 
         [parameter(Mandatory = $false)] 
+        [String] $Stage = $null,
+        
+        [parameter(Mandatory = $false)] 
         [String] $Location,
 
         [parameter(Mandatory = $false)] 
@@ -132,17 +135,23 @@ function Publish-AdfV2UsingArm {
     Write-Host "===================================================================================";
     Write-Host "STEP: Reading Azure Data Factory from ARM Template files..."
     $adf = New-Object -TypeName 'adf'
+    $adf.Location = $RootFolder
     $arm = Get-Content -Path $TemplateFile -Raw | ConvertFrom-Json 
     $armParamBody = Get-Content -Path $TemplateParameterFile -Raw
     $armParam = $armParamBody | ConvertFrom-Json
+    $adf.ArmTemplateJson = $arm
+
     $arm.resources | ForEach-Object {
         $ArmType = $_.type
         $ArmName = $_.name
         $o = New-Object -TypeName 'AdfObject'
         $o.name = $ArmName.ToString().Substring(37, $ArmName.ToString().Length - 40)
         $o.type = ConvertTo-AdfType $ArmType
-        $o.adf = $adf
+        $o.Adf = $adf
+        $o.Body = $_
         $adf.Pipelines.Add($o)
+        $collectionName = $ArmType.Substring(32)
+        Invoke-Expression "`$adf.$collectionName.Add(`$o)"
     }
     if ($armParam.parameters.factoryName.value -ne $DataFactoryName) {
         Write-Error "Given factory name does not match name in ARMTemplate parameter file. The deployment stopped."
@@ -161,12 +170,22 @@ function Publish-AdfV2UsingArm {
 
     Write-Host "===================================================================================";
     Write-Host "STEP: Replacing all properties environment-related..."
-    Write-Warning 'Update parameters is not supported for this method yet.'
-    # if (![string]::IsNullOrEmpty($Stage)) {
-    #     #Update-PropertiesFromFile -adf $adf -stage $Stage
-    # } else {
-    #     Write-Host "Stage parameter was not provided - action skipped."
-    # }
+    #Write-Warning 'Update parameters is not supported for this method yet.'
+    if (![string]::IsNullOrEmpty($Stage)) {
+        Update-PropertiesFromFile -adf $adf -stage $Stage
+
+        #TODO: Remove 'never used' parameters from new ARM Template
+
+        # Create new ARM Template file
+        $OldTemplateFile = $TemplateFile
+        $TemplateFile = $OldTemplateFile + '.~.json'
+        Write-Verbose "Writing new ARM Template file: $TemplateFile"
+        $output = ($adf.ArmTemplateJson | ConvertTo-Json -Compress:$true -Depth 100)
+        $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+        [IO.File]::WriteAllLines($TemplateFile, $output, $Utf8NoBomEncoding)
+    } else {
+        Write-Host "Stage parameter was not provided - action skipped."
+    }
 
     Write-Host "===================================================================================";
     Write-Host "STEP: Microsoft PreDeployment script..."

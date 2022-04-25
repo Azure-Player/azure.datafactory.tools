@@ -20,7 +20,8 @@ class Adf {
     [string] $Location = ""
     [AdfGlobalProp] $GlobalFactory = [AdfGlobalProp]::new()
     [AdfPublishOption] $PublishOptions
-
+    $ArmTemplateJson
+    
     [System.Collections.ArrayList] AllObjects()
     {
         return $this.LinkedServices + $this.Pipelines + $this.DataSets + $this.DataFlows + $this.Triggers + $this.IntegrationRuntimes + $this.Factories + $this.ManagedVirtualNetwork + $this.ManagedPrivateEndpoints
