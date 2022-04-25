@@ -244,12 +244,15 @@ InModuleScope azure.datafactory.tools {
                 $t.Body.properties.activities[2].name | Should -Be "Wait Number 4"
             }
         }
+    }
 
+    Describe 'Update-PropertiesFromFile' -Tag 'Unit','private' {
         Context 'When called and CSV contains global parameters to be replaced' {
             It 'Should complete' {
                 $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
                 $script:option = New-AdfPublishOption
                 {
+                    $DebugPreference = 'Continue'
                     $script:adf.PublishOptions = $option
                     Update-PropertiesFromFile -adf $script:adf -stage "globalparam1"
                 } | Should -Not -Throw
@@ -258,9 +261,9 @@ InModuleScope azure.datafactory.tools {
                 $script:gp = Get-AdfObjectByName -adf $script:adf -name $script:adf.Factories[0].Name -type "factory"
                 $script:gp.Body.properties.globalParameters.'GP-String'.value | Should -Be "This text has been replaced"
                 $script:gp.Body.properties.globalParameters.'GP-Int'.value | Should -Be 2020
+                $script:gp.Body.properties.globalParameters.'GP-Bool'.value | Should -Be $False
             }
         }
-
     } 
 
     Describe 'Update-PropertiesFromFile with JSON' -Tag 'Unit','private','jsonconfig' {

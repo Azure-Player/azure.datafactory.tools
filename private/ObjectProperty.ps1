@@ -7,10 +7,13 @@ function Update-ObjectProperty {
     )
     
     Invoke-Expression "`$fieldType = `$obj.$path.GetType()"
-    Write-Debug "Type of field [$path] = $fieldType"
+    Write-Debug "Type of field [$path] = $fieldType / Value = $value"
     if ($fieldType -eq [String]) {
         Write-Debug "Setting as string value"
         $exp = "`$obj.$path = `"$value`""
+    } elseif ($fieldType -eq [Boolean]) {
+        Write-Debug "Setting as boolean value"
+        $exp = "`$obj.$path = `$$value"
     } elseif ($fieldType -eq [System.Management.Automation.PSCustomObject]) {
         Write-Debug "Setting as json value"
         $jvalue = ConvertFrom-Json $value
@@ -22,7 +25,6 @@ function Update-ObjectProperty {
     Invoke-Expression "$exp"
 
 }
-  
 
 function Remove-ObjectProperty {
 [CmdletBinding()]
