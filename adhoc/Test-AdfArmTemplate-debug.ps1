@@ -8,6 +8,8 @@ Export-AdfToArmTemplate -RootFolder $folder
 Publish-AdfV2FromJson -RootFolder $folder -ResourceGroupName 'rg-devops' -DataFactoryName 'padf2022bits' -Location 'uksouth'
 
 Test-AdfArmTemplate 'd:\GitHub\SQLPlayer\azure.datafactory.examples\adf-simpledeployment\ArmTemplate\ARMTemplateForFactory.json'
+$r = Test-AdfArmTemplate 'D:\azure.datafactory.tools-Export.Test\test\adf-simpledeployment-dev\armtemplate\ARMTemplateForFactory.json'
+$r
 
 Get-AzContext
 

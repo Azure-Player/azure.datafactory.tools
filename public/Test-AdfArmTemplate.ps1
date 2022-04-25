@@ -1,9 +1,13 @@
 <#
 .SYNOPSIS
+Runs validation agains Data Factory code in ARMTemplate in terms of best practices from the field.
 
 .DESCRIPTION
+Runs validation agains Data Factory code in ARMTemplate in terms of best practices from the field.
+Author: Paul Andrew
 
 .PARAMETER ARMTemplateFilePath
+Provide the location of your ARM template file
 
 .EXAMPLE
 Test-AdfArmTemplate -ARMTemplateFilePath "$File"
@@ -944,5 +948,7 @@ if($VerboseOutput)
     }
     Write-Host $Hr
 }
+
+return $SummaryTable
 
 }

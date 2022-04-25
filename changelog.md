@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 * Added tests for `Publish-AdfV2UsingArm`
 * Added `OutputFolder` input parameter to `Export-AdfToArmTemplate`
+* Added new cmdlet: `Test-AdfArmTemplate` #191
 
 ## [0.96.0] - 2022-02-24
 ### Fixed
