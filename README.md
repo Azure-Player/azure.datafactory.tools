@@ -647,7 +647,7 @@ Get-AdfDocDiagram -adf $adf | Set-Content -Path 'adf-diagram.md'
 
 Result:
 
-::: mermaid
+```mermaid
 graph LR
 linkedService.LS_AzureSqlDb_AW2014_SqlAuth --> linkedService.LS_AzureKeyVault
 linkedService.LS_SqlServer_DEV19_AW2017 --> integrationRuntime.SharedIR-DEV2019
@@ -680,7 +680,7 @@ dataflow.TaxiDemo --> dataset.taxi_trip_data_input
 dataflow.TaxiDemo --> dataset.taxi_trip_fare_input
 trigger.TR_AlwaysDisabled --> pipeline.PL_Wait5sec
 trigger.TR_RunEveryDay --> pipeline.PL_Wait5sec
-:::
+```
 
 # Export ADF code to ArmTemplate
 Cmdlet: `Export-AdfToArmTemplate`  
