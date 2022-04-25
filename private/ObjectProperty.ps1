@@ -7,7 +7,7 @@ function Update-ObjectProperty {
     )
     
     Invoke-Expression "`$fieldType = `$obj.$path.GetType()"
-    Write-Debug "Type of field [$path] = $fieldType / Value = $value"
+    Write-Debug "Type of field [$path] = $fieldType"
     if ($fieldType -eq [String]) {
         Write-Debug "Setting as string value"
         $exp = "`$obj.$path = `"$value`""
