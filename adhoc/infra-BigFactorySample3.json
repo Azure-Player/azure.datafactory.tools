@@ -1,0 +1,60 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "dataFactoryName": {
+      "type": "string",
+      "defaultValue": "BigFactorySample3"
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "northeurope"
+    },
+    "environment": {
+      "type": "string",
+      "defaultValue": "prod"
+    }
+  },
+  "functions": [],
+  "variables": {
+    "properties": {
+      "publicNetworkAccess": "Disabled",
+				"globalParameters": {
+					"gpVersion": {
+						"type": "string",
+						"value": "2022"
+					},
+          "gpArray": {
+            "type": "array",
+            "value": [
+              1,
+              2,
+              "xyz",
+              4,
+              6,
+              1050
+            ]
+          },
+					"gpFileFormat": {
+						"type": "string",
+						"value": "Delta"
+					}
+        }
+    },
+    "properties_git": {
+      "publicNetworkAccess": "Enabled"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.DataFactory/factories",
+      "apiVersion": "2018-06-01",
+      "name": "[parameters('dataFactoryName')]",
+      "location": "[parameters('location')]",
+      "properties": "[if(equals(parameters('environment'), 'development'), variables('properties_git'), variables('properties'))]",
+      "identity": {
+        "type": "SystemAssigned"
+      }
+    }
+  ]
+}
