@@ -1,0 +1,18 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "factoryName": {
+            "value": "adf-simpledeployment-dev"
+        },
+        "LS_SQL_Stackoverflow_connectionString": {
+            "value": ""
+        },
+        "LS_ADLS_properties_typeProperties_url": {
+            "value": "https://storageblogdev.dfs.core.windows.net"
+        },
+        "LS_AzureKeyVault_properties_typeProperties_baseUrl": {
+            "value": "https://kv-blog-dev.vault.azure.net/"
+        }
+    }
+}

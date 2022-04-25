@@ -1,12 +1,13 @@
 function Microsoft-PrePostDeploymentScript {
-[CmdletBinding()]
+    [CmdletBinding()]
 param
 (
     [parameter(Mandatory = $false)] [String] $armTemplate,
     [parameter(Mandatory = $false)] [String] $ResourceGroupName,
     [parameter(Mandatory = $false)] [String] $DataFactoryName,
     [parameter(Mandatory = $false)] [Bool] $predeployment=$true,
-    [parameter(Mandatory = $false)] [Bool] $deleteDeployment=$false
+    [parameter(Mandatory = $false)] [Bool] $deleteDeployment=$false,
+    [parameter(Mandatory = $false)] [String] $selectiveArmTemplate
     ,[parameter(Mandatory = $false)] [Bool] $DeleteNotInSource = $false
     ,[parameter(Mandatory = $false)] [Bool] $StartActiveTriggers = $true
 )
@@ -146,9 +147,20 @@ Write-Host "Getting triggers"
 $triggersInTemplate = $resources | Where-Object { $_.type -eq "Microsoft.DataFactory/factories/triggers" }
 $triggerNamesInTemplate = $triggersInTemplate | ForEach-Object {$_.name.Substring(37, $_.name.Length-40)}
 
+#Do not stop/start triggers not included in selective ARM template (if provided)
+$triggersUpdatedInTemplate = $triggersInTemplate
+$triggerNamesUpdatedInTemplate = $triggerNamesInTemplate
+if ($selectiveArmTemplate) {
+    Write-Host "Using selective template for stopping/starting triggers"
+    $selectiveTemplateJson = Get-Content $selectiveArmTemplate | ConvertFrom-Json
+    $selectiveResources = $selectiveTemplateJson.resources
+    $triggersUpdatedInTemplate = $selectiveResources | Where-Object { $_.type -eq "Microsoft.DataFactory/factories/triggers" }
+    $triggerNamesUpdatedInTemplate = $triggersUpdatedInTemplate | ForEach-Object {$_.name.Substring(37, $_.name.Length-40)}
+}
+
 $triggersDeployed = Get-SortedTriggers -DataFactoryName $DataFactoryName -ResourceGroupName $ResourceGroupName
 
-$triggersToStop = $triggersDeployed | Where-Object { $triggerNamesInTemplate -contains $_.Name } | ForEach-Object { 
+$triggersToStop = $triggersDeployed | Where-Object { $triggerNamesUpdatedInTemplate -contains $_.Name } | ForEach-Object { 
     New-Object PSObject -Property @{
         Name = $_.Name
         TriggerType = $_.Properties.GetType().Name 
@@ -160,7 +172,7 @@ $triggersToDelete = $triggersDeployed | Where-Object { $triggerNamesInTemplate -
         TriggerType = $_.Properties.GetType().Name 
     }
 }
-$triggersToStart = $triggersInTemplate | Where-Object { $_.properties.runtimeState -eq "Started" -and ($_.properties.pipelines.Count -gt 0 -or $_.properties.pipeline.pipelineReference -ne $null)} | ForEach-Object { 
+$triggersToStart = $triggersUpdatedInTemplate | Where-Object { $_.properties.runtimeState -eq "Started" -and ($_.properties.pipelines.Count -gt 0 -or $_.properties.pipeline.pipelineReference -ne $null)} | ForEach-Object { 
     New-Object PSObject -Property @{
         Name = $_.name.Substring(37, $_.name.Length-40)
         TriggerType = $_.Properties.type
@@ -171,7 +183,7 @@ if ($predeployment -eq $true) {
     #Stop all triggers
     Write-Host "Stopping deployed triggers`n"
     $triggersToStop | ForEach-Object {
-        if ($_.TriggerType -eq "BlobEventsTrigger") {
+        if ($_.TriggerType -eq "BlobEventsTrigger" -or $_.TriggerType -eq "CustomEventsTrigger") {
             Write-Host "Unsubscribing" $_.Name "from events"
             $status = Remove-AzDataFactoryV2TriggerSubscription -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Name $_.Name
             while ($status.Status -ne "Disabled"){
@@ -222,7 +234,7 @@ else {
         Write-Host "Deleting trigger "  $_.Name
         $trig = Get-AzDataFactoryV2Trigger -name $_.Name -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName
         if ($trig.RuntimeState -eq "Started") {
-            if ($_.TriggerType -eq "BlobEventsTrigger") {
+            if ($_.TriggerType -eq "BlobEventsTrigger" -or $_.TriggerType -eq "CustomEventsTrigger") {
                 Write-Host "Unsubscribing trigger" $_.Name "from events"
                 $status = Remove-AzDataFactoryV2TriggerSubscription -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Name $_.Name
                 while ($status.Status -ne "Disabled"){
@@ -283,7 +295,7 @@ else {
     if ($StartActiveTriggers) {
     Write-Host "Starting active triggers"
     $triggersToStart | ForEach-Object { 
-        if ($_.TriggerType -eq "BlobEventsTrigger") {
+        if ($_.TriggerType -eq "BlobEventsTrigger" -or $_.TriggerType -eq "CustomEventsTrigger") {
             Write-Host "Subscribing" $_.Name "to events"
             $status = Add-AzDataFactoryV2TriggerSubscription -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Name $_.Name
             while ($status.Status -ne "Enabled"){

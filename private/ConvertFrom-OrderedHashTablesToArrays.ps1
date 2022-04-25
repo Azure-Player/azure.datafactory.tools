@@ -9,10 +9,16 @@ function ConvertFrom-OrderedHashTablesToArrays {
     if ( $Item.GetType().Name -eq "PSCustomObject" ) {
 
         Write-Verbose "Processing PSCustomObject...";
-        Write-Verbose "Properties: $($Item.PSObject.Properties.Name -join ', ')";
+        $cnt = @($Item.PSobject.Properties).Count
+        if ($cnt) {
+            Write-Verbose "Properties: $($Item.PSObject.Properties.Name -join ', ')";
+        } else {
+            Write-Verbose "The object is empty - no further processing";
+        }
 
         # Loop through the properties, changing arrays and processing PSCustomObject's
-        foreach ($prop in $Item.PSObject.Properties.Name) {
+        foreach ($p in $Item.PSObject.Properties) {
+            $prop = $p.Name
             if ($null -eq $Item.$prop) {
                 Write-Verbose "Skipping property '$prop' as type cannot be determined for null";
                 continue;
