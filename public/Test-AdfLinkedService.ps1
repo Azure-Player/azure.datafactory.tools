@@ -30,9 +30,9 @@ function Test-AdfLinkedService {
         $ls = $_
         Write-Host "Testing ADF Linked Service connection: [$_] ..." 
         if ($PSCmdlet.ParameterSetName -eq "ClientDetails") {
-            $r = Test-LinkedServiceConnection -LinkedServiceName $ls -DataFactoryName $DataFactoryName -ResourceGroup $ResourceGroupName -BearerToken $bearerToken
+            $r = Test-LinkedServiceConnection -LinkedServiceName $ls -DataFactoryName $DataFactoryName -ResourceGroup $ResourceGroupName -BearerToken $bearerToken -SubscriptionID $SubscriptionID
         } else {
-            $r = Test-LinkedServiceConnectionAzRestMethod -LinkedServiceName $ls -DataFactoryName $DataFactoryName -ResourceGroup $ResourceGroupName
+            $r = Test-LinkedServiceConnectionAzRestMethod -LinkedServiceName $ls -DataFactoryName $DataFactoryName -ResourceGroup $ResourceGroupName -SubscriptionID $SubscriptionID
             Write-Debug ($r | ConvertTo-Json)
         }
         if ($null -ne $r -and $r.succeeded) {
