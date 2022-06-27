@@ -1,5 +1,5 @@
 function Test-AdfLinkedService {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName="AzRestMethod")]
     param (
         [parameter(Mandatory = $true)] 
         [String] $LinkedServiceName,
@@ -9,14 +9,12 @@ function Test-AdfLinkedService {
         [String] $ResourceGroupName,
         [parameter(Mandatory = $true)] 
         [String] $SubscriptionID,
-        [parameter(Mandatory = $true, ParameterSetName="ClientDetails")] 
+        [parameter(Mandatory = $true, ParameterSetName="ClientDetails")]
         [String] $TenantID,
-        [parameter(Mandatory = $true, ParameterSetName="ClientDetails")] 
+        [parameter(Mandatory = $true, ParameterSetName="ClientDetails")]
         [String] $ClientID,
-        [parameter(Mandatory = $true, ParameterSetName="ClientDetails")] 
-        [String] $ClientSecret,
-        [parameter(Mandatory = $true, ParameterSetName="AzRestMethod")]
-        [switch] $preferAzRestMethod
+        [parameter(Mandatory = $true, ParameterSetName="ClientDetails")]
+        [String] $ClientSecret
     )
 
     if ($PSCmdlet.ParameterSetName -eq "ClientDetails") {
@@ -32,7 +30,7 @@ function Test-AdfLinkedService {
         if ($PSCmdlet.ParameterSetName -eq "ClientDetails") {
             $r = Test-LinkedServiceConnection -LinkedServiceName $ls -DataFactoryName $DataFactoryName -ResourceGroup $ResourceGroupName -BearerToken $bearerToken -SubscriptionID $SubscriptionID
         } else {
-            $r = Test-LinkedServiceConnectionAzRestMethod -LinkedServiceName $ls -DataFactoryName $DataFactoryName -ResourceGroup $ResourceGroupName -SubscriptionID $SubscriptionID
+            $r = Test-LinkedServiceConnectionAzRestMethod -LinkedServiceName $ls -DataFactoryName $DataFactoryName -ResourceGroup $ResourceGroupName
             Write-Debug ($r | ConvertTo-Json)
         }
         if ($null -ne $r -and $r.succeeded) {
