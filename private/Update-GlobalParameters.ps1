@@ -31,7 +31,7 @@ param
             #$newGlobalParameters.Values | Out-Host
 
             Write-Verbose "Updating $($newGlobalParameters.Count) global parameters..."
-            Set-AzDataFactoryV2 -InputObject $targetAdf -Force | Out-Null
+            Set-AzDataFactoryV2 -InputObject $targetAdf -Force -PublicNetworkAccess $targetAdf.PublicNetworkAccess| Out-Null
             Write-Host "Update of $($newGlobalParameters.Count) global parameters complete."
         }
     }
