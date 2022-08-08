@@ -587,7 +587,11 @@ The cmdlet returns number of found errors, 0 (zero) = all good.
 # Test connection of Linked Service (preview)
 
 This allows you to automate test connections, which normally you can only do via browser in ADF UX by clicking `Test connection` button:
-![](media/linked-service-test-connection.gif)  
+![](media/linked-service-test-connection.gif)
+
+> Note that the function uses undocumented API call (testConnectivity).
+
+## Test connection with Service Principal
 It required Service Principal (Reg App) registered in AAD.
 
 ```PowerShell
@@ -621,8 +625,32 @@ Parameters:
 
 More about Service Principal Objects in Microsoft Doc: [Application and service principal objects in Azure Active Directory](https://docs.microsoft.com/en-us/azure/active-directory/develop/app-objects-and-service-principals)
 
-> Note that the function uses undocumented API call (testConnectivity).
 
+## Test connection current Az PowerShell module context
+```PowerShell
+# Prep
+$params = @{
+    DataFactoryName   = 'adf-example-uat'
+    ResourceGroupName = 'rg-example-uat' 
+    SubscriptionID    = "{Your-subscriptionId-here}" # or (Get-AzContext).Subscription.Id if using context directly
+    preferAzRestMethod = $true
+}
+
+# Example 1
+$LinkedServiceName = 'AzureSqlDatabase1'      
+Test-AdfLinkedService @params -LinkedServiceName $LinkedServiceName
+
+# Example 2
+$LinkedServiceNames = 'AzureSqlDatabase1,LS_ADLS'   # Comma-separated list   
+Test-AdfLinkedService @params -LinkedServiceName $LinkedServiceNames
+```
+
+Parameters:  
+- `LinkedServiceName`   - ADF Linked Service to be tested
+- `DataFactoryName`     - ADF you want to test
+- `ResourceGroupName`   - Azure Resource Group which ADF belongs to
+- `SubscriptionID`      - Subscription (Guid)
+- `preferAzRestMethod`  - Switch to turn on authentication based on the current Az Context
 
 # Generate dependencies diagram
 

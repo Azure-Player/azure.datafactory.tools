@@ -28,7 +28,7 @@ function Get-Bearer([string]$TenantID, [string]$ClientID, [string]$ClientSecret)
 }
 
 
-function Get-LinkedServiceBody([string]$LinkedServiceName, [string]$DataFactoryName, [string]$ResourceGroupName, [string]$BearerToken)
+function Get-LinkedServiceBody([string]$LinkedServiceName, [string]$DataFactoryName, [string]$ResourceGroupName, [string]$BearerToken, [string]$SubscriptionID)
 {
   $ADFEndpoint = "https://management.azure.com/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.DataFactory/factories/$DataFactoryName/linkedservices/$($LinkedServiceName)?api-version=2018-06-01"
 
@@ -43,11 +43,26 @@ function Get-LinkedServiceBody([string]$LinkedServiceName, [string]$DataFactoryN
   return ConvertTo-Json -InputObject @{"linkedService" = $a} -Depth 50
 }
 
+function Get-LinkedServiceBodyAzRestMethod([string]$LinkedServiceName, [string]$DataFactoryName, [string]$ResourceGroupName, [string]$SubscriptionID)
+{
+  $ADFEndpoint = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.DataFactory/factories/$DataFactoryName/linkedservices/$($LinkedServiceName)?api-version=2018-06-01"
 
-function Test-LinkedServiceConnection([string]$LinkedServiceName, [string]$DataFactoryName, [string]$ResourceGroupName, [string]$BearerToken)
+  $params = @{
+      Path = $ADFEndpoint
+      Method = 'GET'
+  }
+
+  $a = Invoke-AzRestMethod @params
+  $a = ($a.Content | ConvertFrom-Json)
+  Write-Debug (ConvertTo-Json -InputObject @{"linkedService" = $a} -Depth 50)
+  return ConvertTo-Json -InputObject @{"linkedService" = $a} -Depth 50
+}
+
+
+function Test-LinkedServiceConnection([string]$LinkedServiceName, [string]$DataFactoryName, [string]$ResourceGroupName, [string]$BearerToken, [string]$SubscriptionID)
 {
 
-  $body = Get-LinkedServiceBody -LinkedServiceName $LinkedServiceName -DataFactoryName $DataFactoryName -ResourceGroupName $ResourceGroupName -BearerToken $bearerToken
+  $body = Get-LinkedServiceBody -LinkedServiceName $LinkedServiceName -DataFactoryName $DataFactoryName -ResourceGroupName $ResourceGroupName -BearerToken $bearerToken -SubscriptionID $SubscriptionID
 
   $AzureEndpoint = "https://management.azure.com/subscriptions/$SubscriptionID/resourcegroups/$ResourceGroupName/providers/Microsoft.DataFactory/factories/$DataFactoryName/testConnectivity?api-version=2018-06-01"
 
@@ -66,4 +81,27 @@ function Test-LinkedServiceConnection([string]$LinkedServiceName, [string]$DataF
     Write-Error -Exception $_.Exception
   }
   return $response
+}
+
+function Test-LinkedServiceConnectionAzRestMethod([string]$LinkedServiceName, [string]$DataFactoryName, [string]$ResourceGroupName, [string]$SubscriptionID)
+{
+
+  $body = Get-LinkedServiceBodyAzRestMethod -LinkedServiceName $LinkedServiceName -DataFactoryName $DataFactoryName -ResourceGroupName $ResourceGroupName -SubscriptionID $SubscriptionID
+
+  $AzureEndpoint = "/subscriptions/$SubscriptionID/resourcegroups/$ResourceGroupName/providers/Microsoft.DataFactory/factories/$DataFactoryName/testConnectivity?api-version=2018-06-01"
+
+  $params = @{
+      Path = $AzureEndpoint
+      Payload = $Body
+      Method = 'POST'
+  }
+
+  try {
+    $response = Invoke-AzRestMethod @params
+  }
+  catch {
+    # Note: Invoke-AzRestMethod fails when payload indicates failure and error will be printed. Not fully feature parity with LinkedServiceConnection
+    Write-Error -Exception $_.Exception
+  }
+  return ($response.Content | ConvertFrom-Json)
 }

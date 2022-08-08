@@ -1,5 +1,5 @@
 function Test-AdfLinkedService {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName="AzRestMethod")]
     param (
         [parameter(Mandatory = $true)] 
         [String] $LinkedServiceName,
@@ -9,15 +9,17 @@ function Test-AdfLinkedService {
         [String] $ResourceGroupName,
         [parameter(Mandatory = $true)] 
         [String] $SubscriptionID,
-        [parameter(Mandatory = $true)] 
+        [parameter(Mandatory = $true, ParameterSetName="ClientDetails")]
         [String] $TenantID,
-        [parameter(Mandatory = $true)] 
+        [parameter(Mandatory = $true, ParameterSetName="ClientDetails")]
         [String] $ClientID,
-        [parameter(Mandatory = $true)] 
+        [parameter(Mandatory = $true, ParameterSetName="ClientDetails")]
         [String] $ClientSecret
     )
 
-    $bearerToken = Get-Bearer -TenantID $TenantID -ClientID $ClientID -ClientSecret $ClientSecret
+    if ($PSCmdlet.ParameterSetName -eq "ClientDetails") {
+        $bearerToken = Get-Bearer -TenantID $TenantID -ClientID $ClientID -ClientSecret $ClientSecret
+    }
 
     $all = 0
     $ok = 0
@@ -25,11 +27,17 @@ function Test-AdfLinkedService {
         $all += 1
         $ls = $_
         Write-Host "Testing ADF Linked Service connection: [$_] ..." 
-        $r = Test-LinkedServiceConnection -LinkedServiceName $ls -DataFactoryName $DataFactoryName -ResourceGroup $ResourceGroupName -BearerToken $bearerToken
+        if ($PSCmdlet.ParameterSetName -eq "ClientDetails") {
+            $r = Test-LinkedServiceConnection -LinkedServiceName $ls -DataFactoryName $DataFactoryName -ResourceGroup $ResourceGroupName -BearerToken $bearerToken -SubscriptionID $SubscriptionID
+        } else {
+            $r = Test-LinkedServiceConnectionAzRestMethod -LinkedServiceName $ls -DataFactoryName $DataFactoryName -ResourceGroup $ResourceGroupName -SubscriptionID $SubscriptionID
+            Write-Debug ($r | ConvertTo-Json)
+        }
         if ($null -ne $r -and $r.succeeded) {
             Write-Host "[$_] : Connection successful."
             $ok += 1
         } else {
+            Write-Host ($r | ConvertTo-Json)
             Write-Host "[$_] : Connection failed."
         }
     }
