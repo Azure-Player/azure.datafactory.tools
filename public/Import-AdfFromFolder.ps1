@@ -55,6 +55,8 @@ function Import-AdfFromFolder {
     Write-Host ("Managed VNet: {0} object(s) loaded." -f $adf.ManagedVirtualNetwork.Count)
     Import-AdfObjects -Adf $adf -All $adf.ManagedPrivateEndpoints -RootFolder $RootFolder -SubFolder "managedVirtualNetwork\default\managedPrivateEndpoint" | Out-Null
     Write-Host ("Managed Private Endpoints: {0} object(s) loaded." -f $adf.ManagedPrivateEndpoints.Count)
+    Import-AdfObjects -Adf $adf -All $adf.Credentials -RootFolder $RootFolder -SubFolder "credential" | Out-Null
+    Write-Host ("Credentials: {0} object(s) loaded." -f $adf.Credentials.Count)
     Import-AdfObjects -Adf $adf -All $adf.Factories -RootFolder $RootFolder -SubFolder "factory" | Out-Null
     Write-Host ("Factories: {0} object(s) loaded." -f $adf.Factories.Count)
 
