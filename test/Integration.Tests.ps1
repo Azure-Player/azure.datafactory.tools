@@ -180,6 +180,22 @@ InModuleScope azure.datafactory.tools {
             It 'Should run successfully' {
                 $script:opt = New-AdfPublishOption
                 $script:opt.Excludes.Add("*.*", "")
+                $script:opt.DeployGlobalParams = $false
+                $script:opt.StopStartTriggers = $false
+                {
+                    Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                        -ResourceGroupName "$ResourceGroupName" `
+                        -DataFactoryName "$DataFactoryName" -Location "$Location" -Option $script:opt 
+                } | Should -Not -Throw
+            }
+        }
+    }
+
+    Describe 'Publish-AdfV2FromJson and DeployGlobalParams=true' -Tag 'Integration', 'global' {
+        Context 'But factory folder does not exist' {
+            It 'Should run successfully' {
+                $script:opt = New-AdfPublishOption
+                $script:opt.Excludes.Add("*.*", "")
                 $script:opt.Includes.Add("factory.*", "")
                 $script:opt.DeployGlobalParams = $true
                 $script:opt.StopStartTriggers = $false
@@ -190,16 +206,28 @@ InModuleScope azure.datafactory.tools {
                 } | Should -Not -Throw
             }
         }
+
+        Context 'Change PublicEndpoint to Disabled' {
+            It 'Should be changed' {
+                $targetAdf = Get-AzDataFactoryV2 -ResourceGroupName $ResourceGroupName -Name $DataFactoryName
+                $df = Set-AzDataFactoryV2 -InputObject $targetAdf -Force -PublicNetworkAccess "Disabled"
+                $df.PublicNetworkAccess | Should -Be "Disabled"
+            }
+        }
+
         Context 'factory folder exists and some global params exist' {
             It 'Should run and deploy 7 global properties' {
                 Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "$($script:DataFactoryOrigName).json" -Recurse:$true -Force 
-                $adf = Import-AdfFromFolder -FactoryName "$($script:DataFactoryName)" -RootFolder "$RootFolder"
-                $gp = $adf.Factories[0].Body.properties.globalParameters
                 Publish-AdfV2FromJson -RootFolder "$RootFolder" `
                     -ResourceGroupName "$ResourceGroupName" `
                     -DataFactoryName "$DataFactoryName" -Location "$Location" -Option $script:opt 
-                $adfi = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName"
-                $adfi.GlobalParameters.Count | Should -Be 7
+                    $script:adfi = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName"
+                    $adfi.GlobalParameters.Count | Should -Be 7
+                }
+
+            It 'Should have all global params of right types' {
+                $adf = Import-AdfFromFolder -FactoryName "$($script:DataFactoryName)" -RootFolder "$RootFolder"
+                $gp = $adf.Factories[0].Body.properties.globalParameters
                 $adfi.GlobalParameters.'GP-String'.Type | Should -Be $gp.'GP-String'.type
                 $adfi.GlobalParameters.'GP-String'.Value | Should -Be $gp.'GP-String'.value
                 $adfi.GlobalParameters.'GP-Int'.Type | Should -Be $gp.'GP-Int'.type

@@ -36,11 +36,10 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
 * Build function to support validation of files, dependencies and config
 * Test connections (Linked Services)
 * Generates mermaid dependencies diagram to be used in MarkDown type of documents
-  
-The following features coming in the future:
-* Unit Tests of selected Pipelines and Linked Services
 
-> The module publishes code, which is created and maintained by ADF in a code repository, when configured.
+# Known issues
+
+The module accepts **Credentials** type of object (when loading from files), but the deployment is skipped and not supported yet. [Read more here](https://github.com/SQLPlayer/azure.datafactory.tools/issues/156).
 
 # Overview
 

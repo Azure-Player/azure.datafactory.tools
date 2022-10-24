@@ -24,7 +24,6 @@ InModuleScope azure.datafactory.tools {
     Write-Host $script:RootFolder
     
     $VerbosePreference = 'Continue'
-    $script:RootFolder = 'C:\Users\kamil\AppData\Local\Temp\ADFTools-3oirmp1y.vrn\BigFactorySample2'
 
     Describe 'Prerequisites of Export-AdfToArmTemplate' -Tag 'Unit' {
         It 'no files *.json!' {
