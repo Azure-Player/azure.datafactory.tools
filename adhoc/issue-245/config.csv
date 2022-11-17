@@ -1,0 +1,2 @@
+type,name,path,value
+pipeline,PL_GEN_Sources_Orch,activities["DFL_FlattenConversations"].typeProperties.dataflow.datasetParameters.SinkJsonConversations.DataLakeAccount,"NEWVALUE"

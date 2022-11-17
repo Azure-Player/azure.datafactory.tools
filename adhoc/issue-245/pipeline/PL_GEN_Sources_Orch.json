@@ -1,0 +1,25 @@
+{
+    "name": "PL_GEN_Sources_Orch",
+    "properties": {
+        "activities": [
+            {
+                "name": "DFL_FlattenConversations",
+                "type": "ExecuteDataFlow",
+                "userProperties": [],
+                "typeProperties": {
+                    "dataflow": {
+                        "referenceName": "DFLJsonFlattenConverations",
+                        "type": "DataFlowReference",
+                        "parameters": {},
+                        "datasetParameters": {
+                            "SinkJsonConversations": {
+                                "DataLakeAccount": "datalakestaccounttst",
+                                "Container": "landingzone"
+                            }
+                        }
+                    }
+                }
+            }
+        ]
+    }
+}
