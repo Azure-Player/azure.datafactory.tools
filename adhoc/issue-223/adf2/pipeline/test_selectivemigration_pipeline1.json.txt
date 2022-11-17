@@ -1,0 +1,162 @@
+{
+	"name": "test_selectivemigration_pipeline1",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy Files",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Set FileName Prefix",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Source Path",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set Dest Path",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Get Today Date",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "FileServerReadSettings",
+							"recursive": false,
+							"modifiedDatetimeStart": "2022-09-29T00:00:00.080Z",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".csv"
+						}
+					},
+					"enableStaging": false,
+					"enableSkipIncompatibleRow": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "sftp_dataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"folder_name": "@variables('source_path')"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "blob_dataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"container_name": "data1",
+							"directory_name": {
+								"value": "@variables('destination_path')",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Set Source Path",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "source_path",
+					"value": "test"
+				}
+			},
+			{
+				"name": "Set Dest Path",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "destination_path",
+					"value": "test1"
+				}
+			},
+			{
+				"name": "Get Today Date",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "today_date",
+					"value": {
+						"value": "@formatDateTime(convertFromUtc(utcnow(), 'Eastern Standard Time'),'yyMMdd')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"file_prefix": {
+				"type": "String"
+			},
+			"FileName": {
+				"type": "String"
+			},
+			"dest_path": {
+				"type": "String"
+			},
+			"source_path": {
+				"type": "String"
+			},
+			"Foreach_File": {
+				"type": "String"
+			},
+			"destination_path": {
+				"type": "String"
+			},
+			"today_date": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "test1"
+		},
+		"annotations": []
+	}
+}

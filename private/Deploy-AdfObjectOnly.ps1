@@ -21,6 +21,7 @@ function Deploy-AdfObjectOnly {
 
     $type = $obj.Type
     if ($script:PublishMethod -eq "AzResource") { $type = "AzResource" }
+    if ($obj.Type -eq "credential") { $type = $obj.Type }
     # Global parameters is being deployed with different method:
     if ($obj.Type -eq "factory") { $type = "GlobalParameters" }
 
@@ -120,6 +121,11 @@ function Deploy-AdfObjectOnly {
             -Name $obj.Name `
             -DefinitionFile $obj.FileName `
             -Force | Out-Null
+        }
+        'credential'
+        {
+            Write-Warning "Credentials are not yet supported. The deployment for the object is skipped."
+            Write-Warning "Any reference to the object causes error, unless to deploy it before."
         }
         'AzResource'
         {

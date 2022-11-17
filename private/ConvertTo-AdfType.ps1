@@ -15,6 +15,7 @@ function ConvertTo-AdfType {
         'Microsoft.DataFactory/factories/dataflows'              { $resType = 'dataflow' }
         'Microsoft.DataFactory/factories/linkedservices'         { $resType = 'linkedService' }
         'Microsoft.DataFactory/factories/triggers'               { $resType = 'trigger' }
+        'Microsoft.DataFactory/factories/credentials'            { $resType = 'credential' }
         'Microsoft.DataFactory/factories/managedVirtualNetworks' { $resType = 'managedVirtualNetwork' }
         'Microsoft.DataFactory/factories/managedVirtualNetworks/managedPrivateEndpoints' { $resType = 'managedVirtualNetwork\default\managedPrivateEndpoint' }
         'Microsoft.DataFactory/factories'               { $resType = 'factory' }

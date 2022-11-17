@@ -128,7 +128,14 @@ InModuleScope azure.datafactory.tools {
             Context 'of adf2' {
                 It 'Should completed successfully' {
                     $script:RootFolder = "$PSScriptRoot\adf2"
-                    { Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder $script:RootFolder -ErrorAction Stop } | Should -Not -Throw
+                    { $script:result = Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder $script:RootFolder -ErrorAction Stop } | Should -Not -Throw
+                }
+                It 'Should contains Credentials prop as ArrayList and # of items matches' {
+                    $script:result.Credentials.GetType() | Should -Be 'System.Collections.ArrayList'
+                    $cnt = 0
+                    $folder = Join-Path -Path "$script:RootFolder" -ChildPath "Credential"
+                    if (Test-Path $folder) { $cnt = ($folder | Get-ChildItem -Recurse:$false -Filter "*.json" | Measure-Object).Count }
+                    $script:result.Credentials.Count | Should -Be $cnt
                 }
             }
 
@@ -147,6 +154,7 @@ InModuleScope azure.datafactory.tools {
                     Restore-File -FileName $bf $true
                     { Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder $RootFolder -ErrorAction Stop } | Should -Not -Throw
                 }
+    
             }
 
         }
