@@ -24,7 +24,7 @@ function Read-JsonConfigFile {
         $name = $_
         $o = $json.($name)
         $o | ForEach-Object {
-            $dst = $adf.AllObjects() | Where-Object { $_.Name -eq $name } | Select-Object -First 1
+            $dst = $adf.AllObjects() | Where-Object { $_.Name -like $name } | Select-Object -First 1
             if ($null -ne $dst) {
                 $cl = New-Object -TypeName ConfigLine
                 $cl.name = $name

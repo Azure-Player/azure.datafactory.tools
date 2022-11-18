@@ -295,6 +295,26 @@ InModuleScope azure.datafactory.tools {
             }
         }
 
+        Context 'When called and JSON has wildcard in object name column' {
+            It 'Should complete' {
+                $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
+                $script:option = New-AdfPublishOption
+                $script:adf.PublishOptions = $option
+                {
+                    Update-PropertiesFromFile -adf $script:adf -stage "$($script:ConfigFolder)\config-multiple.json"
+                } | Should -Not -Throw
+            }
+        }
+        # Context 'When called and CSV has wildcard in object name column' {
+        #     BeforeEach {
+        #         Mock Update-PropertiesForObject { return 0; }
+        #     }
+        #     It 'Should execute Update-PropertiesForObject 3 times' {
+        #         Update-PropertiesFromFile -adf $script:adf -stage "multiple"
+        #         Assert-MockCalled Update-PropertiesForObject -Times 3
+        #     }
+        # }
+
 
     } 
 

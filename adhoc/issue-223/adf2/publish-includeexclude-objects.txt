@@ -1,0 +1,2 @@
++pipeline.test_selectivemigration_pipeline1
++trigger.test_selectivemigration_trigger2
