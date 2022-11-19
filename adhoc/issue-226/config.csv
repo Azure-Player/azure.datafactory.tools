@@ -1,0 +1,2 @@
+type,name,path,value
+trigger,trigger-example,typeProperties.startTime,"2022-07-28T06:00:00Z"

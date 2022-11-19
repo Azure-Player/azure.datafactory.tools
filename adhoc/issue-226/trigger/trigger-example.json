@@ -1,0 +1,21 @@
+{
+	"name": "trigger-example",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipeline": {},
+		"type": "TumblingWindowTrigger",
+		"typeProperties": {
+			"frequency": "Hour",
+			"interval": 24,
+			"startTime": "2021-02-08T06:00:00Z",
+			"delay": "00:00:00",
+			"maxConcurrency": 1,
+			"retryPolicy": {
+				"count": 3,
+				"intervalInSeconds": 600
+			},
+			"dependsOn": []
+		}
+	}
+}
