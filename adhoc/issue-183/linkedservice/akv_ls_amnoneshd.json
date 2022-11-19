@@ -1,0 +1,11 @@
+{
+    "name": "akv_ls_amnoneshd",
+    "type": "Microsoft.DataFactory/factories/linkedservices",
+    "properties": {
+        "annotations": [],
+        "type": "AzureKeyVault",
+        "typeProperties": {
+            "baseUrl": "https://co-wus2-xxxxxxx-kv-d01.vault.azure.net/"
+        }
+    }
+}

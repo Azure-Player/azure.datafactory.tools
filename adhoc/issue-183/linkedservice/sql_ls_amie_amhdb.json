@@ -1,0 +1,22 @@
+{
+    "name": "sql_ls_xxxx_amhdb",
+    "type": "Microsoft.DataFactory/factories/linkedservices",
+    "properties": {
+        "annotations": [],
+        "type": "SqlServer",
+        "typeProperties": {
+            "connectionString": {
+                "type": "AzureKeyVaultSecret",
+                "store": {
+                    "referenceName": "akv_ls_amnoneshd",
+                    "type": "LinkedServiceReference"
+                },
+                "secretName": "xxxdb-sqlconnection-adf"
+            }
+        },
+        "connectVia": {
+            "referenceName": "intRunTimexxxOneAmieDev",
+            "type": "IntegrationRuntimeReference"
+        }
+    }
+}
