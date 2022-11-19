@@ -1,0 +1,25 @@
+{
+    "name": "pl_nav_extract",
+    "properties": {
+        "activities": [
+            {
+                "name": "DFL_FlattenConversations",
+                "type": "ExecuteDataFlow"
+            }
+        ],
+        "concurrency": 1,
+        "parameters": {
+            "param_queries": {
+                "type": "array",
+                "defaultValue": [
+                    {
+                        "QueryName": "SalesInvoiceHeader",
+                        "QueryStatement": "SELECT",
+                        "IncrementalLoad": true,
+                        "MaxTimestampInt": 100
+                    }
+                ]
+            }
+        }
+    }
+}
