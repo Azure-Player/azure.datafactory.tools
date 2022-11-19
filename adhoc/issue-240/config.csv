@@ -1,0 +1,2 @@
+type,name,path,value
+pipeline,pl_nav_extract,-parameters.param_queries.defaultValue,
