@@ -3,3 +3,4 @@ trigger,TR_AlwaysDisabled,runtimeState,Started
 # Comment in the middle of the file
 dataset,CADOutput1,typeProperties.columnDelimiter,"¦"
 trigger,TR_AlwaysDisabled,typeProperties.recurrence.interval,2
+trigger,TR_TumblingWindow,$.properties.typeProperties.startTime,"2022-10-07T00:35:00.000Z"

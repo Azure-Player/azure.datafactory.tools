@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.101.0] - 2022-11-19 
+### Fixed
+* Bug #226: Cannot overwrite/set DateTime type of value via config file
+
 ## [0.100.0] - 2022-11-18 
 ### Fixed
 * Bug #229: Wildcard in name not working in json config file
