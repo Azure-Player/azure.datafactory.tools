@@ -2,6 +2,7 @@
 #Get-Module 
 $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'Continue'
+$path = (.\adhoc\Get-RootPath.ps1)
 
 . .\adhoc\~~Load-all-cmdlets-locally.ps1   # Load to this session
 
@@ -42,7 +43,7 @@ $DebugPreference = 'Continue'
 #$LinkedServiceName = 'LS_SQL_Stackoverflow'
 $LinkedServiceName = 'LS_ADLS'
 $LinkedServiceName = 'LS_SQL_GenericDb'
-$LinkedServiceName = 'D:\GitHub\SQLPlayer\azure.datafactory.tools\adhoc\issue-144-165\list.json'
+$LinkedServiceName = "$path\list2.json"
 $r = Test-AdfLinkedService @params -LinkedServiceName $LinkedServiceName
 $r | Format-Table
 $r.Report
