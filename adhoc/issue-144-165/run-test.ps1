@@ -5,14 +5,11 @@ $VerbosePreference = 'Continue'
 
 . .\adhoc\~~Load-all-cmdlets-locally.ps1   # Load to this session
 
-#$path = (.\adhoc\Get-RootPath.ps1)
-#$adf = Import-AdfFromFolder -FactoryName 'abc' -RootFolder $path
-
 # Prep
 $params = @{
     DataFactoryName   = 'adf-simpledeployment-dev'
     ResourceGroupName = 'rg-blog-dev' 
-    SubscriptionID    = "0278080f-***" # or (Get-AzContext).Subscription.Id if using context directly
+    SubscriptionID    = (Get-AzContext).Subscription.Id
 }
 
 # Example 1
@@ -33,11 +30,19 @@ Test-AdfLinkedService @params -LinkedServiceName $LinkedServiceNames
 $params = @{
     DataFactoryName   = 'adf-simpledeployment-dev'
     ResourceGroupName = 'rg-blog-dev' 
-    SubscriptionID    = "0278080f-***" # or (Get-AzContext).Subscription.Id if using context directly
+    SubscriptionID    = (Get-AzContext).Subscription.Id
     TenantID          = "f331b859-caa3-4395-bc2d-546406838798"
     ClientID          = "e24c67cf-a065-491a-929e-86485e0f5d65"
     ClientSecret      = '***'
 }
-$LinkedServiceName = 'LS_AzureKeyVault'
-$LinkedServiceName = 'LS_NotExist'
+. .\adhoc\~~Load-all-cmdlets-locally.ps1   # Load to this session
+$DebugPreference = 'Continue'
+#$LinkedServiceName = 'LS_AzureKeyVault'
+#$LinkedServiceName = 'LS_NotExist'
+#$LinkedServiceName = 'LS_SQL_Stackoverflow'
+$LinkedServiceName = 'LS_ADLS'
+$LinkedServiceName = 'LS_SQL_GenericDb'
+$LinkedServiceName = 'D:\GitHub\SQLPlayer\azure.datafactory.tools\adhoc\issue-144-165\list.json'
 $r = Test-AdfLinkedService @params -LinkedServiceName $LinkedServiceName
+$r | Format-Table
+$r.Report

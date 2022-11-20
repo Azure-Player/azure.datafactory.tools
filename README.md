@@ -606,11 +606,13 @@ $params = @{
 
 # Example 1
 $LinkedServiceName = 'AzureSqlDatabase1'      
-Test-AdfLinkedService @params -LinkedServiceName $LinkedServiceName
+$r = Test-AdfLinkedService @params -LinkedServiceName $LinkedServiceName
+$r | Format-Table
 
 # Example 2
 $LinkedServiceNames = 'AzureSqlDatabase1,LS_ADLS'   # Comma-separated list   
-Test-AdfLinkedService @params -LinkedServiceName $LinkedServiceNames
+$r = Test-AdfLinkedService @params -LinkedServiceName $LinkedServiceNames
+$r.Report
 ```
 
 Parameters:  
@@ -636,11 +638,13 @@ $params = @{
 
 # Example 1
 $LinkedServiceName = 'AzureSqlDatabase1'      
-Test-AdfLinkedService @params -LinkedServiceName $LinkedServiceName
+$r = Test-AdfLinkedService @params -LinkedServiceName $LinkedServiceName
+$r | Format-Table
 
 # Example 2
 $LinkedServiceNames = 'AzureSqlDatabase1,LS_ADLS'   # Comma-separated list   
-Test-AdfLinkedService @params -LinkedServiceName $LinkedServiceNames
+$r = Test-AdfLinkedService @params -LinkedServiceName $LinkedServiceNames
+$r.Report
 ```
 
 Parameters:  

@@ -1,19 +1,29 @@
 function Test-AdfLinkedService {
-    [CmdletBinding(DefaultParameterSetName="AzRestMethod")]
+    [CmdletBinding(DefaultParameterSetName = 'AzRestMethod')]
     param (
-        [Parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true, ParameterSetName = 'AzRestMethod')]
+        [Parameter(Mandatory = $true, ParameterSetName = 'ClientDetails')]
         [String] $LinkedServiceName,
-        [Parameter(Mandatory = $true)] 
+
+        [Parameter(Mandatory = $true, ParameterSetName = 'AzRestMethod')]
+        [Parameter(Mandatory = $true, ParameterSetName = 'ClientDetails')]
         [String] $DataFactoryName,
-        [Parameter(Mandatory = $true)] 
+
+        [Parameter(Mandatory = $true, ParameterSetName = 'AzRestMethod')]
+        [Parameter(Mandatory = $true, ParameterSetName = 'ClientDetails')]
         [String] $ResourceGroupName,
-        [Parameter(Mandatory = $true)] 
+
+        [Parameter(Mandatory = $true, ParameterSetName = 'AzRestMethod')]
+        [Parameter(Mandatory = $true, ParameterSetName = 'ClientDetails')]
         [String] $SubscriptionID,
-        [Parameter(Mandatory = $true, ParameterSetName="ClientDetails")]
+
+        [Parameter(Mandatory = $true, ParameterSetName = 'ClientDetails')]
         [String] $TenantID,
-        [Parameter(Mandatory = $true, ParameterSetName="ClientDetails")]
+
+        [Parameter(Mandatory = $true, ParameterSetName = 'ClientDetails')]
         [String] $ClientID,
-        [Parameter(Mandatory = $true, ParameterSetName="ClientDetails")]
+
+        [Parameter(Mandatory = $true, ParameterSetName = 'ClientDetails')]
         [String] $ClientSecret
     )
     Write-Debug "BEGIN: Test-AdfLinkedService(ParameterSetName = $($PSCmdlet.ParameterSetName))"
@@ -21,27 +31,47 @@ function Test-AdfLinkedService {
     if ($PSCmdlet.ParameterSetName -eq "ClientDetails") {
         $bearerToken = Get-Bearer -TenantID $TenantID -ClientID $ClientID -ClientSecret $ClientSecret
     }
+    if ($LinkedServiceName.EndsWith('.json'))
+    {
+        Write-Host "Definition of Linked Services in json file: $LinkedServiceName"
+        $definitionFile = Get-Content -Path $LinkedServiceName -Encoding utf8 -Raw
+        $j = $definitionFile | ConvertFrom-Json
+        $list = $j.linkedServices
+        Write-Host "Found $($list.Count) name(s) in definition file."
+    }
+    else {
+        $list = $LinkedServiceName.Split(',')
+        Write-Host "Found $($list.Count) name(s) in comma-separated list."
+    }
 
     $report = @{}
-
     $all = 0
     $ok = 0
-    $LinkedServiceName.Split(',') | ForEach-Object { 
+    $list | ForEach-Object { 
         $all += 1
-        $ls = $_
-        Write-Host "Testing ADF Linked Service connection: [$_] ..." 
+        if ($_.name) { $ls = $_.name } else { $ls = $_ }
+        Write-Host "Testing ADF Linked Service connection: [$ls] ..." 
         if ($PSCmdlet.ParameterSetName -eq "ClientDetails") {
-            $r = Test-LinkedServiceConnection -LinkedServiceName $ls -DataFactoryName $DataFactoryName -ResourceGroup $ResourceGroupName -BearerToken $bearerToken -SubscriptionID $SubscriptionID
+            $r = Test-LinkedServiceConnection -LinkedServiceName $ls `
+                -DataFactoryName $DataFactoryName `
+                -ResourceGroup $ResourceGroupName `
+                -BearerToken $bearerToken `
+                -SubscriptionID $SubscriptionID `
+                -Params $_.parameters
         } else {
-            $r = Test-LinkedServiceConnectionAzRestMethod -LinkedServiceName $ls -DataFactoryName $DataFactoryName -ResourceGroup $ResourceGroupName -SubscriptionID $SubscriptionID
+            $r = Test-LinkedServiceConnectionAzRestMethod -LinkedServiceName $ls `
+                -DataFactoryName $DataFactoryName `
+                -ResourceGroup $ResourceGroupName `
+                -SubscriptionID $SubscriptionID
         }
+        $id = [String]::Format("{0:000}) {1}", $all, $ls)
         if ($null -ne $r -and $r.succeeded) {
-            Write-Host "[$_] : Connection successful."
-            $report.Add($_, $true)
+            Write-Host "$all) [$ls] : Connection successful."
+            $report.Add($id, $true)
             $ok += 1
         } else {
-            Write-Host "[$_] : Connection failed."
-            $report.Add($_, $false)
+            Write-Host "$all) [$ls] : Connection failed."
+            $report.Add($id, $false)
             Write-Verbose ($r | ConvertTo-Json)
         }
     }

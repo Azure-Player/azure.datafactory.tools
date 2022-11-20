@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.0] - 2022-12-01
+### Added
+* Test-AdfLinkedService can use internally Invoke-AzRestMethod #144
+* Test-AdfLinkedService return an object #165
+* Test-AdfLinkedService accepts parameters of testing LS #222
+
 ## [0.101.0] - 2022-11-19 
 ### Fixed
 * Bug #226: Cannot overwrite/set DateTime type of value via config file
