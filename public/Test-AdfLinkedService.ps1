@@ -1,23 +1,28 @@
 function Test-AdfLinkedService {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName="AzRestMethod")]
     param (
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [String] $LinkedServiceName,
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [String] $DataFactoryName,
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [String] $ResourceGroupName,
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true)] 
         [String] $SubscriptionID,
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true, ParameterSetName="ClientDetails")]
         [String] $TenantID,
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true, ParameterSetName="ClientDetails")]
         [String] $ClientID,
-        [parameter(Mandatory = $true)] 
+        [Parameter(Mandatory = $true, ParameterSetName="ClientDetails")]
         [String] $ClientSecret
     )
+    Write-Debug "BEGIN: Test-AdfLinkedService(ParameterSetName = $($PSCmdlet.ParameterSetName))"
 
-    $bearerToken = Get-Bearer -TenantID $TenantID -ClientID $ClientID -ClientSecret $ClientSecret
+    if ($PSCmdlet.ParameterSetName -eq "ClientDetails") {
+        $bearerToken = Get-Bearer -TenantID $TenantID -ClientID $ClientID -ClientSecret $ClientSecret
+    }
+
+    $report = @{}
 
     $all = 0
     $ok = 0
@@ -25,12 +30,19 @@ function Test-AdfLinkedService {
         $all += 1
         $ls = $_
         Write-Host "Testing ADF Linked Service connection: [$_] ..." 
-        $r = Test-LinkedServiceConnection -LinkedServiceName $ls -DataFactoryName $DataFactoryName -ResourceGroup $ResourceGroupName -BearerToken $bearerToken
+        if ($PSCmdlet.ParameterSetName -eq "ClientDetails") {
+            $r = Test-LinkedServiceConnection -LinkedServiceName $ls -DataFactoryName $DataFactoryName -ResourceGroup $ResourceGroupName -BearerToken $bearerToken -SubscriptionID $SubscriptionID
+        } else {
+            $r = Test-LinkedServiceConnectionAzRestMethod -LinkedServiceName $ls -DataFactoryName $DataFactoryName -ResourceGroup $ResourceGroupName -SubscriptionID $SubscriptionID
+        }
         if ($null -ne $r -and $r.succeeded) {
             Write-Host "[$_] : Connection successful."
+            $report.Add($_, $true)
             $ok += 1
         } else {
             Write-Host "[$_] : Connection failed."
+            $report.Add($_, $false)
+            Write-Verbose ($r | ConvertTo-Json)
         }
     }
     
@@ -39,5 +51,8 @@ function Test-AdfLinkedService {
     Write-Host "Failed: $($all-$ok)"
     Write-Host "Total : $all"
 
+    Write-Debug "END: Test-AdfLinkedService()"
+    $result = [ordered]@{Passed = $ok; Failed = ($all-$ok); Total = $all; Report = $report}
+    return $result
 }
 
