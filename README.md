@@ -591,7 +591,7 @@ This allows you to automate test connections, which normally you can only do via
 
 > Note that the function uses undocumented API call (testConnectivity).
 
-## Test connection with Service Principal
+## Test connection with Service Principal (SPN)
 It required Service Principal (Reg App) registered in AAD.
 
 ```PowerShell
@@ -602,7 +602,7 @@ $params = @{
     SubscriptionID    = "{Your-subscriptionId-here}" 
     TenantID          = "{Your-tenantId-here}"
     ClientID          = "SPN-ApplicationId"
-    ClientSecret      = "SPN-Pas$word"
+    ClientSecret      = "SPN-Password"
 }
 
 # Example 1
@@ -626,14 +626,13 @@ Parameters:
 More about Service Principal Objects in Microsoft Doc: [Application and service principal objects in Azure Active Directory](https://docs.microsoft.com/en-us/azure/active-directory/develop/app-objects-and-service-principals)
 
 
-## Test connection current Az PowerShell module context
+## Test connection with current Az PowerShell module context
 ```PowerShell
 # Prep
 $params = @{
     DataFactoryName   = 'adf-example-uat'
     ResourceGroupName = 'rg-example-uat' 
     SubscriptionID    = "{Your-subscriptionId-here}" # or (Get-AzContext).Subscription.Id if using context directly
-    preferAzRestMethod = $true
 }
 
 # Example 1
@@ -650,7 +649,6 @@ Parameters:
 - `DataFactoryName`     - ADF you want to test
 - `ResourceGroupName`   - Azure Resource Group which ADF belongs to
 - `SubscriptionID`      - Subscription (Guid)
-- `preferAzRestMethod`  - Switch to turn on authentication based on the current Az Context
 
 # Generate dependencies diagram
 

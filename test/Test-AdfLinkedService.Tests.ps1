@@ -61,13 +61,13 @@ InModuleScope azure.datafactory.tools {
                 Mock Test-LinkedServiceConnectionAzRestMethod {return $script:success}
             }
             It 'Should not fail when testing one linked service' {
-                Test-AdfLinkedService @params -preferAzRestMethod -LinkedServiceName "x"
+                Test-AdfLinkedService @params -LinkedServiceName "x"
                 Should -Invoke -CommandName Test-LinkedServiceConnectionAzRestMethod -Times 1
                 Should -Not -Invoke -CommandName Test-LinkedServiceConnection
                 Should -Not -Invoke -CommandName Get-Bearer
             }
             It 'Should not fail when testing two linked service' {
-                Test-AdfLinkedService @params -preferAzRestMethod -LinkedServiceName "x,y"
+                Test-AdfLinkedService @params -LinkedServiceName "x,y"
                 Should -Invoke -CommandName Test-LinkedServiceConnectionAzRestMethod -Times 2
                 Should -Not -Invoke -CommandName Test-LinkedServiceConnection
                 Should -Not -Invoke -CommandName Get-Bearer
@@ -83,7 +83,7 @@ InModuleScope azure.datafactory.tools {
                 Test-AdfLinkedService @params  -TenantID 'x' -ClientID 'y' -ClientSecret 'z' -LinkedServiceName "x"
             }
             It 'Should not fail when called with Az Context' {
-                Test-AdfLinkedService @params -preferAzRestMethod -LinkedServiceName "x,y"
+                Test-AdfLinkedService @params -LinkedServiceName "x,y"
             }
         }
     }
