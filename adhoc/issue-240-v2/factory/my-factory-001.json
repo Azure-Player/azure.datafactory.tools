@@ -1,0 +1,16 @@
+{
+	"name": "my-factory-001",
+	"properties": {
+		"globalParameters": {
+			"one_parameter": {
+				"type": "string",
+				"value": "testing"
+			},
+			"two_parameter": {
+				"type": "string",
+				"value": "foo-bar-whizz"
+			}
+		}
+	},
+	"location": "westeurope"
+}
