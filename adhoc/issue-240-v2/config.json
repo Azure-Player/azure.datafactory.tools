@@ -1,7 +1,7 @@
 {
     "my-factory-001": [
         {
-            "name": "$.properties.globalParameters.one_parameter",
+            "name": "$.properties.globalParameters.one_parameter.value",
             "value": "testingupdate",
             "action": "update"
         }
