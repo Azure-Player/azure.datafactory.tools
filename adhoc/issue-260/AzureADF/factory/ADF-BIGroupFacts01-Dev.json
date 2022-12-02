@@ -1,0 +1,9 @@
+{
+	"name": "ADF-BIGroupFacts01-Dev",
+	"properties": {
+		"globalConfigurations": {
+			"PipelineBillingEnabled": "false"
+		}
+	},
+	"location": "eastus"
+}

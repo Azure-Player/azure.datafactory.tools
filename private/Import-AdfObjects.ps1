@@ -27,6 +27,14 @@ function Import-AdfObjects {
         $o.FileName = $_.FullName
         $o.Body = $txt | ConvertFrom-Json
 
+        # Set Global Parameters
+        if ($SubFolder -eq 'factory') {
+            $adf.GlobalFactory.FilePath = $_.FullName
+            $adf.GlobalFactory.body = $txt
+            Set-StrictMode -Version 1
+            $adf.GlobalFactory.GlobalParameters = $o.Body.Properties.globalParameters
+        }
+
         # Discover all referenced objects
         $refs = Get-ReferencedObjects -obj $o
         foreach ($r in $refs) {
