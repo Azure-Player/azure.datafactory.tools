@@ -76,6 +76,7 @@ function Test-AdfCode {
 
     Write-Host "=== Validating other rules ..."
 
+    Write-Host "Checking duplicated names..."
     $adf.AllObjects().Name | Sort-Object -Unique | ForEach-Object {
         $r = $adf.GetObjectsByFullName("*." + $_)
         if ($r.Count -gt 1) {
@@ -84,6 +85,7 @@ function Test-AdfCode {
         }
     }
 
+    Write-Host "Checking names of datasets, pipelines, dataflows..."
     $adf.LinkedServices + $adf.DataSets + $adf.Pipelines + $adf.DataFlows | ForEach-Object {
         [string] $name = $_.Name
         if ($name.Contains('-')) {
@@ -92,12 +94,16 @@ function Test-AdfCode {
         }
     }
 
-    if ($adf.Factories.Count -gt 0 -and (Get-Member -InputObject $adf.Factories[0].Body -name "properties" -Membertype "Properties")) {
-        Get-Member -InputObject $adf.Factories[0].Body.properties.globalParameters -Membertype "NoteProperty" | ForEach-Object {
-            [string] $name = $_.Name
-            if ($name.Contains('-')) {
-                Write-Warning "Dashes ('-') are not allowed in the names of global parameters ($name)."
-                $result.WarningCount += 1
+    Write-Host "Checking: Global parameter names..."
+    if ($adf.Factories.Count -gt 0) {
+        $gparams = $adf.GlobalFactory.GlobalParameters
+        if ($gparams) {
+            $gparams | ForEach-Object {
+                [string] $name = $_.Name
+                if ($name.Contains('-')) {
+                    Write-Warning "Dashes ('-') are not allowed in the names of global parameters ($name)."
+                    $result.WarningCount += 1
+                }
             }
         }
     }
@@ -118,6 +124,7 @@ function Test-AdfCode {
     $files | ForEach-Object { 
         try {
             $FileName = $_.FullName
+            Write-Host "Checking config file: $FileName..."
             Update-PropertiesFromFile -adf $adf -stage $FileName -ErrorVariable err -ErrorAction 'Stop' -dryRun:$True
         }
         catch {

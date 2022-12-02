@@ -35,6 +35,20 @@ InModuleScope azure.datafactory.tools {
             $res.ErrorCount | Should -Be 1
             $res.WarningCount | Should -Be 6
         }
-
     }
+
+
+    Describe 'Test-AdfCode' -Tag 'Unit' {
+        It 'Should not throw error when factory has no GP but other global config' {
+            $DataFactoryName = "adf3"
+            $RootFolder = Join-Path -Path $PSScriptRoot -ChildPath $DataFactoryName
+            { 
+                $script:res = Test-AdfCode -RootFolder $RootFolder
+            } | Should -Not -Throw
+        }
+    }
+
+
+
+
 }

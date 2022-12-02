@@ -1,0 +1,9 @@
+{
+	"name": "adf3",
+	"properties": {
+		"globalConfigurations": {
+			"PipelineBillingEnabled": "false"
+		}
+	},
+	"location": "eastus"
+}
