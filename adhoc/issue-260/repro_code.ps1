@@ -3,13 +3,15 @@
 $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'Continue'
 $DebugPreference = 'Continue'
+Set-StrictMode -Version 3
 
 . .\adhoc\~~Load-all-cmdlets-locally.ps1   # Load to this session
 
 $path = (.\adhoc\Get-RootPath.ps1)
 #$RootFolder = Join-Path $path 'ADF-BIGroupFacts01-Dev'
-#$RootFolder = "$path\test\BigFactorySample2"
+$RootFolder = "$path\test\BigFactorySample2"
 $RootFolder = Join-Path $path 'AzureADF'
+$RootFolder = 'd:\GitAz\SQLPlayer\ADF-demo\SQLPlayerDemo'
 $ConfigFolder = Join-Path $RootFolder 'deployment'
 
 # Test
@@ -25,7 +27,7 @@ $adf.GlobalFactory.GlobalParameters
 
 #--if ($adf.Factories.Count -gt 0 -and (Get-Member -InputObject $adf.Factories[0].Body -name "properties" -Membertype "Properties")) {
 Get-Member -InputObject $adf.Factories[0].Body.properties.globalParameters -Membertype "NoteProperty" 
-$adf.GlobalFactory
+$adf.GlobalFactory.GlobalParameters
 
 # StrictMode & function
 
@@ -42,5 +44,6 @@ $gparams = $adf.Factories[0].Body.properties.globalParameters
 if ($gparams) 
 {
     Get-Member -InputObject $adf.Factories[0].Body.properties.globalParameters -Membertype "NoteProperty" 
+    Get-Member -InputObject $adf.GlobalFactory.GlobalParameters -Membertype "NoteProperty" 
 }
 

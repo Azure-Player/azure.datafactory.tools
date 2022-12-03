@@ -98,7 +98,7 @@ function Test-AdfCode {
     if ($adf.Factories.Count -gt 0) {
         $gparams = $adf.GlobalFactory.GlobalParameters
         if ($gparams) {
-            $gparams | ForEach-Object {
+            Get-Member -InputObject $gparams -Membertype "NoteProperty" | ForEach-Object {
                 [string] $name = $_.Name
                 if ($name.Contains('-')) {
                     Write-Warning "Dashes ('-') are not allowed in the names of global parameters ($name)."
