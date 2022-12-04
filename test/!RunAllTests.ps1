@@ -46,14 +46,15 @@ if ($InstallModules) {
         #Install-Module 'Az.DataFactory' -Force -MinimumVersion 1.16.0 -Repository 'PSGallery'
         #Install-Module 'PSScriptAnalyzer' -Force
         #Install-Module 'Pester' -Force -MinimumVersion 5.1.1
-        Import-Module 'Pester' -MinimumVersion 5.3.3
-        Import-Module 'PSScriptAnalyzer'
-        Import-Module "$folder\azure.datafactory.tools.psd1"
         [Environment]::SetEnvironmentVariable("azure.datafactory.tools.unitTestInstalledModules", $true, 'Process');
     }
 } else {
     Write-Host "Installation skipped."
 }
+Import-Module 'Pester' -MinimumVersion 5.3.3
+Import-Module 'PSScriptAnalyzer'
+Import-Module "$folder\azure.datafactory.tools.psd1"
+
 Write-Host "=============== Modules ================"
 Get-Module | Out-Host
 
