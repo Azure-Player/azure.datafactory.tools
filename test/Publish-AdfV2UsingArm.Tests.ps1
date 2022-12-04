@@ -16,7 +16,7 @@ InModuleScope azure.datafactory.tools {
     $script:ArmParamFile = "$DataFactoryName\armtemplate\ARMTemplateParametersForFactory.json"
     $script:rg = 'rg-blog-dev'
 
-    Describe 'Publish-AdfV2UsingArm' -Tag 'Unit' {
+    Describe 'Publish-AdfV2UsingArm' -Tag 'Integration' {
 
         It 'Should exist' {
             { Get-Command -Name 'Publish-AdfV2UsingArm' -ErrorAction Stop } | Should -Not -Throw

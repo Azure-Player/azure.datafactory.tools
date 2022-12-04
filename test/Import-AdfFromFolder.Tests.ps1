@@ -58,35 +58,35 @@ InModuleScope azure.datafactory.tools {
             It 'Should contains LinkedServices prop as ArrayList and # of items matches' {
                 $script:result.LinkedServices.GetType() | Should -Be 'System.Collections.ArrayList'
                 $cnt = 0
-                $folder = Join-Path -Path "$script:RootFolder" -ChildPath "LinkedService"
+                $folder = Join-Path -Path "$script:RootFolder" -ChildPath "linkedService"
                 if (Test-Path $folder) { $cnt = ($folder | Get-ChildItem -Recurse:$false -Filter "*.json" | Measure-Object).Count }
                 $script:result.LinkedServices.Count | Should -Be $cnt
             }
             It 'Should contains DataSets prop as ArrayList and # of items matches' {
                 $script:result.DataSets.GetType() | Should -Be 'System.Collections.ArrayList'
                 $cnt = 0
-                $folder = Join-Path -Path "$script:RootFolder" -ChildPath "DataSet"
+                $folder = Join-Path -Path "$script:RootFolder" -ChildPath "dataset"
                 if (Test-Path $folder) { $cnt = ($folder | Get-ChildItem -Recurse:$false -Filter "*.json" | Measure-Object).Count }
                 $script:result.DataSets.Count | Should -Be $cnt
             }
             It 'Should contains DataFlows prop as ArrayList and # of items matches' {
                 $script:result.DataFlows.GetType() | Should -Be 'System.Collections.ArrayList'
                 $cnt = 0
-                $folder = Join-Path -Path "$script:RootFolder" -ChildPath "DataFlow"
+                $folder = Join-Path -Path "$script:RootFolder" -ChildPath "dataflow"
                 if (Test-Path $folder) { $cnt = ($folder | Get-ChildItem -Recurse:$false -Filter "*.json" | Measure-Object).Count }
                 $script:result.DataFlows.Count | Should -Be $cnt
             }
             It 'Should contains Triggers prop as ArrayList and # of items matches' {
                 $script:result.Triggers.GetType() | Should -Be 'System.Collections.ArrayList'
                 $cnt = 0
-                $folder = Join-Path -Path "$script:RootFolder" -ChildPath "Trigger"
+                $folder = Join-Path -Path "$script:RootFolder" -ChildPath "trigger"
                 if (Test-Path $folder) { $cnt = ($folder | Get-ChildItem -Recurse:$false -Filter "*.json" | Measure-Object).Count }
                 $script:result.Triggers.Count | Should -Be $cnt
             }
             It 'Should contains IntegrationRuntimes prop as ArrayList and # of items matches' {
                 $script:result.IntegrationRuntimes.GetType() | Should -Be 'System.Collections.ArrayList'
                 $cnt = 0
-                $folder = Join-Path -Path "$script:RootFolder" -ChildPath "IntegrationRuntime"
+                $folder = Join-Path -Path "$script:RootFolder" -ChildPath "integrationRuntime"
                 if (Test-Path $folder) { $cnt = ($folder | Get-ChildItem -Recurse:$false -Filter "*.json" | Measure-Object).Count }
                 $script:result.IntegrationRuntimes.Count | Should -Be $cnt
             }
@@ -133,7 +133,7 @@ InModuleScope azure.datafactory.tools {
                 It 'Should contains Credentials prop as ArrayList and # of items matches' {
                     $script:result.Credentials.GetType() | Should -Be 'System.Collections.ArrayList'
                     $cnt = 0
-                    $folder = Join-Path -Path "$script:RootFolder" -ChildPath "Credential"
+                    $folder = Join-Path -Path "$script:RootFolder" -ChildPath "credential"
                     if (Test-Path $folder) { $cnt = ($folder | Get-ChildItem -Recurse:$false -Filter "*.json" | Measure-Object).Count }
                     $script:result.Credentials.Count | Should -Be $cnt
                 }

@@ -20,7 +20,7 @@ InModuleScope azure.datafactory.tools {
         }
     } 
 
-    Describe 'Get-AdfFromService' -Tag 'Unit' {
+    Describe 'Get-AdfFromService' -Tag 'Integration' {
         It 'Should execute' {
             Get-AdfFromService -FactoryName $adfName -ResourceGroupName $rg
         }

@@ -55,7 +55,7 @@ InModuleScope azure.datafactory.tools {
 
     }
 
-    Describe 'Publish-AdfV2UsingArm' -Tag 'Unit' {
+    Describe 'Publish-AdfV2UsingArm' -Tag 'Integration' {
         It 'Should deploy ADF' {
             $ArmFile =      "$RootFolder\ArmTemplate\ARMTemplateForFactory.json"
             $ArmParamFile = "$RootFolder\ArmTemplate\ARMTemplateParametersForFactory.json"

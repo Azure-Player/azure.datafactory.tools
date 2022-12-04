@@ -6,47 +6,59 @@ Param(
     [string]$TestFilenameFilter = "*",
 
     [Parameter(Mandatory=$false)]
-    [Switch]$LocalTestsOnly
+    [Switch]$MajorRelease,
+
+    [Parameter(Mandatory=$true)]
+    [Switch]$InstallModules
 )
-# $folder = 'X:\!WORK\GitHub\!SQLPlayer\azure.datafactory.tools\test'
+
+Write-Host "Host Name: $($Host.name)"
+
+$rootPath = Switch ($Host.name) {
+	'Visual Studio Code Host' { split-path $psEditor.GetEditorContext().CurrentFile.Path }
+	'Windows PowerShell ISE Host' { Split-Path -Path $psISE.CurrentFile.FullPath }
+	'ConsoleHost' { $PSScriptRoot }
+}
+$folder = Split-Path $rootPath -Parent
+# $MajorRelease = $false
+# $TestFilenameFilter = "*"
 
 Write-Host "Setting new location: $folder"
 Push-Location "$folder"
 Get-Location | Out-Host
+
 
 # Add the module location to the value of the PSModulePath environment variable
 #$p = [Environment]::GetEnvironmentVariable("PSModulePath")
 #$p += ";$folder"
 #[Environment]::SetEnvironmentVariable("PSModulePath", $p)
 
+Write-Host "=============== PowerShell Repositories ================"
 Get-PSRepository
 
 Write-Host "Installing PS modules..."
-# Set a process scoped flag so we can run tests while developing without waiting for modules to load again
-if ($null -eq [Environment]::GetEnvironmentVariable("azure.datafactory.tools.unitTestInstalledModules", 'Process')){
-    [Environment]::SetEnvironmentVariable("azure.datafactory.tools.unitTestInstalledModules", $false, 'Process');
+if ($InstallModules) {
+    # Set a process scoped flag so we can run tests while developing without waiting for modules to load again
+    if ($null -eq [Environment]::GetEnvironmentVariable("azure.datafactory.tools.unitTestInstalledModules", 'Process')){
+        [Environment]::SetEnvironmentVariable("azure.datafactory.tools.unitTestInstalledModules", $false, 'Process');
+    }
+    if ([Environment]::GetEnvironmentVariable("azure.datafactory.tools.unitTestInstalledModules", 'Process') -eq $false){
+        #Install-Module 'Az.DataFactory' -Force -MinimumVersion 1.16.0 -Repository 'PSGallery'
+        #Install-Module 'PSScriptAnalyzer' -Force
+        #Install-Module 'Pester' -Force -MinimumVersion 5.1.1
+        [Environment]::SetEnvironmentVariable("azure.datafactory.tools.unitTestInstalledModules", $true, 'Process');
+    }
+} else {
+    Write-Host "Installation skipped."
 }
-if ([Environment]::GetEnvironmentVariable("azure.datafactory.tools.unitTestInstalledModules", 'Process') -eq $false){
-    Install-Module 'Az.DataFactory' -Force -MinimumVersion 1.8.0 -Repository 'PSGallery'
-    Install-Module 'PSScriptAnalyzer' -Force
-    Install-Module 'Pester' -Force -MinimumVersion 5.1.1
-    Import-Module 'Pester'
-    Import-Module 'PSScriptAnalyzer'
-    Import-Module 'Az.DataFactory'
-    Import-Module "$folder\azure.datafactory.tools.psd1"
-    [Environment]::SetEnvironmentVariable("azure.datafactory.tools.unitTestInstalledModules", $true, 'Process');
-}
+Import-Module 'Pester' -MinimumVersion 5.3.3
+Import-Module 'PSScriptAnalyzer'
+Import-Module "$folder\azure.datafactory.tools.psd1"
+
+Write-Host "=============== Modules ================"
 Get-Module | Out-Host
 
-#v4
-#Invoke-Pester -Script "$folder\test\*.Tests.ps1" -EnableExit -OutputFile "TEST-Results.xml" -OutputFormat NUnitXml
-
-#v4
-#Invoke-Pester -Script "$testFile" -EnableExit -OutputFile "TEST-Results.xml" -OutputFormat NUnitXml
-
-#v5
-#cls
-try{
+try {
     $r = $null
     $VerbosePreference = 'SilentlyContinue'
     $ErrorActionPreference = 'Stop'     #Important!!!
@@ -60,7 +72,7 @@ try{
     $configuration.TestResult.OutputPath = "$folder\TEST-Results.xml"
     $configuration.TestResult.Enabled = $true
     $configuration.Output.Verbosity = 'Detailed'
-    if ($LocalTestsOnly) {
+    if ($MajorRelease -eq $false) {
         $configuration.Filter.ExcludeTag = 'Integration'
     }
     $configuration.Run.Path = "$folder"

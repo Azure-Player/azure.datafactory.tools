@@ -11,6 +11,7 @@ InModuleScope azure.datafactory.tools {
     Import-Module -Name $testHelperPath -Force
 
     # Variables for use in tests
+    $script:SrcFolder = "$PSScriptRoot\BigFactorySample2"
 
     Describe 'New-AdfPublishOption' -Tag 'Unit' {
         It 'Should exist' {
@@ -49,7 +50,7 @@ InModuleScope azure.datafactory.tools {
         Context 'When called with correct FilterFilePath' {
             It 'Should not throw exception' {
                 {
-                    $script:opt = New-AdfPublishOption -FilterFilePath ".\BigFactorySample2\deployment\filter.option1.txt"
+                    $script:opt = New-AdfPublishOption -FilterFilePath "$SrcFolder\deployment\filter.option1.txt"
                 } | Should -Not -Throw 
             }
             It 'Should contains 2 rules added to Includes with appropriate values' {

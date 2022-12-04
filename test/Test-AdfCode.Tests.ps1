@@ -31,9 +31,9 @@ InModuleScope azure.datafactory.tools {
             } | Should -Not -Throw
         }
         It 'Should return 1 error and 6 warnings in ReturnClass' {
-            $res.GetType() | Should -Be 'Test-AdfCode.ReturnClass'
-            $res.ErrorCount | Should -Be 1
-            $res.WarningCount | Should -Be 6
+            $script:res.GetType() | Should -Be 'Test-AdfCode.ReturnClass'
+            $script:res.ErrorCount | Should -Be 1
+            $script:res.WarningCount | Should -Be 6
         }
     }
 

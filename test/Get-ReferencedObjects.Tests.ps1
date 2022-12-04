@@ -38,7 +38,7 @@ InModuleScope azure.datafactory.tools {
 
         $cases= @{ Adf = 'BigFactorySample2'; Name = 'dataset\CADOutput1'; RefCount = 1},
                 @{ Adf = 'BigFactorySample2'; Name = 'dataset\CurrencyDatasetCAD'; RefCount = 1},
-                @{ Adf = 'BigFactorySample2'; Name = 'linkedservice\LS_AzureKeyVault'; RefCount = 0},
+                @{ Adf = 'BigFactorySample2'; Name = 'linkedService\LS_AzureKeyVault'; RefCount = 0},
                 @{ Adf = 'BigFactorySample2'; Name = 'pipeline\TaxiDemo'; RefCount = 1},
                 @{ Adf = 'BigFactorySample2'; Name = 'dataflow\Currency Converter'; RefCount = 4},
                 @{ Adf = 'adf2';              Name = 'dataset\DS_Json'; RefCount = 1}
