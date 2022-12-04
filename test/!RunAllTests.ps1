@@ -16,12 +16,12 @@ $rootPath = Switch ($Host.name) {
 	'Windows PowerShell ISE Host' { Split-Path -Path $psISE.CurrentFile.FullPath }
 	'ConsoleHost' { $PSScriptRoot }
 }
-# $folder = $rootPath;
+$folder = Split-Path $rootPath -Parent
 # $MajorRelease = $false
 # $TestFilenameFilter = "*"
 
-Write-Host "Setting new location: $testFolder"
-Push-Location "$testFolder"
+Write-Host "Setting new location: $folder"
+Push-Location "$folder"
 Get-Location | Out-Host
 
 
@@ -43,7 +43,7 @@ if ([Environment]::GetEnvironmentVariable("azure.datafactory.tools.unitTestInsta
     Install-Module 'Pester' -Force -MinimumVersion 5.1.1
     Import-Module 'Pester'
     Import-Module 'PSScriptAnalyzer'
-    Import-Module "$folder\..\azure.datafactory.tools.psd1"
+    Import-Module "$folder\azure.datafactory.tools.psd1"
     [Environment]::SetEnvironmentVariable("azure.datafactory.tools.unitTestInstalledModules", $true, 'Process');
 }
 Write-Host "=============== Modules ================"
