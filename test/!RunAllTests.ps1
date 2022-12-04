@@ -6,7 +6,10 @@ Param(
     [string]$TestFilenameFilter = "*",
 
     [Parameter(Mandatory=$false)]
-    [Switch]$MajorRelease
+    [Switch]$MajorRelease,
+
+    [Parameter(Mandatory=$true)]
+    [Switch]$InstallModules
 )
 
 Write-Host "Host Name: $($Host.name)"
@@ -30,21 +33,26 @@ Get-Location | Out-Host
 #$p += ";$folder"
 #[Environment]::SetEnvironmentVariable("PSModulePath", $p)
 
+Write-Host "=============== PowerShell Repositories ================"
 Get-PSRepository
 
 Write-Host "Installing PS modules..."
-# Set a process scoped flag so we can run tests while developing without waiting for modules to load again
-if ($null -eq [Environment]::GetEnvironmentVariable("azure.datafactory.tools.unitTestInstalledModules", 'Process')){
-    [Environment]::SetEnvironmentVariable("azure.datafactory.tools.unitTestInstalledModules", $false, 'Process');
-}
-if ([Environment]::GetEnvironmentVariable("azure.datafactory.tools.unitTestInstalledModules", 'Process') -eq $false){
-    Install-Module 'Az.DataFactory' -Force -MinimumVersion 1.8.0 -Repository 'PSGallery'
-    #Install-Module 'PSScriptAnalyzer' -Force
-    #Install-Module 'Pester' -Force -MinimumVersion 5.1.1
-    Import-Module 'Pester' -MinimumVersion 5.3.3
-    Import-Module 'PSScriptAnalyzer'
-    Import-Module "$folder\azure.datafactory.tools.psd1"
-    [Environment]::SetEnvironmentVariable("azure.datafactory.tools.unitTestInstalledModules", $true, 'Process');
+if ($InstallModules) {
+    # Set a process scoped flag so we can run tests while developing without waiting for modules to load again
+    if ($null -eq [Environment]::GetEnvironmentVariable("azure.datafactory.tools.unitTestInstalledModules", 'Process')){
+        [Environment]::SetEnvironmentVariable("azure.datafactory.tools.unitTestInstalledModules", $false, 'Process');
+    }
+    if ([Environment]::GetEnvironmentVariable("azure.datafactory.tools.unitTestInstalledModules", 'Process') -eq $false){
+        #Install-Module 'Az.DataFactory' -Force -MinimumVersion 1.16.0 -Repository 'PSGallery'
+        #Install-Module 'PSScriptAnalyzer' -Force
+        #Install-Module 'Pester' -Force -MinimumVersion 5.1.1
+        Import-Module 'Pester' -MinimumVersion 5.3.3
+        Import-Module 'PSScriptAnalyzer'
+        Import-Module "$folder\azure.datafactory.tools.psd1"
+        [Environment]::SetEnvironmentVariable("azure.datafactory.tools.unitTestInstalledModules", $true, 'Process');
+    }
+} else {
+    Write-Host "Installation skipped."
 }
 Write-Host "=============== Modules ================"
 Get-Module | Out-Host
