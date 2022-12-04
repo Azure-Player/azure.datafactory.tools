@@ -6,13 +6,24 @@ Param(
     [string]$TestFilenameFilter = "*",
 
     [Parameter(Mandatory=$false)]
-    [Switch]$LocalTestsOnly
+    [Switch]$MajorRelease
 )
-# $folder = 'X:\!WORK\GitHub\!SQLPlayer\azure.datafactory.tools\test'
 
-Write-Host "Setting new location: $folder"
-Push-Location "$folder"
+Write-Host "Host Name: $($Host.name)"
+
+$rootPath = Switch ($Host.name) {
+	'Visual Studio Code Host' { split-path $psEditor.GetEditorContext().CurrentFile.Path }
+	'Windows PowerShell ISE Host' { Split-Path -Path $psISE.CurrentFile.FullPath }
+	'ConsoleHost' { $PSScriptRoot }
+}
+# $folder = $rootPath;
+# $MajorRelease = $false
+# $TestFilenameFilter = "*"
+
+Write-Host "Setting new location: $testFolder"
+Push-Location "$testFolder"
 Get-Location | Out-Host
+
 
 # Add the module location to the value of the PSModulePath environment variable
 #$p = [Environment]::GetEnvironmentVariable("PSModulePath")
@@ -32,21 +43,13 @@ if ([Environment]::GetEnvironmentVariable("azure.datafactory.tools.unitTestInsta
     Install-Module 'Pester' -Force -MinimumVersion 5.1.1
     Import-Module 'Pester'
     Import-Module 'PSScriptAnalyzer'
-    Import-Module 'Az.DataFactory'
-    Import-Module "$folder\azure.datafactory.tools.psd1"
+    Import-Module "$folder\..\azure.datafactory.tools.psd1"
     [Environment]::SetEnvironmentVariable("azure.datafactory.tools.unitTestInstalledModules", $true, 'Process');
 }
+Write-Host "=============== Modules ================"
 Get-Module | Out-Host
 
-#v4
-#Invoke-Pester -Script "$folder\test\*.Tests.ps1" -EnableExit -OutputFile "TEST-Results.xml" -OutputFormat NUnitXml
-
-#v4
-#Invoke-Pester -Script "$testFile" -EnableExit -OutputFile "TEST-Results.xml" -OutputFormat NUnitXml
-
-#v5
-#cls
-try{
+try {
     $r = $null
     $VerbosePreference = 'SilentlyContinue'
     $ErrorActionPreference = 'Stop'     #Important!!!
@@ -60,7 +63,7 @@ try{
     $configuration.TestResult.OutputPath = "$folder\TEST-Results.xml"
     $configuration.TestResult.Enabled = $true
     $configuration.Output.Verbosity = 'Detailed'
-    if ($LocalTestsOnly) {
+    if ($MajorRelease -eq $false) {
         $configuration.Filter.ExcludeTag = 'Integration'
     }
     $configuration.Run.Path = "$folder"
