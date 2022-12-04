@@ -133,7 +133,7 @@ InModuleScope azure.datafactory.tools {
                 It 'Should contains Credentials prop as ArrayList and # of items matches' {
                     $script:result.Credentials.GetType() | Should -Be 'System.Collections.ArrayList'
                     $cnt = 0
-                    $folder = Join-Path -Path "$script:RootFolder" -ChildPath "Credential"
+                    $folder = Join-Path -Path "$script:RootFolder" -ChildPath "credential"
                     if (Test-Path $folder) { $cnt = ($folder | Get-ChildItem -Recurse:$false -Filter "*.json" | Measure-Object).Count }
                     $script:result.Credentials.Count | Should -Be $cnt
                 }
