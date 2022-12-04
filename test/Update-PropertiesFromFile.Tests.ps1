@@ -66,7 +66,7 @@ InModuleScope azure.datafactory.tools {
                 $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
                 $script:option = New-AdfPublishOption
                 $script:adf.PublishOptions = $option
-                $result = Update-PropertiesFromFile -adf $script:adf -stage "UAT"
+                $result = Update-PropertiesFromFile -adf $script:adf -stage "uat"
                 $result | Should -Be $null
             }
             It 'Should not modify any files' {
