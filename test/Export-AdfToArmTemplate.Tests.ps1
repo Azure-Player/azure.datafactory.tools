@@ -11,7 +11,7 @@ InModuleScope azure.datafactory.tools {
     Import-Module -Name $testHelperPath -Force
 
     # Variables for use in tests
-    $t = Get-TargetEnv 'BigFactorySample2'
+    $script:t = Get-TargetEnv 'adf1'
     $script:ResourceGroupName = $t.ResourceGroupName
     $script:DataFactoryOrigName = $t.DataFactoryOrigName
     $script:DataFactoryName = $t.DataFactoryName
@@ -23,7 +23,8 @@ InModuleScope azure.datafactory.tools {
     Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.json" -Recurse:$true -Force 
     Write-Host $TmpFolder
     Write-Host $script:RootFolder
-    
+    Invoke-Expression "explorer.exe '$TmpFolder'"
+
     $VerbosePreference = 'Continue'
 
     Describe 'Prerequisites of Export-AdfToArmTemplate' -Tag 'Unit' {
@@ -57,20 +58,18 @@ InModuleScope azure.datafactory.tools {
     }
 
     Describe 'Publish-AdfV2UsingArm' -Tag 'Integration' {
-        It 'Should deploy ADF' {
+        It 'Should deploy ADF from generated ARM template files' {
             $ArmFile =      "$RootFolder\ArmTemplate\ARMTemplateForFactory.json"
             $ArmParamFile = "$RootFolder\ArmTemplate\ARMTemplateParametersForFactory.json"
-            $rg = 'rg-blog-dev'
-            $DataFactoryName = 'adf1-73489375893'
+            Edit-TextInFile $ArmParamFile "$($t.DataFactoryOrigName)""" "$($t.DataFactoryName)"""
             $o = New-AdfPublishOption
             $o.CreateNewInstance = $true
-            $o.StopStartTriggers = $true
+            $o.StopStartTriggers = $false
             $o.DeployGlobalParams = $true
             { Publish-AdfV2UsingArm -TemplateFile $ArmFile -TemplateParameterFile $ArmParamFile `
-                -ResourceGroupName $rg -DataFactory $DataFactoryName -Option $o -Location 'uksouth'
+                -ResourceGroupName $t.ResourceGroupName -DataFactory $t.DataFactoryName -Option $o -Location $t.Location
             } | Should -Not -Throw
         }
     }
-
 
 }
