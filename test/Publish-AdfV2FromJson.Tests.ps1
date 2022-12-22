@@ -15,6 +15,7 @@ InModuleScope azure.datafactory.tools {
     $script:ResourceGroupName = $t.ResourceGroupName
     $script:DataFactoryOrigName = $t.DataFactoryOrigName
     $script:DataFactoryName = $t.DataFactoryName
+    $script:Location = $t.Location
 
     Describe 'Publish-AdfV2FromJson' -Tag 'Unit' {
         It 'Should exist' {
