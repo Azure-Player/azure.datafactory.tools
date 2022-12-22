@@ -177,6 +177,7 @@ function Get-RootPath {
         'Windows PowerShell ISE Host' { Split-Path -Path $psISE.CurrentFile.FullPath }
         'ConsoleHost' { $PSScriptRoot }
     }
+    $rootPath = Split-Path $rootPath -Parent
     return $rootPath;
 }
 
