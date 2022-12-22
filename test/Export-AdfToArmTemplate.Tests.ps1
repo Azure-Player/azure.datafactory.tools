@@ -11,11 +11,12 @@ InModuleScope azure.datafactory.tools {
     Import-Module -Name $testHelperPath -Force
 
     # Variables for use in tests
-    $script:ResourceGroupName = 'rg-devops-factory'
-    $c = Get-AzContext
-    $script:guid = $c.Subscription.Id.Substring(0,8)
-    $script:DataFactoryOrigName = 'BigFactorySample2'
-    $script:DataFactoryName = $script:DataFactoryOrigName + "-$guid"
+    $t = Get-TargetEnv 'BigFactorySample2'
+    $script:ResourceGroupName = $t.ResourceGroupName
+    $script:DataFactoryOrigName = $t.DataFactoryOrigName
+    $script:DataFactoryName = $t.DataFactoryName
+    $script:ArmFile =      "$DataFactoryOrigName\armtemplate\ARMTemplateForFactory.json"
+    $script:ArmParamFile = "$DataFactoryOrigName\armtemplate\ARMTemplateParametersForFactory.json"
     $script:SrcFolder = "$PSScriptRoot\$($script:DataFactoryOrigName)"
     $script:TmpFolder = (New-TemporaryDirectory).FullName
     $script:RootFolder = Join-Path -Path $script:TmpFolder -ChildPath (Split-Path -Path $script:SrcFolder -Leaf)

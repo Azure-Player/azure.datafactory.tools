@@ -146,6 +146,20 @@ function Remove-ObjectPropertyFromFile {
     [IO.File]::WriteAllLines($FileName, $output, $Utf8NoBomEncoding)
 }
 
+function Edit-TextInFile {
+    param (
+        $FileName,
+        $ReplaceText,
+        $NewText
+    )
+
+    $raw = Get-Content -Path $FileName -Raw -Encoding 'utf8'
+    $output = $raw -replace $ReplaceText, $NewText
+    $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+    [IO.File]::WriteAllLines($FileName, $output, $Utf8NoBomEncoding)
+}
+
+
 function Backup-File {
     param (
         $FileName
@@ -173,11 +187,11 @@ function Restore-File {
 
 function Get-RootPath {
     $rootPath = Switch ($Host.name) {
-        'Visual Studio Code Host' { split-path $psEditor.GetEditorContext().CurrentFile.Path }
+        'Visual Studio Code Host' { Split-Path $psEditor.GetEditorContext().CurrentFile.Path }
         'Windows PowerShell ISE Host' { Split-Path -Path $psISE.CurrentFile.FullPath }
         'ConsoleHost' { $PSScriptRoot }
     }
-    $rootPath = Split-Path $rootPath -Parent
+    #$rootPath = Split-Path $rootPath -Parent
     return $rootPath;
 }
 
@@ -207,6 +221,6 @@ Export-ModuleMember -Function `
     New-AdfObjectFromFile, `
     Remove-TargetTrigger, ConvertTo-RuntimeState, Stop-TargetTrigger, Start-TargetTrigger, Publish-TriggerIfNotExist, `
     Get-AdfObjectFromFile, `
-    Remove-ObjectPropertyFromFile, `
+    Remove-ObjectPropertyFromFile, Edit-TextInFile, `
     Backup-File, Restore-File, `
     Get-RootPath, Get-TargetEnv
