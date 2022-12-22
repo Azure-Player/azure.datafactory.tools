@@ -18,10 +18,10 @@ InModuleScope azure.datafactory.tools {
     $script:Location = $t.Location
 
     $script:TmpFolder = (New-TemporaryDirectory).FullName
-    Copy-Item -Path "$PSScriptRoot\$DataFactoryOrigName\armtemplate\" -Destination "$TmpFolder" -Recurse:$true -Force 
+    Copy-Item -Path (Join-Path $PSScriptRoot $DataFactoryOrigName "armtemplate") -Destination "$TmpFolder" -Recurse:$true -Force 
     #Invoke-Expression "explorer.exe '$TmpFolder'"
-    $script:ArmFile =      "$TmpFolder\armtemplate\ARMTemplateForFactory.json"
-    $script:ArmParamFile = "$TmpFolder\armtemplate\ARMTemplateParametersForFactory.json"
+    $script:ArmFile =      (Join-Path $TmpFolder "armtemplate" "ARMTemplateForFactory.json")
+    $script:ArmParamFile = (Join-Path $TmpFolder "armtemplate" "ARMTemplateParametersForFactory.json")
     Edit-TextInFile $script:ArmParamFile $t.DataFactoryOrigName $t.DataFactoryName
 
     Describe 'Publish-AdfV2UsingArm' -Tag 'Integration' {

@@ -25,7 +25,7 @@ InModuleScope azure.datafactory.tools {
 
     Describe 'Publish-AdfV2FromJson' {
         It 'adf2 Should skip deployment of any credential object' {
-            $script:RootFolder = "$PSScriptRoot\adf2"
+            $script:RootFolder = Join-Path $PSScriptRoot "adf2"
             $o = New-AdfPublishOption
             $o.StopStartTriggers = $false
             $o.Includes.Add("cred*.*", "")
