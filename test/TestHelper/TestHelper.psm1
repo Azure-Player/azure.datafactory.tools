@@ -171,6 +171,32 @@ function Restore-File {
     }
 }
 
+function Get-RootPath {
+    $rootPath = Switch ($Host.name) {
+        'Visual Studio Code Host' { split-path $psEditor.GetEditorContext().CurrentFile.Path }
+        'Windows PowerShell ISE Host' { Split-Path -Path $psISE.CurrentFile.FullPath }
+        'ConsoleHost' { $PSScriptRoot }
+    }
+    return $rootPath;
+}
+
+function Get-TargetEnv {
+    param (
+        [String] $AdfOrigName
+    )
+
+    $target = @{
+        ResourceGroupName = 'rg-devops-factory'
+        DataFactoryOrigName = $AdfOrigName
+        DataFactoryName = ""
+        Location = "UK South"
+    }
+    $c = Get-AzContext
+    $guid = $c.Subscription.Id.Substring(0,8)
+    $target.DataFactoryName = $AdfOrigName + "-$guid"
+    return $target
+}
+
 
 
 
@@ -181,4 +207,5 @@ Export-ModuleMember -Function `
     Remove-TargetTrigger, ConvertTo-RuntimeState, Stop-TargetTrigger, Start-TargetTrigger, Publish-TriggerIfNotExist, `
     Get-AdfObjectFromFile, `
     Remove-ObjectPropertyFromFile, `
-    Backup-File, Restore-File
+    Backup-File, Restore-File, `
+    Get-RootPath, Get-TargetEnv

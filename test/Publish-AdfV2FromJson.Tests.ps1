@@ -11,12 +11,10 @@ InModuleScope azure.datafactory.tools {
     Import-Module -Name $testHelperPath -Force
 
     # Variables for use in tests
-    $script:ResourceGroupName = 'rg-devops-factory'
-    $c = Get-AzContext
-    $script:guid = $c.Subscription.Id.Substring(0,8)
-    $script:DataFactoryOrigName = 'adf2'
-    $script:DataFactoryName = $script:DataFactoryOrigName + "-$guid"
-    $script:Location = "UK South"
+    $t = Get-TargetEnv 'adf2'
+    $script:ResourceGroupName = $t.ResourceGroupName
+    $script:DataFactoryOrigName = $t.DataFactoryOrigName
+    $script:DataFactoryName = $t.DataFactoryName
 
     Describe 'Publish-AdfV2FromJson' -Tag 'Unit' {
         It 'Should exist' {

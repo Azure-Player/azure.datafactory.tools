@@ -10,6 +10,9 @@ InModuleScope azure.datafactory.tools {
     $testHelperPath = $PSScriptRoot | Join-Path -ChildPath 'TestHelper'
     Import-Module -Name $testHelperPath -Force
 
+    $testPath = Get-RootPath
+    Set-Location $testPath
+
     # Variables for use in tests
     $script:DataFactoryName = 'adf-simpledeployment-dev'
     $script:ArmFile =      "$DataFactoryName\armtemplate\ARMTemplateForFactory.json"
