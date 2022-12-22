@@ -23,7 +23,7 @@ InModuleScope azure.datafactory.tools {
     Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.json" -Recurse:$true -Force 
     Write-Host $TmpFolder
     Write-Host $script:RootFolder
-    Invoke-Expression "explorer.exe '$TmpFolder'"
+    #Invoke-Expression "explorer.exe '$TmpFolder'"
 
     $VerbosePreference = 'Continue'
 

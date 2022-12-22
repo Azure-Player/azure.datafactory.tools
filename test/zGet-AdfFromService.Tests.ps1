@@ -11,9 +11,10 @@ InModuleScope azure.datafactory.tools {
     Import-Module -Name $testHelperPath -Force
 
     # Variables for use in tests
-    $script:adfName = 'SQLPlayerDemo-UAT'
-    $script:rg      = 'rg-devops-factory'
-
+    $t = Get-TargetEnv 'adf2'
+    $script:adfName = $t.DataFactoryName
+    $script:rg      = $t.ResourceGroupName
+    
     Describe 'Get-AdfFromService' -Tag 'Unit' {
         It 'Should exist' {
             { Get-Command -Name Get-AdfFromService -ErrorAction Stop } | Should -Not -Throw
