@@ -59,8 +59,8 @@ InModuleScope azure.datafactory.tools {
 
     Describe 'Publish-AdfV2UsingArm' -Tag 'Integration' {
         It 'Should deploy ADF from generated ARM template files' {
-            $ArmFile =      "$RootFolder\ArmTemplate\ARMTemplateForFactory.json"
-            $ArmParamFile = "$RootFolder\ArmTemplate\ARMTemplateParametersForFactory.json"
+            $ArmFile =      (Join-Path $RootFolder "ArmTemplate" "ARMTemplateForFactory.json")
+            $ArmParamFile = (Join-Path $RootFolder "ArmTemplate" "ARMTemplateParametersForFactory.json")
             Edit-TextInFile $ArmParamFile "$($t.DataFactoryOrigName)""" "$($t.DataFactoryName)"""
             $o = New-AdfPublishOption
             $o.CreateNewInstance = $true
