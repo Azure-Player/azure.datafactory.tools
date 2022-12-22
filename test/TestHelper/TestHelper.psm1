@@ -155,6 +155,7 @@ function Edit-TextInFile {
 
     $raw = Get-Content -Path $FileName -Raw -Encoding 'utf8'
     $output = $raw -replace $ReplaceText, $NewText
+    if ($raw -eq $output) { Write-Error "TestHelper.Edit-TextInFile: Content of the file hasn't been updated." }
     $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
     [IO.File]::WriteAllLines($FileName, $output, $Utf8NoBomEncoding)
 }
