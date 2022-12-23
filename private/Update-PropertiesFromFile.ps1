@@ -35,7 +35,12 @@ function Update-PropertiesFromFile {
     }
     #$config | Out-Host 
 
-    $report = @{ Updated = 0; Added = 0; Removed = 0}
+    $report = new-object PsObject -Property @{
+        Updated = 0
+        Added = 0
+        Removed = 0
+    }
+
     $config | ForEach-Object {
         Write-Debug "Item: $_"
         $path = $_.path
@@ -137,17 +142,17 @@ function Update-PropertiesForObject {
             'update'
             {
                 Update-ObjectProperty -obj $json -path "properties.$path" -value "$value"
-                $report['Updated'] += 1
+                $report.Updated += 1
             }
             'add'
             {
                 Add-ObjectProperty -obj $json -path "properties.$path" -value "$value"
-                $report['Added'] += 1
+                $report.Added += 1
             }
             'remove'
             {
                 Remove-ObjectProperty -obj $json -path "properties.$path"
-                $report['Removed'] += 1
+                $report.Removed += 1
             }
         }
     }
