@@ -146,6 +146,23 @@ function Remove-ObjectPropertyFromFile {
     [IO.File]::WriteAllLines($FileName, $output, $Utf8NoBomEncoding)
 }
 
+function Edit-ObjectPropertyInFile {
+    param (
+        $FileName,
+        $Path,
+        $Value
+    )
+
+    $j = Get-Content -Path $FileName -Raw -Encoding 'utf8' | ConvertFrom-Json
+    $exp = "`$j.$Path = $Value"
+    Write-Host "Expression to run: $exp"
+    Invoke-Expression "$exp"
+    $output = ($j | ConvertTo-Json -Compress:$true -Depth 100)
+    $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+    [IO.File]::WriteAllLines($FileName, $output, $Utf8NoBomEncoding)
+}
+
+
 function Edit-TextInFile {
     param (
         $FileName,
@@ -222,6 +239,6 @@ Export-ModuleMember -Function `
     New-AdfObjectFromFile, `
     Remove-TargetTrigger, ConvertTo-RuntimeState, Stop-TargetTrigger, Start-TargetTrigger, Publish-TriggerIfNotExist, `
     Get-AdfObjectFromFile, `
-    Remove-ObjectPropertyFromFile, Edit-TextInFile, `
+    Remove-ObjectPropertyFromFile, Edit-TextInFile, Edit-ObjectPropertyInFile, `
     Backup-File, Restore-File, `
     Get-RootPath, Get-TargetEnv
