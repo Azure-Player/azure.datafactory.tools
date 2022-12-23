@@ -11,10 +11,18 @@ InModuleScope azure.datafactory.tools {
     Import-Module -Name $testHelperPath -Force
 
     # Variables for use in tests
-    $script:DataFactoryName = 'adf-simpledeployment-dev'
-    $script:ArmFile =      "$DataFactoryName\armtemplate\ARMTemplateForFactory.json"
-    $script:ArmParamFile = "$DataFactoryName\armtemplate\ARMTemplateParametersForFactory.json"
-    $script:rg = 'rg-blog-dev'
+    $t = Get-TargetEnv 'adf-simpledeployment-dev'
+    $script:rg = $t.ResourceGroupName
+    $script:DataFactoryOrigName = $t.DataFactoryOrigName
+    $script:DataFactoryName = $t.DataFactoryName
+    $script:Location = $t.Location
+
+    $script:TmpFolder = (New-TemporaryDirectory).FullName
+    Copy-Item -Path (Join-Path $PSScriptRoot $DataFactoryOrigName "armtemplate") -Destination "$TmpFolder" -Recurse:$true -Force 
+    #Invoke-Expression "explorer.exe '$TmpFolder'"
+    $script:ArmFile =      (Join-Path $TmpFolder "armtemplate" "ARMTemplateForFactory.json")
+    $script:ArmParamFile = (Join-Path $TmpFolder "armtemplate" "ARMTemplateParametersForFactory.json")
+    Edit-TextInFile $script:ArmParamFile $t.DataFactoryOrigName $t.DataFactoryName
 
     Describe 'Publish-AdfV2UsingArm' -Tag 'Integration' {
 
@@ -27,7 +35,7 @@ InModuleScope azure.datafactory.tools {
             $o.StopStartTriggers = $false
             $o.DeployGlobalParams = $false
             { Publish-AdfV2UsingArm -TemplateFile $ArmFile -TemplateParameterFile $ArmParamFile `
-                -ResourceGroupName $rg -DataFactory $DataFactoryName -Option $o -WhatIf:$false
+                -ResourceGroupName $rg -DataFactory $DataFactoryName -Location $Location -Option $o -WhatIf:$false
             } | Should -Not -Throw
         }
     }

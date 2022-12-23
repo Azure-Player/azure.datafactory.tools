@@ -11,14 +11,16 @@ InModuleScope azure.datafactory.tools {
     Import-Module -Name $testHelperPath -Force
 
     # Variables for use in tests
-    $script:ResourceGroupName = 'rg-devops-factory'
+    $t = Get-TargetEnv 'adf1'
+    $script:DataFactoryOrigName = $t.DataFactoryOrigName
+    $script:DataFactoryName = $t.DataFactoryName
+    $script:Location = $t.Location
+    $script:ResourceGroupName = $t.ResourceGroupName
     $script:Stage = 'UAT'
-    $script:DataFactoryName = "BigFactorySample2-adf1"
-    $script:RootFolder = "$PSScriptRoot\adf1"
-    $script:Location = "NorthEurope"
+    $script:RootFolder = Join-Path $PSScriptRoot $t.DataFactoryOrigName
     $script:adf = Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder $script:RootFolder
-    $adf.ResourceGroupName = $ResourceGroupName
-    $adf.Region = $Location
+    $adf.ResourceGroupName = $t.ResourceGroupName
+    $adf.Region = $t.Location
     $o = New-AdfPublishOption
     $o.StopStartTriggers = $false
     $adf.PublishOptions = $o

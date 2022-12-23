@@ -11,7 +11,7 @@ InModuleScope azure.datafactory.tools {
     Import-Module -Name $testHelperPath -Force
 
     # Variables for use in tests
-    $script:SrcFolder = "$PSScriptRoot\BigFactorySample2"
+    $script:SrcFolder = Join-Path $PSScriptRoot "BigFactorySample2"
 
     Describe 'New-AdfPublishOption' -Tag 'Unit' {
         It 'Should exist' {

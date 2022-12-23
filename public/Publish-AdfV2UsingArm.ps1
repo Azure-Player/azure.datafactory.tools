@@ -135,7 +135,7 @@ function Publish-AdfV2UsingArm {
     Write-Host "===================================================================================";
     Write-Host "STEP: Reading Azure Data Factory from ARM Template files..."
     $adf = New-Object -TypeName 'adf'
-    $adf.Location = $RootFolder
+    $adf.Location = Split-Path $TemplateFile -Parent
     $arm = Get-Content -Path $TemplateFile -Raw | ConvertFrom-Json 
     $armParamBody = Get-Content -Path $TemplateParameterFile -Raw
     $armParam = $armParamBody | ConvertFrom-Json

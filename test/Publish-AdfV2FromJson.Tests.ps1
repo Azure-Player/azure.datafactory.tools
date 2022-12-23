@@ -11,12 +11,11 @@ InModuleScope azure.datafactory.tools {
     Import-Module -Name $testHelperPath -Force
 
     # Variables for use in tests
-    $script:ResourceGroupName = 'rg-devops-factory'
-    $c = Get-AzContext
-    $script:guid = $c.Subscription.Id.Substring(0,8)
-    $script:DataFactoryOrigName = 'adf2'
-    $script:DataFactoryName = $script:DataFactoryOrigName + "-$guid"
-    $script:Location = "UK South"
+    $t = Get-TargetEnv 'adf2'
+    $script:ResourceGroupName = $t.ResourceGroupName
+    $script:DataFactoryOrigName = $t.DataFactoryOrigName
+    $script:DataFactoryName = $t.DataFactoryName
+    $script:Location = $t.Location
 
     Describe 'Publish-AdfV2FromJson' -Tag 'Unit' {
         It 'Should exist' {
@@ -26,7 +25,7 @@ InModuleScope azure.datafactory.tools {
 
     Describe 'Publish-AdfV2FromJson' {
         It 'adf2 Should skip deployment of any credential object' {
-            $script:RootFolder = "$PSScriptRoot\adf2"
+            $script:RootFolder = Join-Path $PSScriptRoot "adf2"
             $o = New-AdfPublishOption
             $o.StopStartTriggers = $false
             $o.Includes.Add("cred*.*", "")

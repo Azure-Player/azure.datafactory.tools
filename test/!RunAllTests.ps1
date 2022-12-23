@@ -90,3 +90,5 @@ try {
 } finally {
     Pop-Location
 }
+
+# . ".\test\!RunAllTests.ps1" -folder '.\test' -TestFilenameFilter '*' -MajorRelease:$true -InstallModules:$false 

@@ -146,6 +146,38 @@ function Remove-ObjectPropertyFromFile {
     [IO.File]::WriteAllLines($FileName, $output, $Utf8NoBomEncoding)
 }
 
+function Edit-ObjectPropertyInFile {
+    param (
+        $FileName,
+        $Path,
+        $Value
+    )
+
+    $j = Get-Content -Path $FileName -Raw -Encoding 'utf8' | ConvertFrom-Json
+    $exp = "`$j.$Path = $Value"
+    Write-Host "Expression to run: $exp"
+    Invoke-Expression "$exp"
+    $output = ($j | ConvertTo-Json -Compress:$true -Depth 100)
+    $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+    [IO.File]::WriteAllLines($FileName, $output, $Utf8NoBomEncoding)
+}
+
+
+function Edit-TextInFile {
+    param (
+        $FileName,
+        $ReplaceText,
+        $NewText
+    )
+
+    $raw = Get-Content -Path $FileName -Raw -Encoding 'utf8'
+    $output = $raw -replace $ReplaceText, $NewText
+    if ($raw -eq $output) { Write-Error "TestHelper.Edit-TextInFile: Content of the file hasn't been updated." }
+    $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+    [IO.File]::WriteAllLines($FileName, $output, $Utf8NoBomEncoding)
+}
+
+
 function Backup-File {
     param (
         $FileName
@@ -171,6 +203,33 @@ function Restore-File {
     }
 }
 
+function Get-RootPath {
+    $rootPath = Switch ($Host.name) {
+        'Visual Studio Code Host' { Split-Path $psEditor.GetEditorContext().CurrentFile.Path }
+        'Windows PowerShell ISE Host' { Split-Path -Path $psISE.CurrentFile.FullPath }
+        'ConsoleHost' { $PSScriptRoot }
+    }
+    #$rootPath = Split-Path $rootPath -Parent
+    return $rootPath;
+}
+
+function Get-TargetEnv {
+    param (
+        [String] $AdfOrigName
+    )
+
+    $target = @{
+        ResourceGroupName = 'rg-devops-factory'
+        DataFactoryOrigName = $AdfOrigName
+        DataFactoryName = ""
+        Location = "UK South"
+    }
+    $c = Get-AzContext
+    $guid = $c.Subscription.Id.Substring(0,8)
+    $target.DataFactoryName = $AdfOrigName + "-$guid"
+    return $target
+}
+
 
 
 
@@ -180,5 +239,6 @@ Export-ModuleMember -Function `
     New-AdfObjectFromFile, `
     Remove-TargetTrigger, ConvertTo-RuntimeState, Stop-TargetTrigger, Start-TargetTrigger, Publish-TriggerIfNotExist, `
     Get-AdfObjectFromFile, `
-    Remove-ObjectPropertyFromFile, `
-    Backup-File, Restore-File
+    Remove-ObjectPropertyFromFile, Edit-TextInFile, Edit-ObjectPropertyInFile, `
+    Backup-File, Restore-File, `
+    Get-RootPath, Get-TargetEnv

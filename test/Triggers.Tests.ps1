@@ -91,6 +91,11 @@ InModuleScope azure.datafactory.tools {
             )
             if ($CurrentState -eq 'Enabled') { Start-TargetTrigger -Name $triggerName @script:CommonParam }
             if ($CurrentState -eq 'Disabled') { Stop-TargetTrigger -Name $triggerName @script:CommonParam }
+            # The block below is a trick to enforce publishing a trigger, because for some reason, 
+            # unchanged trigger won't be published and hence doesn't have to be stopped prior publish, which fails tests B04 & B06.
+            $file = Join-Path $RootFolder "trigger" "$triggerName.json" 
+            $startTime = (Get-Date -format "yyyy-MM-ddTHH:mm:ss.000Z")
+            Edit-ObjectPropertyInFile $file "properties.typeProperties.recurrence.startTime" """$startTime"""
 
             $opt = New-AdfPublishOption
             if ($Mode -eq 'Included') { $opt.Includes.Add("*.$triggerName", "") }
