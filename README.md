@@ -77,10 +77,10 @@ Source: https://www.powershellgallery.com/packages/azure.datafactory.tools
 # Publish Azure Data Factory 
 
 This module publishes all objects from JSON files stored by ADF in a code repository (collaboration branch). Bear in mind we are talking about *master* branch, NOT *adf_publish* branch.  
-If you want to deploy from *adf_publish* branch - read this article: [Deployment of Azure Data Factory with Azure DevOps](https://sqlplayer.net/2019/06/deployment-of-azure-data-factory-with-azure-devops/).
+If you want to deploy from *adf_publish* branch - read this article: [Deployment of Azure Data Factory with Azure DevOps](https://azureplayer.net/2019/06/deployment-of-azure-data-factory-with-azure-devops/).
 
 ## Where is my code?
-If you have never seen code of your Azure Data Factory instance - then you need to configure the code repository for your ADF. This article helps you to do that: [Setting up Code Repository for Azure Data Factory v2](https://sqlplayer.net/2018/10/setting-up-code-repository-for-azure-data-factory-v2/).  
+If you have never seen code of your Azure Data Factory instance - then you need to configure the code repository for your ADF. This article helps you to do that: [Setting up Code Repository for Azure Data Factory v2](https://azureplayer.net/2018/10/setting-up-code-repository-for-azure-data-factory-v2/).  
 Once you have set up the code repository, clone the repo and pull (download) onto local machine. The folder structure should look like this:  
 ```
 SQLPlayerDemo  
@@ -719,7 +719,7 @@ Custom Build/Release Task for Azure DevOps has been prepared as a very convenien
 The "Publish Azure Data factory" task is available for free and open-source. 
 You can install it from Microsoft MarketPlace onto your organisation.  
 More information: [Marketplace](https://marketplace.visualstudio.com/items?itemName=SQLPlayer.DataFactoryTools)
-| [Source code and documentation](https://github.com/SQLPlayer/azure.datafactory.devops)
+| [Source code and documentation](https://github.com/Azure-Player/azure.datafactory.devops)
 
 ## Using Azure PowerShell (task)
 

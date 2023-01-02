@@ -12,7 +12,7 @@
     RootModule = 'azure.datafactory.tools.psm1'
     
     # Version number of this module.
-    ModuleVersion = '0.110.1'
+    ModuleVersion = '1.0.0'
     
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -27,10 +27,10 @@
     CompanyName = 'SQLPlayer'
     
     # Copyright statement for this module
-    Copyright = '(c) 2020-2022 Kamil Nowinski. All rights reserved.'
+    Copyright = '(c) 2020-2023 Kamil Nowinski. All rights reserved.'
     
     # Description of the functionality provided by this module
-    Description = 'PowerShell module to help with CI&CD for Azure Data Factory, mainly to publish to ADF service in multiple environments. Check https://github.com/SQLPlayer/azure.datafactory.tools/ & https://sqlplayer.net/adf/'
+    Description = 'PowerShell module to help with CI&CD for Azure Data Factory, mainly to publish to ADF service in multiple environments. Check https://github.com/Azure-Player/azure.datafactory.tools/ & https://azureplayer.net/adf/'
     
     # Minimum version of the Windows PowerShell engine required by this module
     PowerShellVersion = '5.1'
@@ -114,20 +114,20 @@
             # LicenseUri = ''
     
             # A URL to the main website for this project.
-            ProjectUri = 'https://github.com/SQLPlayer/azure.datafactory.tools/'
+            ProjectUri = 'https://github.com/Azure-Player/azure.datafactory.tools/'
     
             # A URL to an icon representing this module.
-            IconUri = 'https://github.com/SQLPlayer/azure.datafactory.tools/blob/master/images/AdfColor.png'
+            IconUri = 'https://github.com/Azure-Player/azure.datafactory.tools/blob/master/images/AdfColor.png'
     
             # ReleaseNotes of this module
-            ReleaseNotes = 'https://github.com/SQLPlayer/azure.datafactory.tools/blob/master/changelog.md'
+            ReleaseNotes = 'https://github.com/Azure-Player/azure.datafactory.tools/blob/master/changelog.md'
     
         } # End of PSData hashtable
     
     } # End of PrivateData hashtable
     
     # HelpInfo URI of this module
-    HelpInfoURI = 'https://github.com/SQLPlayer/azure.datafactory.tools'
+    HelpInfoURI = 'https://github.com/Azure-Player/azure.datafactory.tools'
     
     # Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
     # DefaultCommandPrefix = ''
