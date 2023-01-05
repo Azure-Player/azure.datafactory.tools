@@ -13,7 +13,8 @@ function Update-ObjectProperty {
         $exp = "`$obj.$path = `"$value`""
     } elseif ($fieldType -eq [Boolean]) {
         Write-Debug "Setting as Boolean value"
-        $exp = "`$obj.$path = `$$value"
+        if($dryRun){$value = $false}
+        $exp = "`$obj.$path = `"$value`""
     } elseif ($fieldType -eq [DateTime]) {
         Write-Debug "Setting as DateTime value"
         $exp = "`$obj.$path = `"$value`""
