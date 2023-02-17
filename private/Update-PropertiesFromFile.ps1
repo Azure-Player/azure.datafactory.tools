@@ -135,7 +135,6 @@ function Update-PropertiesForObject {
         }
     }
 
-    if ($dryRun) { $value = 123 }
     if ($validPath) {
         switch -Exact ($action)
         {
