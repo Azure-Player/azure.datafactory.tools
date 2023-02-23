@@ -66,7 +66,7 @@ function Test-AdfCode {
             $_.DependsOn | ForEach-Object {
                 Write-Verbose -Message "  - Checking dependency: [$_]"
                 $ref_arr = $adf.GetObjectsByFullName("$_")
-                if ($ref_arr.Count -eq 0) {
+                if ($ref_arr.Count -eq 0 -and $_ -notlike "notebook.*") {
                     $result.ErrorCount += 1
                     Write-Error -Message "Couldn't find referenced object $_." -ErrorAction 'Continue'
                 }
