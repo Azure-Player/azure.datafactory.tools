@@ -11,8 +11,17 @@ function Find-RefObject($node, $list) {
         [string] $type = $node.type
         if ($type.EndsWith('Reference')) {
             $type = $type.Substring(0, $type.Length-9)
-            #Write-Verbose "$type.$($node.referenceName)"
-            $list.Add("$type.$($node.referenceName)") | Out-Null
+            $refNameType = $node.referenceName.GetType().Name
+            #Write-Verbose "$refNameType"
+            if ($refNameType -eq 'string') {
+                $refFullName = "$type.$($node.referenceName)"
+                #Write-Verbose "$refFullName"
+                $list.Add($refFullName) | Out-Null
+            } else {
+                $refFullName = "$type.Expression" 
+                #Write-Verbose "$refFullName"
+                $list.Add($refFullName) | Out-Null
+            }
         }
     }
 

@@ -121,44 +121,43 @@ InModuleScope azure.datafactory.tools {
                 $list.Count | Should -Be 2
             }
         }
-
+    }
         
-        Describe 'Import-AdfFromFolder' -Tag 'Unit' {
-            
-            Context 'of adf2' {
-                It 'Should completed successfully' {
-                    $script:RootFolder = "$PSScriptRoot\adf2"
-                    { $script:result = Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder $script:RootFolder -ErrorAction Stop } | Should -Not -Throw
-                }
-                It 'Should contains Credentials prop as ArrayList and # of items matches' {
-                    $script:result.Credentials.GetType() | Should -Be 'System.Collections.ArrayList'
-                    $cnt = 0
-                    $folder = Join-Path -Path "$script:RootFolder" -ChildPath "credential"
-                    if (Test-Path $folder) { $cnt = ($folder | Get-ChildItem -Recurse:$false -Filter "*.json" | Measure-Object).Count }
-                    $script:result.Credentials.Count | Should -Be $cnt
-                }
+    Describe 'Import-AdfFromFolder' -Tag 'Unit' {
+        
+        Context 'of adf2' {
+            It 'Should completed successfully' {
+                $script:RootFolder = "$PSScriptRoot\adf2"
+                { $script:result = Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder $script:RootFolder -ErrorAction Stop } | Should -Not -Throw
             }
+            It 'Should contains Credentials prop as ArrayList and # of items matches' {
+                $script:result.Credentials.GetType() | Should -Be 'System.Collections.ArrayList'
+                $cnt = 0
+                $folder = Join-Path -Path "$script:RootFolder" -ChildPath "credential"
+                if (Test-Path $folder) { $cnt = ($folder | Get-ChildItem -Recurse:$false -Filter "*.json" | Measure-Object).Count }
+                $script:result.Credentials.Count | Should -Be $cnt
+            }
+        }
 
-            Context 'of BigFactorySample2_vnet with properties node' {
-                It 'Should completed successfully' {
-                    $RootFolder = "$PSScriptRoot\BigFactorySample2_vnet"
-                    { Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder $RootFolder -ErrorAction Stop } | Should -Not -Throw
-                }
+        Context 'of BigFactorySample2_vnet with properties node' {
+            It 'Should completed successfully' {
+                $RootFolder = "$PSScriptRoot\BigFactorySample2_vnet"
+                { Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder $RootFolder -ErrorAction Stop } | Should -Not -Throw
             }
-            Context 'of BigFactorySample2_vnet without properties node' {
-                It 'Should completed successfully' {
-                    $RootFolder = "$PSScriptRoot\BigFactorySample2_vnet"
-                    $vnetFile = Join-Path $RootFolder 'managedVirtualNetwork\default.json'
-                    $bf = Backup-File -FileName $vnetFile
-                    Remove-ObjectPropertyFromFile -FileName $vnetFile -Path 'properties'
-                    Restore-File -FileName $bf $true
-                    { Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder $RootFolder -ErrorAction Stop } | Should -Not -Throw
-                }
-    
+        }
+        Context 'of BigFactorySample2_vnet without properties node' {
+            It 'Should completed successfully' {
+                $RootFolder = "$PSScriptRoot\BigFactorySample2_vnet"
+                $vnetFile = Join-Path $RootFolder 'managedVirtualNetwork\default.json'
+                $bf = Backup-File -FileName $vnetFile
+                Remove-ObjectPropertyFromFile -FileName $vnetFile -Path 'properties'
+                Restore-File -FileName $bf $true
+                { Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder $RootFolder -ErrorAction Stop } | Should -Not -Throw
             }
 
         }
+
+    }
     
 
-    } 
 }

@@ -1,0 +1,12 @@
+{
+    "name": "LS_AzureSynapseArtifacts1",
+    "properties": {
+        "annotations": [],
+        "type": "AzureSynapseArtifacts",
+        "typeProperties": {
+            "endpoint": "https://synapsesqlplayer.dev.azuresynapse.net",
+            "authentication": "MSI",
+            "workspaceResourceId": "/subscriptions/7d6cdb5f-be97-4907-a34c-66635a3f607d/resourceGroups/rg-synapse/providers/Microsoft.Synapse/workspaces/synapsesqlplayer"
+        }
+    }
+}

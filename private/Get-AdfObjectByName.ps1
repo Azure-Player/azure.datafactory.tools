@@ -39,6 +39,13 @@ function Get-AdfObjectByName {
         {
             $r = $adf.Credentials | Where-Object { $_.Name -eq $name } | Select-Object -First 1
         }
+        'Notebook'
+        {
+            $r = New-Object -TypeName AdfObject 
+            $r.Name = "Null"
+            $r.Type = $simtype
+            $r.Adf = $adf
+        }
         'Factory'
         {
             $r = $adf.Factories | Where-Object { $_.Name -eq $name } | Select-Object -First 1

@@ -41,7 +41,8 @@ InModuleScope azure.datafactory.tools {
                 @{ Adf = 'BigFactorySample2'; Name = 'linkedService\LS_AzureKeyVault'; RefCount = 0},
                 @{ Adf = 'BigFactorySample2'; Name = 'pipeline\TaxiDemo'; RefCount = 1},
                 @{ Adf = 'BigFactorySample2'; Name = 'dataflow\Currency Converter'; RefCount = 4},
-                @{ Adf = 'adf2';              Name = 'dataset\DS_Json'; RefCount = 1}
+                @{ Adf = 'adf2';              Name = 'dataset\DS_Json'; RefCount = 1},
+                @{ Adf = 'adf2';              Name = 'pipeline\SynapseNotebook1'; RefCount = 2}
 
         It 'Should find <RefCount> refs in object "<Adf>\<Name>"' -TestCases $cases {
             param
@@ -57,6 +58,25 @@ InModuleScope azure.datafactory.tools {
             @($refs).Count | Should -Be $RefCount
         }
 
+        $cases= 
+                @{ Adf = 'adf2';              Name = 'dataset\DS_Json' },
+                @{ Adf = 'adf2';              Name = 'pipeline\SynapseNotebook1' }
+
+        It 'Should find refs in object "<Adf>\<Name>" with expression' -TestCases $cases {
+            param
+            (
+                [string] $Adf,
+                [string] $Name
+            )
+            $script:RootFolder = "$PSScriptRoot\$Adf"
+            $o = Get-AdfObjectFromFile -FullPath "$($RootFolder)\$Name.json"
+            $o | Should -Not -Be $null
+            $refs = Get-ReferencedObjects -obj $o
+            foreach ($r in $refs) {
+                [AdfObjectName]::new($r)
+            }
+            
+        }
 
     } 
 }

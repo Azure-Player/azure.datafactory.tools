@@ -83,7 +83,7 @@ class AdfObject {
         return $ofn
     }
 
-    static $AllowedTypes = @('integrationRuntime', 'pipeline', 'dataset', 'dataflow', 'linkedService', 'trigger', 'factory', 'managedVirtualNetwork', 'managedPrivateEndpoint', 'credential')
+    static $AllowedTypes = @('integrationRuntime', 'pipeline', 'dataset', 'dataflow', 'linkedService', 'trigger', 'factory', 'managedVirtualNetwork', 'managedPrivateEndpoint', 'credential', 'notebook')
 
     static AssertType ([string] $Type)
     {
