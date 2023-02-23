@@ -39,6 +39,7 @@ function Find-RefObject($node, $list) {
             Write-Debug ("-"+"."*2*$script:ind + "$name")
             if ($name.Length -gt 0)
             {
+                $name = $name -replace "'", "''"
                 Invoke-Expression "`$in = `$node.`'$name`'"
                 Find-RefObject -node $in -list $list
             }

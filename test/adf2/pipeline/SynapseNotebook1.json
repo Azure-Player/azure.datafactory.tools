@@ -22,7 +22,8 @@
                         },
                         "type": "NotebookReference"
                     },
-                    "snapshot": true
+                    "snapshot": true,
+                    "Single'Quote": true
                 },
                 "linkedServiceName": {
                     "referenceName": "LS_AzureSynapseArtifacts1",
