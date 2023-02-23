@@ -48,6 +48,15 @@ InModuleScope azure.datafactory.tools {
         }
     }
 
+    Describe 'Test-AdfCode' -Tag 'Unit' {
+        It 'Should parse properly adf2 code' {
+            $DataFactoryName = "adf2"
+            $RootFolder = Join-Path -Path $PSScriptRoot -ChildPath $DataFactoryName
+            { 
+                $script:res = Test-AdfCode -RootFolder $RootFolder
+            } | Should -Not -Throw
+        }
+    }
 
 
 
