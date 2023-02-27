@@ -11,6 +11,14 @@ function Get-AdfObjectByName {
     $simtype = Get-SimplifiedType -Type "$type"
     switch -Exact ($simtype)
     {
+        {$simtype -in [AdfObject]::IgnoreTypes}
+        {
+            $r = New-Object -TypeName AdfObject 
+            $r.Name = "Ignored"
+            $r.Type = $simtype
+            $r.Adf = $adf
+            Break
+        }
         'IntegrationRuntime'
         {
             $r = $adf.IntegrationRuntimes | Where-Object { $_.Name -eq $name } | Select-Object -First 1
@@ -38,13 +46,6 @@ function Get-AdfObjectByName {
         'Credential'
         {
             $r = $adf.Credentials | Where-Object { $_.Name -eq $name } | Select-Object -First 1
-        }
-        'Notebook'
-        {
-            $r = New-Object -TypeName AdfObject 
-            $r.Name = "Null"
-            $r.Type = $simtype
-            $r.Adf = $adf
         }
         'Factory'
         {

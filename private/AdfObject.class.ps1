@@ -83,11 +83,13 @@ class AdfObject {
         return $ofn
     }
 
-    static $AllowedTypes = @('integrationRuntime', 'pipeline', 'dataset', 'dataflow', 'linkedService', 'trigger', 'factory', 'managedVirtualNetwork', 'managedPrivateEndpoint', 'credential', 'notebook')
+    static $AllowedTypes = @('integrationRuntime', 'pipeline', 'dataset', 'dataflow', 'linkedService', 'trigger', 'factory', 'managedVirtualNetwork', 'managedPrivateEndpoint', 'credential')
+    static $IgnoreTypes  = @('notebook', 'BigDataPool')
 
     static AssertType ([string] $Type)
     {
-        if ($Type -notin [AdfObject]::allowedTypes ) { 
+        $AllTypes = [AdfObject]::AllowedTypes + [AdfObject]::IgnoreTypes
+        if ($Type -notin $AllTypes ) { 
             throw "ADFT0029: Unknown object type: $Type."
         }
     }

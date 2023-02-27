@@ -33,7 +33,7 @@ function Deploy-AdfObject {
                 } else {
                     Write-Error "ADFT0005: Referenced object [$type].[$name] was not found."
                 }
-            } elseif ($type -ne "notebook") {
+            } elseif ($type -notin [AdfObject]::IgnoreTypes) {
                 Deploy-AdfObject -obj $depobj
             }
             $i++

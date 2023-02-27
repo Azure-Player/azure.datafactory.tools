@@ -42,7 +42,7 @@ InModuleScope azure.datafactory.tools {
                 @{ Adf = 'BigFactorySample2'; Name = 'pipeline\TaxiDemo'; RefCount = 1},
                 @{ Adf = 'BigFactorySample2'; Name = 'dataflow\Currency Converter'; RefCount = 4},
                 @{ Adf = 'adf2';              Name = 'dataset\DS_Json'; RefCount = 1},
-                @{ Adf = 'adf2';              Name = 'pipeline\SynapseNotebook1'; RefCount = 2}
+                @{ Adf = 'adf2';              Name = 'pipeline\SynapseNotebook1'; RefCount = 3}
 
         It 'Should find <RefCount> refs in object "<Adf>\<Name>"' -TestCases $cases {
             param
