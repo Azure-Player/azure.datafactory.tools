@@ -23,7 +23,20 @@
                         "type": "NotebookReference"
                     },
                     "snapshot": true,
-                    "Single'Quote": true
+                    "Single'Quote": true,
+                    "sparkPool": {
+                        "referenceName": {
+                            "value": "cosdsdsd",
+                            "type": "Expression"
+                        },
+                        "type": "BigDataPoolReference"
+                    },
+                    "conf": {
+                        "spark.dynamicAllocation.enabled": null,
+                        "spark.dynamicAllocation.minExecutors": null,
+                        "spark.dynamicAllocation.maxExecutors": null
+                    },
+                    "numExecutors": null
                 },
                 "linkedServiceName": {
                     "referenceName": "LS_AzureSynapseArtifacts1",
