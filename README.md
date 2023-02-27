@@ -22,17 +22,17 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
 * Built-in mechanism to replace, remove or add the properties with the indicated values (CSV and JSON file formats supported)
 * Stopping/starting triggers
 * Dropping objects when not exist in the source (code)  
-  * (new!) Optionally can skip deletion of excluded objects
-* Filtering (include or exclude) objects to be deployed by name and/or type **and/or folder** (new!)
+  * Optionally can skip deletion of excluded objects
+* Filtering (include or exclude) objects to be deployed by name and/or type **and/or folder**
 * Filtering supports wildcards
 * Publish options allow you to control:
   * Whether stop and restarting triggers
   * Whether delete or not objects not in the source
   * Whether create or not a new instance of ADF if it not exist
 * Tokenisation in config file allows replace any value by Environment Variable or Variable from DevOps Pipeline
-  * (new!) Allows to define multiple file (objects) by wildcarding
+  * Allows to define multiple file (objects) by wildcarding
 * Global Parameters
-* Support for Managed VNET and Managed Private Endpoint (new!)
+* Support for Managed VNET and Managed Private Endpoint 
 * Build function to support validation of files, dependencies and config
 * Test connections (Linked Services)
 * Generates mermaid dependencies diagram to be used in MarkDown type of documents
