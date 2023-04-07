@@ -95,7 +95,7 @@ function Update-PropertiesForObject {
         [Parameter(Mandatory)]          [AdfObject] $o,
         [Parameter(Mandatory)]          [string] $action,
         [Parameter(Mandatory)]          [string] $path,
-        [Parameter(Mandatory = $false)] [string] $value,
+        [AllowEmptyString()]            [string] $value,
         [Parameter(Mandatory)]          [string] $name,
         [Parameter(Mandatory)]          [string] $type,
         [Parameter(Mandatory)]          $report,

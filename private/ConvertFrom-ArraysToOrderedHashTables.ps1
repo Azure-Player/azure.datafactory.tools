@@ -59,6 +59,7 @@ function ConvertFrom-ArraysToOrderedHashTables {
             }
         }
 
+        Write-Debug "END: ConvertFrom-ArraysToOrderedHashTables";
         return $Item;
     }
     elseif ( $Item.GetType().BaseType -eq "Object[]" ) {
@@ -69,10 +70,12 @@ function ConvertFrom-ArraysToOrderedHashTables {
         }
 
         $result = ConvertFrom-ArraysToOrderedHashTables -obj $wrapper;
+        Write-Debug "END: ConvertFrom-ArraysToOrderedHashTables";
         return $result.WrappedObject;
     }
     else {
         Write-Verbose "Unknown input object type, not supportted";
+        Write-Debug "END: ConvertFrom-ArraysToOrderedHashTables";
         return $Item;
     }
 }

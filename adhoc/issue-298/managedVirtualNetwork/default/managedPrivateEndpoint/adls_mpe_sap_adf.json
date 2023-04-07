@@ -1,0 +1,11 @@
+{
+	"name": "adls_mpe_sap_adf",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/xxxxx/resourceGroups/rg-xxxxx-westeurope/providers/Microsoft.Storage/storageAccounts/xxxxxx",
+		"groupId": "dfs",
+		"fqdns": [
+			"xxxxxx.dfs.core.windows.net"
+		],
+		"timeout": 5.55
+	}
+}

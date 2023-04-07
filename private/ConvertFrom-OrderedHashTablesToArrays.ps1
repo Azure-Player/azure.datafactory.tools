@@ -24,7 +24,7 @@ function ConvertFrom-OrderedHashTablesToArrays {
                 continue;
             }
 
-            Write-Verbose "Processing property '$prop' of type  $($Item.$prop.GetType().Name)";
+            Write-Verbose "Processing property '$prop' of type $($Item.$prop.GetType().Name)";
 
             if ( $Item.$prop.GetType().Name -eq "OrderedDictionary" ) {
             
