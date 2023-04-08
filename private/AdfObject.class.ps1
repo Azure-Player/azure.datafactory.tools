@@ -83,6 +83,12 @@ class AdfObject {
         return $ofn
     }
 
+    [String] GetHash()
+    {
+        $hash = Get-FileHash -Path $this.FileName -Algorithm 'MD5'
+        return $hash.Hash
+    }
+
     static $AllowedTypes = @('integrationRuntime', 'pipeline', 'dataset', 'dataflow', 'linkedService', 'trigger', 'factory', 'managedVirtualNetwork', 'managedPrivateEndpoint', 'credential')
     static $IgnoreTypes  = @('notebook', 'BigDataPool')
 

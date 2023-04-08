@@ -11,12 +11,12 @@ function ConvertFrom-ArraysToOrderedHashTables {
 
     if ( $Item.GetType().Name -eq "PSCustomObject" ) {
 
-        Write-Verbose "Processing PSCustomObject...";
+        Write-Debug "Processing PSCustomObject...";
         $cnt = @($Item.PSobject.Properties).Count
         if ($cnt) {
-            Write-Verbose "Properties: $($Item.PSObject.Properties.Name -join ', ')";
+            Write-Debug "Properties: $($Item.PSObject.Properties.Name -join ', ')";
         } else {
-            Write-Verbose "The object is empty - no further processing";
+            Write-Debug "The object is empty - no further processing";
         }
 
         # Loop through the properties, changing arrays and processing PSCustomObject's
@@ -24,10 +24,10 @@ function ConvertFrom-ArraysToOrderedHashTables {
 
             $prop = $p.Name
             if ($null -eq $Item.$prop) {
-                Write-Verbose "Skipping property '$prop' as type cannot be determined for null";
+                Write-Debug "Skipping property '$prop' as type cannot be determined for null";
                 continue;
             }
-            Write-Verbose "Processing property '$prop' of type '$($Item.$prop.GetType().Name)'";
+            Write-Debug "Processing property '$prop' of type '$($Item.$prop.GetType().Name)'";
 
             # If the current property is a non-empty array
             if ( $Item.$prop.GetType().Name -eq "Object[]" -and $Item.$prop.Count -gt 0) {
@@ -53,7 +53,7 @@ function ConvertFrom-ArraysToOrderedHashTables {
             }
 
             elseif ( $Item.$prop.GetType().Name -eq "PSCustomObject" ) {
-                Write-Verbose "Converting PSCustomObject property using a recursive function call...";
+                Write-Debug "Converting PSCustomObject property using a recursive function call...";
 
                 $Item.$prop = ConvertFrom-ArraysToOrderedHashTables -Item $Item.$prop;
             }
@@ -74,7 +74,7 @@ function ConvertFrom-ArraysToOrderedHashTables {
         return $result.WrappedObject;
     }
     else {
-        Write-Verbose "Unknown input object type, not supportted";
+        Write-Debug "Unknown input object type, not supportted";
         Write-Debug "END: ConvertFrom-ArraysToOrderedHashTables";
         return $Item;
     }

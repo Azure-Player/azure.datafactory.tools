@@ -8,23 +8,23 @@ function ConvertFrom-OrderedHashTablesToArrays {
 
     if ( $Item.GetType().Name -eq "PSCustomObject" ) {
 
-        Write-Verbose "Processing PSCustomObject...";
+        Write-Debug "Processing PSCustomObject...";
         $cnt = @($Item.PSobject.Properties).Count
         if ($cnt) {
-            Write-Verbose "Properties: $($Item.PSObject.Properties.Name -join ', ')";
+            Write-Debug "Properties: $($Item.PSObject.Properties.Name -join ', ')";
         } else {
-            Write-Verbose "The object is empty - no further processing";
+            Write-Debug "The object is empty - no further processing";
         }
 
         # Loop through the properties, changing arrays and processing PSCustomObject's
         foreach ($p in $Item.PSObject.Properties) {
             $prop = $p.Name
             if ($null -eq $Item.$prop) {
-                Write-Verbose "Skipping property '$prop' as type cannot be determined for null";
+                Write-Debug "Skipping property '$prop' as type cannot be determined for null";
                 continue;
             }
 
-            Write-Verbose "Processing property '$prop' of type $($Item.$prop.GetType().Name)";
+            Write-Debug "Processing property '$prop' of type $($Item.$prop.GetType().Name)";
 
             if ( $Item.$prop.GetType().Name -eq "OrderedDictionary" ) {
             
@@ -41,7 +41,7 @@ function ConvertFrom-OrderedHashTablesToArrays {
                 $Item.$prop = @($Item.$prop.Values | ForEach-Object { $_ });
             }
             elseif ( $Item.$prop.GetType().Name -eq "PSCustomObject" ) {
-                Write-Verbose "Converting PSCustomObject property using a recursive function call...";
+                Write-Debug "Converting PSCustomObject property using a recursive function call...";
 
                 $Item.$prop = ConvertFrom-OrderedHashTablesToArrays -Item $Item.$prop;
             }
@@ -60,7 +60,7 @@ function ConvertFrom-OrderedHashTablesToArrays {
         return $result.WrappedObject;
     }
     else {
-        Write-Verbose "Unknown input object type, not supportted";
+        Write-Debug "Unknown input object type, not supportted";
         return $Item;
     }
 }

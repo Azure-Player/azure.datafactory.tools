@@ -65,7 +65,7 @@ function Add-ObjectProperty {
 param (
     [Parameter(Mandatory = $true)] [PSCustomObject] $obj, 
     [Parameter(Mandatory = $true)] [string] $path, 
-    [Parameter(Mandatory = $true)] [string] $value
+    [Parameter(Mandatory = $true)] $value
 )
 
     Write-Debug "Adding new property: $path"
@@ -74,12 +74,13 @@ param (
     $root = $arr[0]
     if ($arr.Count -eq 1) { $path = ""} else { $path = ($arr[1..($arr.Length-1)] -join '.') }
 
-    if ($obj.PSobject.Properties.Name -contains "$root" -and $path)
+    if ([string]::IsNullOrEmpty($obj.PSobject.Properties) -eq $false -and $obj.PSobject.Properties.Name -contains "$root" -and $path)
     {
         Add-ObjectProperty -obj $obj.$root -path $path -value $value
     }
     elseif ($arr.Count -gt 1)
     { 
+        # Write-Debug "$root / $path / $value"
         $obj | Add-Member -NotePropertyName $root -NotePropertyValue (New-Object "PSCustomObject")
         Add-ObjectProperty -obj $obj.$root -path $path -value $value  
     }

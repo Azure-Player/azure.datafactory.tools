@@ -124,9 +124,14 @@ function Publish-AdfV2FromJson {
     Write-Host "Publishing method:  $Method";
     Write-Host "Is Dry Run?:        $($DryRun.IsPresent)";
     Write-Host "======================================================================================";
-
+    if ($null -ne $Option) {
+        Write-Host "Options:"
+        $opt | Format-List | Out-Host
+        Write-Host "======================================================================================";
+    }
     $script:StartTime = Get-Date
     $script:PublishMethod = $Method
+    $script:ds = [AdfDeploymentState]::new($verStr)
 
     if ($null -ne $Option) {
         Write-Host "Publish options are provided."
@@ -143,6 +148,10 @@ function Publish-AdfV2FromJson {
         $targetAdf = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -ErrorAction:Ignore
         if ($targetAdf) {
             Write-Host "Azure Data Factory exists."
+            if ($opt.IncrementalDeployment -and !$DryRun.IsPresent) {
+                Write-Host "Loading Deployment State from ADF..."
+                $ds.GetStateFromService($targetAdf) | Out-Null
+            }
         }
         else {
             $msg = "Azure Data Factory instance does not exist."
@@ -173,13 +182,8 @@ function Publish-AdfV2FromJson {
     $adf.ResourceGroupName = "$ResourceGroupName";
     $adf.Region = "$Location";
     $adf.PublishOptions = $opt
-    
-    Write-Debug ($adf | Format-List | Out-String)
 
-    # Apply Deployment Options if applicable
-    if ($null -ne $Option) {
-        ApplyExclusionOptions -adf $adf
-    }
+    Write-Debug ($adf | Format-List | Out-String)
 
     Write-Host "===================================================================================";
     Write-Host "STEP: Replacing all properties environment-related..."
@@ -188,6 +192,32 @@ function Publish-AdfV2FromJson {
     } else {
         Write-Host "Stage parameter was not provided - action skipped."
     }
+
+    Write-Host "===================================================================================";
+    Write-Host "STEP: Determining the objects to be deployed..."
+
+    # Apply Deployment Options if applicable
+    if ($null -ne $Option) {
+        ApplyExclusionOptions -adf $adf
+    }
+    Write-Verbose "Incremental Deployment = $($opt.IncrementalDeployment)"
+    if ($opt.IncrementalDeployment) {
+        Write-Verbose "The following objects will not be deployed as they have no changes since last deployment:"
+        $unchanged_count = 0
+        $adf.AllObjects() | ForEach-Object {
+            $fullName = $_.FullName()
+            $newHash = $_.GetHash()
+            $isUnchanged = $ds.Deployed.ContainsKey($fullName) -and $ds.Deployed[$fullName] -eq $newHash
+            Write-Debug "- $fullName ( $newHash ) = Unchanged: $isUnchanged"
+            if ($isUnchanged) {
+                Write-Verbose "- $fullName"
+                $_.ToBeDeployed = $false
+                $unchanged_count++
+            }
+        }
+        Write-Host "Found $unchanged_count unchanged object(s)."
+    }
+    ToBeDeployedStat -adf $adf
 
     if ($DryRun.IsPresent) {
         Write-Host "DRY RUN: Terminating script pre-deployment - inspect returned object to review planned changes."
@@ -213,6 +243,34 @@ function Publish-AdfV2FromJson {
     }
     $adf.AllObjects() | ForEach-Object {
         Deploy-AdfObject -obj $_
+    }
+
+    Write-Host "===================================================================================";
+    Write-Host "STEP: Updating (incremental) deployment state..."
+    if ($opt.IncrementalDeployment) {
+        if ($opt.DeployGlobalParams -eq $false) {
+            Write-Warning "Incremental Deployment State will not be saved as publish option 'DeployGlobalParams' = false"
+        } else {
+            $ds.SetStateFromAdf($adf)
+            $dsjson = ConvertTo-Json $ds -Depth 5
+            Write-Verbose "--- Deployment State: ---`r`n $dsjson"
+            $gp = [AdfGlobalParam]::new($ds)
+            $report = new-object PsObject -Property @{
+                Updated = 0
+                Added = 0
+                Removed = 0
+            }
+            Update-PropertiesForObject -o $adf.Factories[0] -action 'add' -path 'globalParameters.adftools_deployment_state' -value $gp -name 'type' -type 'factory' -report $report
+        
+            Write-Verbose "Redeploying Global Parameters..."
+            $adf.Factories[0].Deployed = $false
+            #$adf.Factories[0].ToBeDeployed = $true
+            Deploy-AdfObject -obj $adf.Factories[0]
+        }
+    } else 
+    {
+        Write-Host "Incremental Deployment State will not be saved as publish option 'IncrementalDeployment' = false"
+        Write-Host "Try this new feature to speed up the deployment process. Check out more in documentation."
     }
 
     Write-Host "===================================================================================";
