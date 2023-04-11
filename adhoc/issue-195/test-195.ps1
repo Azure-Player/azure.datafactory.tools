@@ -9,7 +9,8 @@ $VerbosePreference = 'Continue'
 
 $opt = New-AdfPublishOption
 #$opt.Excludes.Add('*.*', '')
-#$opt.Includes.Add('fac*.*', '')
+$opt.Includes.Add('link*.*', '')
+$opt.Includes.Add('fac*.*', '')
 $opt.IncrementalDeployment = $true
 $ResourceGroupName = 'rg-devops-factory'
 $DataFactoryName = "adf2-99443"

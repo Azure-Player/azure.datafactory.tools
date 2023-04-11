@@ -186,6 +186,29 @@ function Publish-AdfV2FromJson {
     Write-Debug ($adf | Format-List | Out-String)
 
     Write-Host "===================================================================================";
+    Write-Host "STEP: Pre-deployment"
+    if ($opt.IncrementalDeployment -and $opt.DeployGlobalParams) {
+        Write-Host "Incremental Deployment Mode: Preparing..."
+        Write-Debug "Incremental Deployment Mode: Checking whether factory file exist..."
+        if ($adf.Factories.Count -eq 0) {
+            Write-Debug "Creating empty factory file..."
+            $EmptyFactoryFileBody = '{ "name": "'+ $adf.Name +'", "properties": { "globalParameters": {} } }'
+            $o = New-Object -TypeName "AdfObject"
+            $o.Adf = $Adf
+            $o.Name = $DataFactoryName
+            $o.Type = 'factory'
+            $o.Body = $EmptyFactoryFileBody | ConvertFrom-Json
+            $o.FileName = Save-AdfObjectAsFile -obj $o
+            $adf.GlobalFactory.FilePath = $o.FileName
+            $adf.GlobalFactory.body = $EmptyFactoryFileBody 
+            $adf.GlobalFactory.GlobalParameters = $o.Body.Properties.globalParameters
+            $adf.Factories.Add($o) | Out-Null
+            Write-Host ("Factories: 1 object created.")
+        }
+        Write-Host "Incremental Deployment Mode: Preparation Done"
+    }
+
+    Write-Host "===================================================================================";
     Write-Host "STEP: Replacing all properties environment-related..."
     if (![string]::IsNullOrEmpty($Stage)) {
         Update-PropertiesFromFile -adf $adf -stage $Stage
@@ -251,6 +274,7 @@ function Publish-AdfV2FromJson {
         if ($opt.DeployGlobalParams -eq $false) {
             Write-Warning "Incremental Deployment State will not be saved as publish option 'DeployGlobalParams' = false"
         } else {
+            Write-Debug "Deployment State -> SetStateFromAdf..."
             $ds.SetStateFromAdf($adf)
             $dsjson = ConvertTo-Json $ds -Depth 5
             Write-Verbose "--- Deployment State: ---`r`n $dsjson"

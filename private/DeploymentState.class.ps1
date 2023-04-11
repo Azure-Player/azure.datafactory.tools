@@ -19,11 +19,11 @@ class AdfDeploymentState {
                 if ($this.Deployed.ContainsKey($name))
                 {
                     $this.Deployed[$name] = $hash
-                    Write-Debug "[UPDATED] hash for $name = $hash"
+                    Write-Verbose "[UPDATED] hash for $name = $hash"
                     $cnt++
                 } else {
                     $this.Deployed.Add($name, $hash)
-                    Write-Debug "  [ADDED] hash for $name = $hash"
+                    Write-Verbose "  [ADDED] hash for $name = $hash"
                     $cnt++
                 }
             }
