@@ -27,5 +27,11 @@
         "name": "$.properties.typeProperties.baseUrl",
         "value": "https://keyvault-$($Env:ProjectName)-$($Env:Environment).vault.azure.net/"
       }
+    ],
+    "TR_RunEveryDay": [
+      {
+        "name": "$.properties.typeProperties.recurrence.startTime",
+        "value": "2020-06-01T23:22:00.000Z"
+      }
     ]
   }
