@@ -594,8 +594,8 @@ In order to speed up the deployment process, you may want to use new switch `Inc
 ### How it works?
 It uses **Deployment State** kept in one of Global Parameters and is save/read to/from ADF service.  
 When the mode is ON, the process does a few additional steps across entire deployment process:
-1. Read Global Parameters from ADF (when not newly created) to get **Deployment State**
-2. Identify which objects are unchanged and excludes them from deployment 
+1. Reads Global Parameters from ADF (when not newly created) to get previous **Deployment State**
+2. Identifies which objects are unchanged and excludes them from deployment 
 3. Calculates MD5 hashes of deployed objects and merges them to previous **Deployment State**
 4. Saves **Deployment State** as `adftools_deployment_state` global parameter
 
