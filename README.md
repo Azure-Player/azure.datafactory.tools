@@ -311,7 +311,7 @@ Currently ```Publish-AdfV2FromJson``` cmdlet contains two methods of publishing:
 
 This section describes what the function ```Publish-AdfV2FromJson``` does step by step.
 
-::: mermaid
+``` mermaid
 graph LR;
   S10[Create ADF] --> S15[Load files];
   S15 --> S20[Update properties];
@@ -321,7 +321,7 @@ graph LR;
   S40 --> S45[Save Deployment State]
 	S45 --> S50[Delete objects];
 	S50 --> S60[Restart triggers];
-:::
+```
 
 ## Step: Create ADF (if not exist)
 
