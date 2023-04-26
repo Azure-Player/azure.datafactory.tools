@@ -11,42 +11,39 @@ InModuleScope azure.datafactory.tools {
     Import-Module -Name $testHelperPath -Force
 
     # Variables for use in tests
-    $t = Get-TargetEnv 'adf2'
+    $t = Get-TargetEnv 'BigFactorySample2'
     $script:ResourceGroupName = $t.ResourceGroupName
     $script:DataFactoryOrigName = $t.DataFactoryOrigName
     $script:DataFactoryName = $t.DataFactoryName
     $script:Location = $t.Location
+    $script:adfi = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName"
 
-    Describe 'Publish-AdfV2FromJson' -Tag 'Unit' {
+
+    Describe 'Get-AzDFV2Credential' -Tag 'Unit' {
         It 'Should exist' {
-            { Get-Command -Name Publish-AdfV2FromJson -ErrorAction Stop } | Should -Not -Throw
+            { Get-Command -Name Get-AzDFV2Credential -ErrorAction Stop } | Should -Not -Throw
+        }
+        It 'Should run successfully' {
+            { Get-AzDFV2Credential -adfi $adfi | ToArray } | Should -Not -Throw
         }
     } 
 
     Describe 'Publish-AdfV2FromJson' {
-        It 'adf2 Should skip deployment of any credential object' {
-            $script:RootFolder = Join-Path $PSScriptRoot "adf2"
+        It 'BigFactorySample2 should deploy credential object successfully' {
+            $script:RootFolder = Join-Path $PSScriptRoot "BigFactorySample2"
             $o = New-AdfPublishOption
             $o.StopStartTriggers = $false
             $o.Includes.Add("cred*.*", "")
+            $o.Includes.Add("linked*.ls_azurekeyvault", "")
             Publish-AdfV2FromJson -RootFolder $RootFolder -ResourceGroupName $script:ResourceGroupName `
                 -Location $script:Location -DataFactoryName $script:DataFactoryName -Option $o
         }
-
-    }
-
-
-    Describe 'Publish-AdfV2FromJson' {
-        It 'adf2 Should skip referenced Synapse notebook in a pipeline' {
-            $script:RootFolder = Join-Path $PSScriptRoot "adf2"
-            $o = New-AdfPublishOption
-            $o.StopStartTriggers = $false
-            $o.Includes.Add("pipe*.*", "")
-            $o.Includes.Add("*.LS_AzureSynapseArtifacts1", "")
-            Publish-AdfV2FromJson -RootFolder $RootFolder -ResourceGroupName $script:ResourceGroupName `
-                -Location $script:Location -DataFactoryName $script:DataFactoryName -Option $o
+        It 'must return credential object after deployment' {
+            $crs = Get-AzDFV2Credential -adfi $adfi | ToArray
+            $crs.Count | Should -Be 1
         }
-
     }
+
+
 
 }
