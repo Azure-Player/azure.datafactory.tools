@@ -133,9 +133,10 @@ InModuleScope azure.datafactory.tools {
 
         }
 
+    }
 
+    Describe 'Publish-AdfV2FromJson' -Tag 'Integration', 'adf' {
 
-        
         Context 'ADF exist and publish whole ADF (except SharedIR)' {
             It 'Should finish successfully' {
                 Copy-Item -path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.json" -Recurse:$true -Force 

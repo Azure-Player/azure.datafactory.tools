@@ -18,6 +18,7 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
   - Integration Runtimes
   - Managed Virtual Network
   - Managed Private Endpoint
+  - Credential
 * Finding the **right order** for deploying objects (no more worrying about object names)
 * Built-in mechanism to replace, remove or add the properties with the indicated values (CSV and JSON file formats supported)
 * Stopping/starting triggers
@@ -33,13 +34,14 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
   * Allows to define multiple file (objects) by wildcarding
 * Global Parameters
 * Support for Managed VNET and Managed Private Endpoint 
+* ⭐️ Incremental deployment (**NEW!**)
 * Build function to support validation of files, dependencies and config
 * Test connections (Linked Services)
 * Generates mermaid dependencies diagram to be used in MarkDown type of documents
 
 # Known issues
 
-The module accepts **Credentials** type of object (when loading from files), but the deployment is skipped and not supported yet. [Read more here](https://github.com/SQLPlayer/azure.datafactory.tools/issues/156).
+- **[Native CDC](https://learn.microsoft.com/en-us/azure/data-factory/concepts-change-data-capture)** objects are not yet supported.
 
 # Overview
 
@@ -127,8 +129,6 @@ Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGro
 Use optional ```[-Stage]``` parameter to prepare json files of ADF with appropriate values for properties and deploy to another environment correctly. See section: **How it works / Step: Replacing all properties environment-related** for more details.  
 
 
-> Detailed *Wiki* documentation - coming soon.
-
 ## Publish Options
 
 The options allows you control which objects should be deployed by including or excluding them from the list. First of all you need to create the object:
@@ -148,6 +148,8 @@ $opt = New-AdfPublishOption
 * [Boolean] **FailsWhenPathNotFound** - indicates whether missing paths fails the script. (default: *true*)
 * [Boolean] **DoNotStopStartExcludedTriggers** - specifies whether excluded triggers will be stopped before deployment (default: *false*)
 * [Boolean] **DoNotDeleteExcludedObjects** - specifies whether excluded objects can be removed. Applies when `DeleteNotInSource` is set to *True* only. (default: *true*) 
+* [Boolean] **IncrementalDeployment** - specifies whether Incremental Deployment mode is enabled (default: *false*) 
+
 
 
 Subsequently, you can define the needed options:
@@ -249,6 +251,7 @@ pipeline.ScdType[123]
 trigger.*@testFolder
 managedVirtualNetwork*.*
 *managedPrivateEndpoint.*
+factory.*
 ```
 Full name of objects supported by the module is built of: `{Type}.{Name}@{Folder}`  
 All potential combinations can be found in code repository of ADF:  
@@ -305,12 +308,46 @@ Currently ```Publish-AdfV2FromJson``` cmdlet contains two methods of publishing:
 
 This section describes what the function ```Publish-AdfV2FromJson``` does step by step.
 
+``` mermaid
+graph LR;
+  S10[Create ADF] --> S15[Load files];
+  S15 --> S20[Update properties];
+  S20 --> S25[Deployment Plan]
+	S25 --> S30[Stop triggers];
+	S30 --> S40[Deployment];
+  S40 --> S45[Save Deployment State]
+	S45 --> S50[Delete objects];
+	S50 --> S60[Restart triggers];
+```
+
 ## Step: Create ADF (if not exist)
+
+💬 In log you'll see line: `STEP: Verifying whether ADF exists...`
 
 You must have appropriate permission to create new instance.  
 *Location* parameter is required for this action.
 
+If ADF does exist and `IncrementalDeployment` is ON, the process gets Global Parameters to load latest **Deployment State** from ADF.
+
+## Step: Load files
+
+💬 In log you'll see line: `STEP: Reading Azure Data Factory from JSON files...`
+
+This step reads all local (json) files from a given directory (`rootfolder`).
+
+
+## Step: Pre-deployment
+
+💬 In log you'll see line: `STEP: Pre-deployment`
+
+It prepares new (empty) file in `factory` folder if such file doesn't exist.  
+The file is needed for further steps to keep Deployment State in Global Parameter.
+
+> This step is enable only when `IncrementalDeployment` is ON and `DeployGlobalParams` is ON. 
+
 ## Step: Replacing all properties environment-related
+
+💬 In log you'll see line: `STEP: Replacing all properties environment-related...`
 
 This step will be executed only when `[Stage]` parameter has been provided.  
 The whole concept of CI & CD (Continuous Integration and Continuous Delivery) process is to deploy automatically and without risk onto target infrastructure, supporting multi-environments. Each environment (or stage) has to be exactly the same code except for selected properties. Very often these properties are:  
@@ -353,6 +390,7 @@ Column `type` accepts one of the following values only:
 - managedVirtualNetwork
 - managedPrivateEndpoint
 - factory *(for Global Parameters)*
+- credential
 
 ### Column NAME
 
@@ -421,7 +459,7 @@ Having that in mind, you can leverage variables defined in Azure DevOps pipeline
 
 This parameter is optional. When defined, the process will replace all properties defined in (csv) configuration file.
 The parameter can be either full path to csv file (must ends with .csv) or just stage name.
-When you provide parameter value 'UAT' the process will try open config file located .\deployment\config-UAT.csv
+When you provide parameter value 'UAT' the process will try open config file located `.\deployment\config-UAT.csv`
 
 > Use the optional [-Stage] parameter when executing ```Publish-AdfV2FromJson``` module to replace values for/with properties specified in config file(s).
 
@@ -489,18 +527,47 @@ If you prefer using JSON rather than CSV for setting up configuration - JSON fil
 ```
 
 
+## Step: Deployment Plan
+
+💬 In log you'll see line: `STEP: Determining the objects to be deployed...`
+
+This step identifies objects to be deployed using `Includes` and `Excludes` list provided in *Publish Options*.  
+Afterwards, if `IncrementalDeployment = true`, it excludes objects by comparing hashes from **Deployment State** to hashed of awaiting objects.
+
+
 ## Step: Stoping triggers
+
+💬 In log you'll see line: `STEP: Stopping triggers...`
+
 This block stops all triggers which must be stopped due to deployment.  
 Since version 0.30 you can better control which triggers you want to omit from stopping. Only need to add such triggers to `Excludes` list and set flag `DoNotStopStartExcludedTriggers` to *true*.
 
 > The step might be skipped when `StopStartTriggers = false` in *Publish Options*
 
 ## Step: Deployment of ADF objects
+
+💬 In log you'll see line: `STEP: Deployment of all ADF objects...`
+
 This step is actually responsible for doing all the stuff.
 The mechanism is smart enough to publish all objects in the right order, thence a developer doesn't need to care of object names due to deployment failure any longer.
 > Find out *Publish Option* capabilities in terms of filtering objects intended to be deployed.
 
+
+## Step: Save deployment state (new in ver.1.4)
+
+💬 In log you'll see line: `STEP: Updating (incremental) deployment state...`
+
+After the deployment, in this step the tool prepares the list of deployed objects and their hashes (MD5 algorithm). The array is wrap up in json format and stored as new global parameter `adftools_deployment_state` in factory file.  
+**Deployment State** speeds up future deployments by identifying objects have been changed since last time.
+
+> The step might be skipped when `IncrementalDeployment = false` OR `DeployGlobalParams = false` in *Publish Options*.   
+> You'll see warning in the console (log) when only `IncrementalDeployment = true`.
+
+
 ## Step: Deleting objects not in source
+
+💬 In log you'll see line: `STEP: Deleting objects not in source ...`
+
 This process removes all objects from ADF service whom couldn't be found in the source (ADF code).  
 The mechanism is smart enough to dropping the objects in right order.  
 Since version 0.30 you can better control which objects you want to omit from removing. Only need to add such objects to `Excludes` list and set flag `DoNotDeleteExcludedObjects` to *true*. 
@@ -508,8 +575,36 @@ Since version 0.30 you can better control which objects you want to omit from re
 > The step might be skipped when `DeleteNotInSource = false` in *Publish Options*
 
 ## Step: Restarting all triggers
+
+💬 In log you'll see line: `STEP: Starting all triggers...`
+
 Restarting all triggers that should be enabled.
+
 > The step might be skipped when `StopStartTriggers = false` in *Publish Options*
+
+## Incremental Deployment
+
+> This is new feature (ver.1.4) in public preview.
+
+Usually the deployment process takes some time as it must go through all object (files) and send them via REST API to be deployed. The more objects in ADF the longer process takes.  
+In order to speed up the deployment process, you may want to use new switch `IncrementalDeployment` (new in *Publish Options*) to enable smart process of identify and deploy only objects that have been changed since last deployment.  
+
+### How it works?
+It uses **Deployment State** kept in one of Global Parameters and is save/read to/from ADF service.  
+When the mode is ON, the process does a few additional steps across entire deployment process:
+1. Reads Global Parameters from ADF (when not newly created) to get previous **Deployment State**
+2. Identifies which objects are unchanged and excludes them from deployment 
+3. Calculates MD5 hashes of deployed objects and merges them to previous **Deployment State**
+4. Saves **Deployment State** as `adftools_deployment_state` global parameter
+
+### Remember
+* Incremental Deployment assumes that no one changes ADF objects manually in the cloud
+* You must deploy Global Parameters in order to save Deployment State
+* Objects' hashes are calculate after update of properties. If you change config for an object - it will be deploy
+* If you want to redeploy all objects again, you've got two options:
+  * Set `IncrementalDeployment = false` OR
+  * Delete manually `adftools_deployment_state` global parameter in target ADF service
+
 
 # Selective deployment, triggers and logic
 
@@ -597,7 +692,7 @@ $params = @{
     SubscriptionID    = "{Your-subscriptionId-here}" 
     TenantID          = "{Your-tenantId-here}"
     ClientID          = "SPN-ApplicationId"
-    ClientSecret      = "SPN-Pas$word"
+    ClientSecret      = "SPN-Password"
 }
 
 # Example 1

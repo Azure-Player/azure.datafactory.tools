@@ -74,6 +74,13 @@ function Remove-AdfObject {
                     -Name $name `
                     -Force -ErrorVariable err -ErrorAction Stop | Out-Null
             }
+            "Credential" {
+                Remove-AdfObjectRestAPI `
+                    -type_plural 'credentials' `
+                    -name $name `
+                    -adfInstance $adfInstance `
+                    -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+            }
             "DoNothing" {
 
             }

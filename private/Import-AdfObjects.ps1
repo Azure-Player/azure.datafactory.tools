@@ -21,7 +21,7 @@ function Import-AdfObjects {
     Foreach-Object {
         Write-Verbose "- $($_.Name)"
         $txt = Get-Content $_.FullName -Encoding "UTF8"
-        $o = New-Object -TypeName AdfObject 
+        $o = New-Object -TypeName "AdfObject"
         $o.Name = $_.BaseName
         $o.Type = $SubFolder
         $o.FileName = $_.FullName

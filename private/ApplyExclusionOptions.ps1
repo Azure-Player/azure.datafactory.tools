@@ -42,6 +42,16 @@ function ApplyExclusionOptions {
         }
     }
 
+    #ToBeDeployedStat -adf $adf
+
+    Write-Debug "END: ApplyExclusionOptions()"
+}
+
+function ToBeDeployedStat {
+    param(
+        [Parameter(Mandatory=$True)] [Adf] $adf
+    )
+
     $ToBeDeployedList = ($adf.AllObjects() | Where-Object { $_.ToBeDeployed -eq $true } | ToArray)
     $i = $ToBeDeployedList.Count
     Write-Host "# Number of objects marked as to be deployed: $i/$($adf.AllObjects().Count)"
@@ -49,7 +59,4 @@ function ApplyExclusionOptions {
         Write-Host "- $($_.FullName($true))"
     }
 
-
-    Write-Debug "END: ApplyExclusionOptions()"
 }
-

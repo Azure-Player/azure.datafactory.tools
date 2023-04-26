@@ -95,7 +95,7 @@ function Update-PropertiesForObject {
         [Parameter(Mandatory)]          [AdfObject] $o,
         [Parameter(Mandatory)]          [string] $action,
         [Parameter(Mandatory)]          [string] $path,
-        [Parameter(Mandatory = $false)] [string] $value,
+        [AllowEmptyString()]            $value,
         [Parameter(Mandatory)]          [string] $name,
         [Parameter(Mandatory)]          [string] $type,
         [Parameter(Mandatory)]          $report,
@@ -140,12 +140,12 @@ function Update-PropertiesForObject {
         {
             'update'
             {
-                Update-ObjectProperty -obj $json -path "properties.$path" -value "$value"
+                Update-ObjectProperty -obj $json -path "properties.$path" -value $value
                 $report.Updated += 1
             }
             'add'
             {
-                Add-ObjectProperty -obj $json -path "properties.$path" -value "$value"
+                Add-ObjectProperty -obj $json -path "properties.$path" -value $value
                 $report.Added += 1
             }
             'remove'

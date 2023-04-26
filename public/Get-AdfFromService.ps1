@@ -49,6 +49,8 @@ function Get-AdfFromService {
     Write-Host ("DataFlows: {0} object(s) loaded." -f $adf.DataFlows.Count)
     $adf.Triggers = Get-AzDataFactoryV2Trigger -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$FactoryName" | ToArray
     Write-Host ("Triggers: {0} object(s) loaded." -f $adf.Triggers.Count)
+    $adf.Credentials = Get-AzDFV2Credential -adfi $adfi | ToArray
+    Write-Host ("Credentials: {0} object(s) loaded." -f $adf.Credentials.Count)
 
     Write-Debug "END: Get-AdfFromService()"
     return $adf

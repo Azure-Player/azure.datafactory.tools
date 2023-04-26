@@ -6,6 +6,7 @@ function Get-SimplifiedType {
 
     $simtype = $type
     if ($type -like 'PS*') { $simtype = $type.Substring(2) }
+    if ($type -like 'AdfPS*') { $simtype = $type.Substring(5) }     # New internal type
     if ($simtype -like '*IntegrationRuntime') { $simtype = 'IntegrationRuntime' }
     if ($simtype -like '*managedPrivateEndpoint') { $simtype = 'managedPrivateEndpoint' }
 

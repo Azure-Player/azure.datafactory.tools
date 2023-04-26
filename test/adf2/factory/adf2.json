@@ -1,0 +1,12 @@
+{
+	"name": "adf2",
+	"properties": {
+		"globalParameters": {
+			"GPInt": {
+				"type": "int",
+				"value": 2000000
+			}
+
+		}
+	}
+}

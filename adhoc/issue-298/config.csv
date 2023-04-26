@@ -1,0 +1,8 @@
+type,name,path,value
+# managedPrivateEndpoint,adls_mpe_sap_adf,$.properties.fqdns,"[""kv1.vault.azure.net ""]"
+# managedPrivateEndpoint,adls_mpe_sap_adf,$.properties.fqdns,"kv2.vault.azure.net "
+# managedPrivateEndpoint,adls_mpe_sap_adf,$.properties.fqdns[0],"kv3.vault.azure.net"
+# managedPrivateEndpoint,adls_mpe_sap_adf,$.properties.fqdns[0],
+# managedPrivateEndpoint,adls_mpe_sap_adf,$.properties.timeout,64.2
+managedPrivateEndpoint,adls_mpe_sap_adf,$.properties.timeout,
+# managedPrivateEndpoint,adls_mpe_sap_adf,groupId,
