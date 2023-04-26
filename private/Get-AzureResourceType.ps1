@@ -20,7 +20,7 @@ function Get-AzureResourceType {
         'managedVirtualNetwork' { $resType = 'Microsoft.DataFactory/factories/managedVirtualNetworks' }
         'managedVirtualNetwork\default\managedPrivateEndpoint' { $resType = 'Microsoft.DataFactory/factories/managedVirtualNetworks/managedPrivateEndpoints' }
         'factory'               { $resType = 'Microsoft.DataFactory/factories' }
-        'credential'            { $resType = 'Microsoft.DataFactory/credentials' }
+        'credential'            { $resType = 'Microsoft.DataFactory/factories/credentials' }
         default                 { Write-Error "ADFT0016: Type '$Type' is not supported." }
     }
 

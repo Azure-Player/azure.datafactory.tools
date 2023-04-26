@@ -18,6 +18,7 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
   - Integration Runtimes
   - Managed Virtual Network
   - Managed Private Endpoint
+  - Credential
 * Finding the **right order** for deploying objects (no more worrying about object names)
 * Built-in mechanism to replace, remove or add the properties with the indicated values (CSV and JSON file formats supported)
 * Stopping/starting triggers
@@ -39,8 +40,6 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
 * Generates mermaid dependencies diagram to be used in MarkDown type of documents
 
 # Known issues
-
-- The module accepts **Credentials** type of object (when loading from files), but the deployment is skipped and not supported yet. [Read more here](https://github.com/SQLPlayer/azure.datafactory.tools/issues/156).
 
 - **[Native CDC](https://learn.microsoft.com/en-us/azure/data-factory/concepts-change-data-capture)** objects are not yet supported.
 
@@ -129,8 +128,6 @@ Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGro
 
 Use optional ```[-Stage]``` parameter to prepare json files of ADF with appropriate values for properties and deploy to another environment correctly. See section: **How it works / Step: Replacing all properties environment-related** for more details.  
 
-
-> Detailed *Wiki* documentation - coming soon.
 
 ## Publish Options
 
@@ -393,6 +390,7 @@ Column `type` accepts one of the following values only:
 - managedVirtualNetwork
 - managedPrivateEndpoint
 - factory *(for Global Parameters)*
+- credential
 
 ### Column NAME
 
@@ -694,7 +692,7 @@ $params = @{
     SubscriptionID    = "{Your-subscriptionId-here}" 
     TenantID          = "{Your-tenantId-here}"
     ClientID          = "SPN-ApplicationId"
-    ClientSecret      = "SPN-Pas$word"
+    ClientSecret      = "SPN-Password"
 }
 
 # Example 1
