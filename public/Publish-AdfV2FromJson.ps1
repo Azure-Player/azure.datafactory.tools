@@ -126,7 +126,7 @@ function Publish-AdfV2FromJson {
     Write-Host "======================================================================================";
     if ($null -ne $Option) {
         Write-Host "Options:"
-        $opt | Format-List | Out-Host
+        $Option | Format-List | Out-Host
         Write-Host "======================================================================================";
     }
     $script:StartTime = Get-Date
