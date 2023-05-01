@@ -86,8 +86,8 @@ function Test-AdfCode {
         }
     }
 
-    Write-Host "Checking names of datasets, pipelines, dataflows..."
-    $adf.LinkedServices + $adf.DataSets + $adf.Pipelines + $adf.DataFlows | ForEach-Object {
+    Write-Host "Checking names of linkedservices, datasets, pipelines, dataflows..."
+    $adf.LinkedServices + $adf.DataSets + $adf.DataFlows | ForEach-Object {
         [string] $name = $_.Name
         if ($name.Contains('-')) {
             Write-Warning "Dashes ('-') are not allowed in the names of linked services, data flows, and datasets ($name)."
