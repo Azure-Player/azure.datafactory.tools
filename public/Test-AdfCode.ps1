@@ -86,7 +86,7 @@ function Test-AdfCode {
         }
     }
 
-    Write-Host "Checking names of linkedservices, datasets, pipelines, dataflows..."
+    Write-Host "Checking names of linkedservices, datasets, dataflows..."
     $adf.LinkedServices + $adf.DataSets + $adf.DataFlows | ForEach-Object {
         [string] $name = $_.Name
         if ($name.Contains('-')) {
