@@ -1,6 +1,10 @@
 Import-Module ".\azure.datafactory.tools.psd1" -Force
 #Get-Module 
 
+Get-AzContext
+Select-AzSubscription -SubscriptionName 'MVP'
+
+
 $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'Continue'
 #$DebugPreference = 'Continue'
@@ -23,4 +27,21 @@ $adf
 
 
 $res = Get-GlobalParam -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName
+
+#-----------------
+Select-AzSubscription -SubscriptionName 'Microsoft Azure Sponsorship'
+
+$opt = New-AdfPublishOption
+$opt.Excludes.Add('integr*.*', '')
+$opt.Excludes.Add('link*.LS_SQLServer_DEV19*', '')
+$opt.IncrementalDeployment = $true
+$ResourceGroupName = 'rg-devops-factory'
+$DataFactoryName = "BigFactorySample2-17274af2"
+$RootFolder = "D:\GitHub\SQLPlayer\azure.datafactory.tools\test\BigFactorySample2"
+$Location = "NorthEurope"
+
+$adf = Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName"  -Location "$Location" -Option $opt
+
+
+[Unnecessarily start & stop triggers]
 
