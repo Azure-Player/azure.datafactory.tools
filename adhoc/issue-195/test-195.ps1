@@ -43,5 +43,4 @@ $Location = "NorthEurope"
 $adf = Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName"  -Location "$Location" -Option $opt
 
 
-[Unnecessarily start & stop triggers]
-
+# [Unnecessarily start & stop triggers]
