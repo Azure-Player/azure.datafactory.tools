@@ -1,0 +1,10 @@
+{
+    "linkedServices": [
+        {
+            "name": "LS_SQL_Stackoverflow"
+        },
+        {
+            "name": "LS_SQL_GenericDb"
+        }
+    ]
+}
