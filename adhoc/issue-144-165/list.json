@@ -1,0 +1,22 @@
+{
+    "linkedServices": [
+        {
+            "name": "LS_SQL_GenericDb",
+            "parameters": {
+                "DatabaseName": {
+                    "type": "string",
+                    "defaultValue": "Stackoverflow"
+                }
+            }
+        },
+        {
+            "name": "LS_SQL_GenericDb",
+            "parameters": {
+                "DatabaseName": {
+                    "type": "string",
+                    "defaultValue": "SomethingBad"
+                }
+            }
+        }
+    ]
+}
