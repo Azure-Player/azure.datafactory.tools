@@ -48,6 +48,10 @@ function Get-AdfObjectByPattern {
         {
             $r = $adf.ManagedPrivateEndpoints | Where-Object { $_.Name -like $name }
         }
+        'Credential'
+        {
+            $r = $adf.Credentials | Where-Object { $_.Name -like $name }
+        }
         default
         {
             Write-Error "ADFT0015: Type [$type] is not supported."

@@ -290,6 +290,8 @@ InModuleScope azure.datafactory.tools {
                 $script:lsdbr.Body.properties.typeProperties.domain | Should -Be "https://$($Env:Region).azuredatabricks.net"
                 $script:ls = Get-AdfObjectByName -adf $script:adf -name "LS_AzureKeyVault" -type "linkedService"
                 $script:ls.Body.properties.typeProperties.baseUrl | Should -Be "https://keyvault-$($Env:ProjectName)-$($Env:Environment).vault.azure.net/"
+                $script:ls = Get-AdfObjectByName -adf $script:adf -name "TR_RunEveryDay" -type "trigger"
+                $script:ls.Body.properties.typeProperties.recurrence.startTime | Should -Be "2020-06-01T23:22:11.000Z"
 
                 Get-Member -InputObject $script:lsdbr.Body.properties.typeProperties -name "encryptedCredential" -Membertype "Properties" | Should -Be $null
             }

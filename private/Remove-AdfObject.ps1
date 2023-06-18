@@ -79,7 +79,7 @@ function Remove-AdfObject {
                     -type_plural 'credentials' `
                     -name $name `
                     -adfInstance $adfInstance `
-                    -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+                    -ErrorVariable err -ErrorAction Stop | Out-Null
             }
             "DoNothing" {
 

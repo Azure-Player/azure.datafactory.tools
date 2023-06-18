@@ -25,7 +25,9 @@ function Update-ObjectProperty {
         $exp = "`$obj.$path = `$$value"
     } elseif ($fieldType -eq [DateTime]) {
         Write-Debug "Setting as DateTime value"
-        $exp = "`$obj.$path = `"$value`""
+        $datevalue = [DateTime]$value
+        $utcvalue = Get-Date $datevalue -Format "yyyy-MM-ddTHH:mm:ss.fffZ"
+        $exp = "`$obj.$path = `"$utcvalue`""
     } elseif ($fieldType -eq [System.Management.Automation.PSCustomObject]) {
         Write-Debug "Setting as json value"
         $jvalue = ConvertFrom-Json $value

@@ -34,6 +34,13 @@ Select-AzSubscription -SubscriptionName 'MVP'
 $adfi = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName"
 Remove-AdfObjectRestAPI -type_plural 'credentials' -name 'credential1' -adfInstance $adfi
 
+Remove-AdfObjectRestAPI -type_plural 'credentials' -name 'credential13' -adfInstance $adfi -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+
+
+$err = ''
+Remove-AdfObjectRestAPI -type_plural 'credentials' -name 'credential13' -adfInstance $adfi -ErrorVariable err -ErrorAction Stop | Out-Null
+$err
+
 
 # Test: Remove-AdfObjectIfNotInSource
 $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
