@@ -4,14 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [1.5.0] - 2023-06-xx
+## [1.5.0] - 2023-06-18
 ### Added
 * Remove pipeline's from check (`Test-AdfCode`) for dashes in name #309
-* Bug #311: Fixed deletion of credential type of objects
-* Bug #331: Fixed `Test-AdfCode` for [credential] objects
 * Test-AdfLinkedService can use internally Invoke-AzRestMethod #144
 * Test-AdfLinkedService return an object #165
 * Test-AdfLinkedService accepts parameters of testing LS #222
+### Fixed
+* Bug #311: Fixed deletion of credential type of objects
+* Bug #331: Fixed `Test-AdfCode` for [credential] objects
 
 ## [1.4.0] - 2023-04-26
 ### Added
