@@ -75,9 +75,9 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
   - [Step: Deployment Plan](#step-deployment-plan)
   - [Step: Stoping triggers](#step-stoping-triggers)
   - [Step: Deployment of ADF objects](#step-deployment-of-adf-objects)
-  - [Step: Save deployment state (new in ver.1.4)](#step-save-deployment-state-new-in-ver14)
+  - [Step: Save deployment state](#step-save-deployment-state)
   - [Step: Deleting objects not in source](#step-deleting-objects-not-in-source)
-  - [Step: Restarting all triggers](#step-restarting-all-triggers)
+  - [Step: Restarting triggers](#step-restarting-triggers)
   - [Incremental Deployment](#incremental-deployment)
     - [How it works?](#how-it-works-1)
     - [Remember](#remember)
@@ -215,7 +215,12 @@ $opt = New-AdfPublishOption
 * [Boolean] **DoNotStopStartExcludedTriggers** - specifies whether excluded triggers will be stopped before deployment (default: *false*)
 * [Boolean] **DoNotDeleteExcludedObjects** - specifies whether excluded objects can be removed. Applies when `DeleteNotInSource` is set to *True* only. (default: *true*) 
 * [Boolean] **IncrementalDeployment** - specifies whether Incremental Deployment mode is enabled (default: *false*) 
-
+* [Enum] **TriggerStopMethod** - determines which triggers should be stopped.  
+  Available values: `AllEnabled` (default) | `DeployableOnly`  
+  Find more about the above option in section [Step: Stoping triggers](#step-stoping-triggers)
+* [Enum] **TriggerStartMethod** - determines which triggers should be started.  
+  Available values: `BasedOnSourceCode` (default) | `KeepPreviousState`  
+  Find more about the above option in section [Step: Restarting triggers](#step-restarting-triggers)
 
 
 Subsequently, you can define the needed options:
@@ -606,7 +611,9 @@ Afterwards, if `IncrementalDeployment = true`, it excludes objects by comparing 
 💬 In log you'll see line: `STEP: Stopping triggers...`
 
 This block stops all triggers which must be stopped due to deployment.  
-Since version 0.30 you can better control which triggers you want to omit from stopping. Only need to add such triggers to `Excludes` list and set flag `DoNotStopStartExcludedTriggers` to *true*.
+By default the process stops **all active** triggers when `TriggerStopMethod = AllEnabled` (default setting).
+However, it makes sense to use option `TriggerStopMethod = DeployableOnly` when one does selective or incremental deployment which would omit some triggers from being stopped.  
+Another way to control which triggers you want to omit from stopping is by adding such triggers to `Excludes` list and set flag `DoNotStopStartExcludedTriggers` to *true*.
 
 > The step might be skipped when `StopStartTriggers = false` in *Publish Options*
 
@@ -619,9 +626,11 @@ The mechanism is smart enough to publish all objects in the right order, thence 
 > Find out *Publish Option* capabilities in terms of filtering objects intended to be deployed.
 
 
-## Step: Save deployment state (new in ver.1.4)
+## Step: Save deployment state
 
 💬 In log you'll see line: `STEP: Updating (incremental) deployment state...`
+
+> This is new feature (ver.1.4) in public preview.
 
 After the deployment, in this step the tool prepares the list of deployed objects and their hashes (MD5 algorithm). The array is wrap up in json format and stored as new global parameter `adftools_deployment_state` in factory file.  
 **Deployment State** speeds up future deployments by identifying objects have been changed since last time.
@@ -640,11 +649,14 @@ Since version 0.30 you can better control which objects you want to omit from re
 
 > The step might be skipped when `DeleteNotInSource = false` in *Publish Options*
 
-## Step: Restarting all triggers
+## Step: Restarting triggers
 
-💬 In log you'll see line: `STEP: Starting all triggers...`
+💬 In log you'll see line: `STEP: Starting triggers...`
 
-Restarting all triggers that should be enabled.
+Restarting all triggers that should be enabled.  
+Since v.1.6 you have more control of which triggers should be started. Use `TriggerStartMethod` in *Publish Option* to set one of the following values:
+- **BasedOnSourceCode** (default) - uses source files and config file entries to determine desired status of triggers
+- **KeepPreviousState** - statuses from source or config files are ignored. In this case, the process remembers statuses before deployment (when stopping triggers) and the restores those statuses after the deployment. The status will be "disable" (trigger stopped) for any newly created trigger.
 
 > The step might be skipped when `StopStartTriggers = false` in *Publish Options*
 

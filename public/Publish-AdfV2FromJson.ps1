@@ -310,7 +310,7 @@ function Publish-AdfV2FromJson {
     }
 
     Write-Host "===================================================================================";
-    Write-Host "STEP: Starting all triggers..."
+    Write-Host "STEP: Starting triggers..."
     if ($opt.StopStartTriggers -eq $true) {
         Start-Triggers -adf $adf
     } else {
