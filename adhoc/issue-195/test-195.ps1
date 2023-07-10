@@ -44,7 +44,8 @@ $adf = Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$Reso
 
 
 # [Unnecessarily start & stop triggers]
+$opt.IncrementalDeployment = $true
 $opt.TriggerStopMethod = 'DeployableOnly'
-$opt.TriggerStartMethod = 'KeepPreviousState'
+#$opt.TriggerStartMethod = 'KeepPreviousState'
 $adf = Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName"  -Location "$Location" -Option $opt
 

@@ -23,6 +23,7 @@ class Adf {
     [AdfPublishOption] $PublishOptions
     $ArmTemplateJson
     [System.Collections.ArrayList] $ActiveTriggers = @{}
+    [System.Collections.ArrayList] $DisabledTriggerNames = @{}
     [System.Collections.ArrayList] $DeletedObjectNames = @{}
 
     [System.Collections.ArrayList] AllObjects()
@@ -59,6 +60,11 @@ class Adf {
     [Boolean] IsObjectDeleted([string] $ObjectName)
     {
         return $this.DeletedObjectNames -contains $ObjectName
+    }
+
+    [Boolean] IsTriggerDisabled([string] $ObjectName)
+    {
+        return $this.DisabledTriggerNames -contains $ObjectName
     }
 
     [System.Collections.ArrayList] GetUnusedDatasets()

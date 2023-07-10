@@ -60,7 +60,7 @@ function Stop-Triggers {
             }
             Write-Host "Complete stopping deployed triggers."
         }
-
+        $adf.DisabledTriggerNames = $toBeStopped
     }
     else 
     {
