@@ -71,19 +71,36 @@ InModuleScope azure.datafactory.tools {
     Describe 'New-AdfPublishOption' -Tag 'Unit' {
 
         Context 'When new object created' {
-            It 'Should have "StopTriggers" = AllEnabled be default' {
+            It 'Should "TriggerStopMethod" = AllEnabled be default' {
                 $script:result = New-AdfPublishOption
-                $script:result.StopTriggers | Should -Be 'AllEnabled'
+                $script:result.TriggerStopMethod | Should -Be 'AllEnabled'
             }
-            It '"StopTriggers" should be changeable' {
-                $script:result.StopTriggers = [StopTriggerTypes]::DeployableOnly
-                $script:result.StopTriggers | Should -Be 'DeployableOnly'
-                $script:result.StopTriggers = 'AllEnabled'
-                $script:result.StopTriggers | Should -Be 'AllEnabled'
+            It '"TriggerStopMethod" should be changeable' {
+                $script:result.TriggerStopMethod = [TriggerStopTypes]::DeployableOnly
+                $script:result.TriggerStopMethod | Should -Be 'DeployableOnly'
+                $script:result.TriggerStopMethod = 'AllEnabled'
+                $script:result.TriggerStopMethod | Should -Be 'AllEnabled'
             }
-            It '"StopTriggers" should not accept invalid values' {
-                { $script:result.StopTriggers = [StopTriggerTypes]::SomethingInvalid } | Should -Throw 
-                { $script:result.StopTriggers = 'SomethingInvalid' } | Should -Throw 
+            It '"TriggerStopMethod" should not accept invalid values' {
+                { $script:result.TriggerStopMethod = [TriggerStopTypes]::SomethingInvalid } | Should -Throw 
+                { $script:result.TriggerStopMethod = 'SomethingInvalid' } | Should -Throw 
+            }
+        }
+
+        Context 'When new object created' {
+            It 'Should "TriggerStartMethod" = BasedOnSourceCode be default' {
+                $script:result = New-AdfPublishOption
+                $script:result.TriggerStartMethod | Should -Be 'BasedOnSourceCode'
+            }
+            It '"TriggerStartMethod" should be changeable' {
+                $script:result.TriggerStartMethod = [TriggerStartTypes]::KeepPreviousState
+                $script:result.TriggerStartMethod | Should -Be 'KeepPreviousState'
+                $script:result.TriggerStartMethod = 'BasedOnSourceCode'
+                $script:result.TriggerStartMethod | Should -Be 'BasedOnSourceCode'
+            }
+            It '"TriggerStartMethod" should not accept invalid values' {
+                { $script:result.TriggerStartMethod = [TriggerStartTypes]::SomethingInvalid } | Should -Throw 
+                { $script:result.TriggerStartMethod = 'SomethingInvalid' } | Should -Throw 
             }
         }
 

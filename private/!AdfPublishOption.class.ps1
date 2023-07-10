@@ -1,7 +1,13 @@
-enum StopTriggerTypes
+enum TriggerStopTypes
 {
     AllEnabled
     DeployableOnly
+}
+
+enum TriggerStartTypes
+{
+    BasedOnSourceCode
+    KeepPreviousState
 }
 
 class AdfPublishOption {
@@ -17,5 +23,6 @@ class AdfPublishOption {
     [Boolean] $DoNotStopStartExcludedTriggers = $false
     [Boolean] $DoNotDeleteExcludedObjects = $true
     [Boolean] $IncrementalDeployment = $false
-    [StopTriggerTypes] $StopTriggers = [StopTriggerTypes]::AllEnabled
+    [TriggerStopTypes] $TriggerStopMethod = [TriggerStopTypes]::AllEnabled
+    [TriggerStartTypes] $TriggerStartMethod = [TriggerStartTypes]::BasedOnSourceCode
 }

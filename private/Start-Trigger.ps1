@@ -7,6 +7,7 @@ function Start-Trigger {
     )
     Write-Debug "BEGIN: Start-Trigger()"
 
+    Write-Host "- Enabling trigger: $Name"
     $attempts = 5;
     $i = 0
     while ($i -lt $attempts)

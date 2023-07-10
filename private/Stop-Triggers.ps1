@@ -11,9 +11,10 @@ function Stop-Triggers {
     {
         # Goal: Stop all active triggers (<>Stopped) present in ADF service
         $activeTriggers = $triggersADF | Where-Object { $_.RuntimeState -ne "Stopped" } | ToArray
+        $adf.activeTriggers = $activeTriggers       # Remember to use after the deployment when TriggerStartMethod = 'KeepPreviousState'
         $allAdfTriggersArray = $triggersADF | ToArray
         Write-Host ("The number of active triggers: " + $activeTriggers.Count + " (out of $($allAdfTriggersArray.Count))")
-        Write-Host ("StopTriggers = $($adf.PublishOptions.StopTriggers)")
+        Write-Host ("TriggerStopMethod = $($adf.PublishOptions.TriggerStopMethod)")
 
         # Determine triggers to be stopped
         [System.Collections.ArrayList] $toBeStopped = @{}
@@ -24,7 +25,7 @@ function Stop-Triggers {
                 $triggerName = $_.Name
                 [AdfObjectName] $oname = [AdfObjectName]::new("trigger.$triggerName")
                 # Check whether a trigger is not for deployment
-                if ($adf.PublishOptions.StopTriggers -eq 'DeployableOnly') {
+                if ($adf.PublishOptions.TriggerStopMethod -eq 'DeployableOnly') {
                     $sourceObject = Get-AdfObjectByName -adf $adf -name $triggerName -type 'Trigger'
                     if ($null -eq $sourceObject -or $sourceObject.ToBeDeployed -eq $false) {
                         Write-Host "- Ignored trigger: $triggerName"
@@ -40,26 +41,30 @@ function Stop-Triggers {
                     } 
                 }
                 if ($deploy) {
-                    $toBeStopped.Add($_)
+                    $toBeStopped.Add($triggerName)
                 }
             }
         }
         Write-Host ("The number of triggers to stop: " + $toBeStopped.Count)
 
-        # Stop all triggers
-        if ($null -ne $toBeStopped -and $toBeStopped.Count -gt 0)
+        # Stop triggers
+        if ($toBeStopped.Count -gt 0)
         {
             Write-Host "Stopping deployed triggers:"
             $toBeStopped | ForEach-Object { 
                 Stop-Trigger `
                 -ResourceGroupName $adf.ResourceGroupName `
                 -DataFactoryName $adf.Name `
-                -Name $_.Name `
+                -Name $_ `
                 | Out-Null
             }
             Write-Host "Complete stopping deployed triggers."
         }
 
+    }
+    else 
+    {
+        Write-Host ("No remote triggers found.")
     }
 
     Write-Debug "END: Stop-Triggers()"

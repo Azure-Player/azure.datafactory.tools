@@ -304,6 +304,7 @@ function Publish-AdfV2FromJson {
         $adfIns.AllObjects() | ForEach-Object {
             Remove-AdfObjectIfNotInSource -adfSource $adf -adfTargetObj $_ -adfInstance $adfIns
         }
+        Write-Host "Deleted $($adf.DeletedObjectNames.Count) objects from ADF service."
     } else {
         Write-Host "Operation skipped as publish option 'DeleteNotInSource' = false"
     }
