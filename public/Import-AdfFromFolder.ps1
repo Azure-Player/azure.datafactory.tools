@@ -38,6 +38,7 @@ function Import-AdfFromFolder {
     if ( !(Test-Path -Path $RootFolder) ) { Write-Error "ADFT0019: Folder '$RootFolder' doesn't exist." }
     
     $adf.Location = $RootFolder
+    $adf.PublishOptions = New-AdfPublishOption
 
     Import-AdfObjects -Adf $adf -All $adf.IntegrationRuntimes -RootFolder $RootFolder -SubFolder "integrationRuntime" | Out-Null
     Write-Host ("IntegrationRuntimes: {0} object(s) loaded." -f $adf.IntegrationRuntimes.Count)
