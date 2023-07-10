@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 * Stop and restart only changed triggers #264 #332
 * New option to Stop/Start only the triggers that are already Started #291
+### Fixed
+* `RootFolder` must be absolute otherwise temp files cannot be written #335
 
 ## [1.5.0] - 2023-06-18
 ### Added
