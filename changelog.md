@@ -6,7 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [1.6.0] - 2023-07-10
 ### Added
-* Do not stop triggers when not planning for deployment #332
+* Stop and restart only changed triggers #264 #332
+* New option to Stop/Start only the triggers that are already Started #291
 
 ## [1.5.0] - 2023-06-18
 ### Added
