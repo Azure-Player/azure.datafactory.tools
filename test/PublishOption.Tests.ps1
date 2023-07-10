@@ -65,6 +65,17 @@ InModuleScope azure.datafactory.tools {
             }
         }
 
+        Context 'When called with empty file in FilterFilePath' {
+            It 'Should not throw exception' {
+                {
+                    $script:opt = New-AdfPublishOption -FilterFilePath "$SrcFolder\deployment\filter.empty.txt"
+                } | Should -Not -Throw 
+            }
+            It 'Should add no rules to Includes and Excludes' {
+                $script:opt.Includes.Count | Should -Be 0
+                $script:opt.Excludes.Count | Should -Be 0
+            }
+        }
         
     } 
 

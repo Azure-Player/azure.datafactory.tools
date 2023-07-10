@@ -45,6 +45,7 @@ function New-AdfPublishOption {
             Write-Error "ADFT0026: File does not exist: $FilterFilePath"
         }
         $FilterText = Get-Content -Path $FilterFilePath -Encoding "UTF8"
+        if ($null -eq $FilterText) { $FilterText = '' }
 
         $FilterArray = $FilterText.Replace(',', "`n").Replace("`r`n", "`n").Split("`n");
 
