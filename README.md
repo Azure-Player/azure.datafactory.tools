@@ -17,8 +17,8 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
   - Triggers, 
   - Integration Runtimes
   - Managed Virtual Network
-  - Managed Private Endpoint
-  - Credential
+  - Managed Private Endpoints
+  - Credentials
 * Finding the **right order** for deploying objects (no more worrying about object names)
 * Built-in mechanism to replace, remove or add the properties with the indicated values (CSV and JSON file formats supported)
 * Stopping/starting triggers
@@ -38,6 +38,72 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
 * Build function to support validation of files, dependencies and config
 * Test connections (Linked Services)
 * Generates mermaid dependencies diagram to be used in MarkDown type of documents
+
+# Table of Content
+- [azure.datafactory.tools](#azuredatafactorytools)
+- [Table of Content](#table-of-content)
+- [Known issues](#known-issues)
+- [Overview](#overview)
+  - [Support](#support)
+- [How to start](#how-to-start)
+  - [Install-Module](#install-module)
+- [Publish Azure Data Factory](#publish-azure-data-factory)
+  - [Where is my code?](#where-is-my-code)
+- [Examples](#examples)
+  - [Other environments (stage)](#other-environments-stage)
+  - [Publish Options](#publish-options)
+    - [Includes \& Excludes rules in a file](#includes--excludes-rules-in-a-file)
+    - [Filtering file example](#filtering-file-example)
+    - [Using Publish Options in deployment](#using-publish-options-in-deployment)
+    - [Pattern (WildCard)](#pattern-wildcard)
+  - [Publishing objects from selected ADF's folder only](#publishing-objects-from-selected-adfs-folder-only)
+  - [Publishing Method](#publishing-method)
+- [How it works](#how-it-works)
+  - [Step: Create ADF (if not exist)](#step-create-adf-if-not-exist)
+  - [Step: Load files](#step-load-files)
+  - [Step: Pre-deployment](#step-pre-deployment)
+  - [Step: Replacing all properties environment-related](#step-replacing-all-properties-environment-related)
+    - [Column TYPE](#column-type)
+    - [Column NAME](#column-name)
+    - [Column PATH](#column-path)
+    - [Column VALUE](#column-value)
+      - [Using Tokens as dynamic values](#using-tokens-as-dynamic-values)
+    - [Stage parameter](#stage-parameter)
+    - [Stage value as environment code/name](#stage-value-as-environment-codename)
+    - [Stage value as full path to CSV config file](#stage-value-as-full-path-to-csv-config-file)
+    - [JSON format of Config file](#json-format-of-config-file)
+  - [Step: Deployment Plan](#step-deployment-plan)
+  - [Step: Stoping triggers](#step-stoping-triggers)
+  - [Step: Deployment of ADF objects](#step-deployment-of-adf-objects)
+  - [Step: Save deployment state (new in ver.1.4)](#step-save-deployment-state-new-in-ver14)
+  - [Step: Deleting objects not in source](#step-deleting-objects-not-in-source)
+  - [Step: Restarting all triggers](#step-restarting-all-triggers)
+  - [Incremental Deployment](#incremental-deployment)
+    - [How it works?](#how-it-works-1)
+    - [Remember](#remember)
+- [Selective deployment, triggers and logic](#selective-deployment-triggers-and-logic)
+  - [Assumptions](#assumptions)
+    - [StopStartTriggers](#stopstarttriggers)
+    - [DoNotStopStartExcludedTriggers](#donotstopstartexcludedtriggers)
+    - [Excluded (collection)](#excluded-collection)
+    - [DoNotDeleteExcludedObjects](#donotdeleteexcludedobjects)
+- [Build/Test Azure Data Factory code](#buildtest-azure-data-factory-code)
+- [Test connection of Linked Service (preview)](#test-connection-of-linked-service-preview)
+  - [Test connection with Service Principal (SPN)](#test-connection-with-service-principal-spn)
+  - [Test connection with current Az PowerShell module context](#test-connection-with-current-az-powershell-module-context)
+- [Generate dependencies diagram](#generate-dependencies-diagram)
+- [Export ADF code to ArmTemplate](#export-adf-code-to-armtemplate)
+    - [Parameters:](#parameters)
+- [Publish ADF using ArmTemplate file(s) *(preview)*](#publish-adf-using-armtemplate-files-preview)
+    - [Limitations. No support for:](#limitations-no-support-for)
+- [Publish from Azure DevOps](#publish-from-azure-devops)
+  - [Using Publish Azure Data factory (task)](#using-publish-azure-data-factory-task)
+  - [Using Azure PowerShell (task)](#using-azure-powershell-task)
+- [Release Notes](#release-notes)
+- [Misc](#misc)
+  - [New feature requests](#new-feature-requests)
+
+
 
 # Known issues
 
