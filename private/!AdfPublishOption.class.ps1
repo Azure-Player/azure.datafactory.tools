@@ -1,3 +1,9 @@
+enum StopTriggerTypes
+{
+    AllEnabled
+    DeployableOnly
+}
+
 class AdfPublishOption {
     [hashtable] $Includes = @{}
     [hashtable] $Excludes = @{}
@@ -11,4 +17,5 @@ class AdfPublishOption {
     [Boolean] $DoNotStopStartExcludedTriggers = $false
     [Boolean] $DoNotDeleteExcludedObjects = $true
     [Boolean] $IncrementalDeployment = $false
+    [StopTriggerTypes] $StopTriggers = [StopTriggerTypes]::AllEnabled
 }

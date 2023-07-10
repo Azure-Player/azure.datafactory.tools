@@ -63,9 +63,29 @@ InModuleScope azure.datafactory.tools {
                 $script:opt.Excludes.ContainsKey('*.SharedIR*') | Should -Be $true
                 $script:opt.Excludes.ContainsKey('*.LS_SqlServer_DEV19_AW2017') | Should -Be $true
             }
-
         }
 
         
     } 
+
+    Describe 'New-AdfPublishOption' -Tag 'Unit' {
+
+        Context 'When new object created' {
+            It 'Should have "StopTriggers" = AllEnabled be default' {
+                $script:result = New-AdfPublishOption
+                $script:result.StopTriggers | Should -Be 'AllEnabled'
+            }
+            It '"StopTriggers" should be changeable' {
+                $script:result.StopTriggers = [StopTriggerTypes]::DeployableOnly
+                $script:result.StopTriggers | Should -Be 'DeployableOnly'
+                $script:result.StopTriggers = 'AllEnabled'
+                $script:result.StopTriggers | Should -Be 'AllEnabled'
+            }
+            It '"StopTriggers" should not accept invalid values' {
+                { $script:result.StopTriggers = [StopTriggerTypes]::SomethingInvalid } | Should -Throw 
+                { $script:result.StopTriggers = 'SomethingInvalid' } | Should -Throw 
+            }
+        }
+
+    }
 }

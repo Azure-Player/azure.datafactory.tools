@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.6.0] - 2023-07-10
+### Added
+* Do not stop triggers when not planning for deployment #332
+
 ## [1.5.0] - 2023-06-18
 ### Added
 * Remove pipeline's from check (`Test-AdfCode`) for dashes in name #309
