@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 * `RootFolder` must be absolute otherwise temp files cannot be written #335
 * Catch InvalidOperation exception when reading empty FilterFilePath in New-AdfPublishOption.ps1 #338
+* Purview configuration gets overwritten when deploy Global Parameters using ADF deployment task #343
 
 ## [1.5.0] - 2023-06-18
 ### Added
