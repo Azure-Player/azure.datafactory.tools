@@ -484,16 +484,26 @@ See example below:
 type,name,path,value
 # As usual - this line only update value for connectionString:
 linkedService,BlobSampleData,typeProperties.connectionString,"DefaultEndpointsProtocol=https;AccountName=sqlplayer2019;EndpointSuffix=core.windows.net;"
+
 # MINUS means the desired action is to REMOVE encryptedCredential:
 linkedService,BlobSampleData,-typeProperties.encryptedCredential,
 # PLUS means the desired action is to ADD new property with associated value:
 linkedService,BlobSampleData,+typeProperties.accountKey,"$($Env:VARIABLE)"
 factory,BigFactorySample2,"$.properties.globalParameters.'Env-Code'.value","PROD"
+
 # Multiple following configurations for many files:
 dataset,DS_SQL_*,properties.xyz,ABC
+
 # Change a pipeline activity timeout using integer and name based indexers
 pipeline,PL_Demo,activities[1].typeProperties.waitTimeInSeconds,30
 pipeline,PL_Demo,activities["Copy Data"].typeProperties.waitTimeInSeconds,30
+
+# Update the value of existing Global Parameter:
+factory,BigFactorySample2,"$.properties.globalParameters.envName.value",POC
+
+# Create NEW Global Parameter:
+factory,BigFactorySample2,"+$.properties.globalParameters.NewGlobalParam.value",2023
+factory,BigFactorySample2,"+$.properties.globalParameters.NewGlobalParam.type",int
 ```
 
 > When you use `$` at the beginning of the path it refers to root element of the JSON file. 
