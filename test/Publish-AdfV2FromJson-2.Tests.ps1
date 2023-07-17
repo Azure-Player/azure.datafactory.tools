@@ -90,13 +90,10 @@ InModuleScope azure.datafactory.tools {
             }
         }
 
-
         It 'Should have 1 trigger active' {
             Start-AzDataFactoryV2Trigger -ResourceGroupName $t.ResourceGroupName -DataFactoryName $t.DataFactoryName -Name 'TR_RunEveryDay' -Force
-            $t = Get-AzDataFactoryV2Trigger -ResourceGroupName $t.ResourceGroupName -DataFactoryName $t.DataFactoryName
-            $trgs = (,$t)
-            $trgs.Count | Should -Be 1
-            $trgs[0].RuntimeState | Should -Be 'Started'
+            $t = Get-AzDataFactoryV2Trigger -ResourceGroupName $t.ResourceGroupName -DataFactoryName $t.DataFactoryName -Name 'TR_RunEveryDay'
+            $t.RuntimeState | Should -Be 'Started'
         }
 
         It 'Should disable and delete trigger when TriggerStartMethod = KeepPreviousState' {
