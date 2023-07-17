@@ -168,7 +168,7 @@ function Publish-AdfV2FromJson {
         }
 
         if ($null -eq $targetAdf) {
-            Write-Host "The process is exiting the function. Do fix the issue and run again."
+            Write-Host "ADFT0032: The process is exiting the function. Do fix the issue and run again."
             return 
         }
     }
@@ -304,12 +304,13 @@ function Publish-AdfV2FromJson {
         $adfIns.AllObjects() | ForEach-Object {
             Remove-AdfObjectIfNotInSource -adfSource $adf -adfTargetObj $_ -adfInstance $adfIns
         }
+        Write-Host "Deleted $($adf.DeletedObjectNames.Count) objects from ADF service."
     } else {
         Write-Host "Operation skipped as publish option 'DeleteNotInSource' = false"
     }
 
     Write-Host "===================================================================================";
-    Write-Host "STEP: Starting all triggers..."
+    Write-Host "STEP: Starting triggers..."
     if ($opt.StopStartTriggers -eq $true) {
         Start-Triggers -adf $adf
     } else {

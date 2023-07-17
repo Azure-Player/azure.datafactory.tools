@@ -4,7 +4,13 @@ function Save-AdfObjectAsFile {
         [parameter(Mandatory = $true)] [AdfObject] $obj
     )
     
-    $newFileName = Join-Path $obj.Adf.Location "$($obj.Type)\~$($obj.Name).json"
+    $folder = Join-Path -Path $obj.Adf.Location -ChildPath $($obj.Type)
+    if (!(Test-Path $folder)) { 
+        Write-Debug "Creating a folder: $folder"
+        New-Item -Path $folder -ItemType Directory | Out-Null
+    }
+
+    $newFileName = Join-Path -Path $folder -ChildPath "~$($obj.Name).json"
     Write-Debug "Writing file: $newFileName"
 
     $output = ($obj.Body | ConvertTo-Json -Compress:$true -Depth 100)

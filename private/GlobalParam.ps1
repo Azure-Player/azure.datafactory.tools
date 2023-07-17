@@ -24,13 +24,17 @@ function Get-GlobalParam([string]$ResourceGroupName, [string]$DataFactoryName)
   }
   catch {
     Write-Error -Exception $_.Exception
+    $response = ""  # Workaround when ADF service returns error 404 for newly created ADF
   }
   return $response
 }
 
 
-function Set-GlobalParam([string]$ResourceGroupName, [string]$DataFactoryName, $value)
+function Set-GlobalParam([Adf] $adf)
 {
+  $ResourceGroupName = $adf.ResourceGroupName
+  $DataFactoryName = $adf.Name
+
   $azContext = Get-AzContext
   [string] $SubscriptionID = $azContext.Subscription.Id
   $azProfile = [Microsoft.Azure.Commands.Common.Authentication.Abstractions.AzureRmProfileProvider]::Instance.Profile
@@ -41,8 +45,10 @@ function Set-GlobalParam([string]$ResourceGroupName, [string]$DataFactoryName, $
       'Authorization'='Bearer ' + $token.AccessToken
   }
 
+  $gp = ($adf.GlobalFactory.body | ConvertFrom-Json).properties.globalParameters | ConvertTo-Json -Depth 50
+
   $body = "{
-    ""properties"": { ""adftools_deployment_state"": { ""value"": ""$value AJHIUHWIUI"", ""type"": ""Object"" }  }
+    ""properties"": $gp
   }"
 
   $restUri = "https://management.azure.com/subscriptions/$SubscriptionID/resourcegroups/$ResourceGroupName/providers/Microsoft.DataFactory/factories/$DataFactoryName/globalParameters/default?api-version=2018-06-01"

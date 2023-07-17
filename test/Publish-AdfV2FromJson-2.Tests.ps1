@@ -11,12 +11,24 @@ InModuleScope azure.datafactory.tools {
     Import-Module -Name $testHelperPath -Force
 
     # Variables for use in tests
-    $t = Get-TargetEnv 'BigFactorySample2'
+    $script:t = Get-TargetEnv 'BigFactorySample2'
     $script:ResourceGroupName = $t.ResourceGroupName
     $script:DataFactoryOrigName = $t.DataFactoryOrigName
     $script:DataFactoryName = $t.DataFactoryName
     $script:Location = $t.Location
     $script:adfi = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName"
+    #$script:RootFolder = Join-Path $PSScriptRoot "BigFactorySample2"
+
+    $script:opt = New-AdfPublishOption
+    $opt.IncrementalDeployment = $true
+    $opt.Includes.Add("*.TR_RunEveryDay", "")
+    $opt.Includes.Add("*.PL_wait5sec", "")
+    $opt.Includes.Add("factory.*", "")
+
+    $script:SrcFolder = "$PSScriptRoot\$($script:DataFactoryOrigName)"
+    $script:TmpFolder = (New-TemporaryDirectory).FullName
+    $script:RootFolder = Join-Path -Path $script:TmpFolder -ChildPath (Split-Path -Path $script:SrcFolder -Leaf)
+    Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.*" -Recurse:$true -Force 
 
 
     Describe 'Get-AzDFV2Credential' -Tag 'Unit' {
@@ -30,7 +42,6 @@ InModuleScope azure.datafactory.tools {
 
     Describe 'Publish-AdfV2FromJson' {
         It 'BigFactorySample2 should deploy credential object successfully' {
-            $script:RootFolder = Join-Path $PSScriptRoot "BigFactorySample2"
             $o = New-AdfPublishOption
             $o.StopStartTriggers = $false
             $o.Includes.Add("cred*.*", "")
@@ -44,6 +55,63 @@ InModuleScope azure.datafactory.tools {
         }
     }
 
+    Describe 'Publish-AdfV2FromJson' -Tag 'Integration', 'IncrementalDeployment' {
+
+        It 'Should run successfully even when no Global Params are in target (new) ADF' {
+            $opt.IncrementalDeployment = $true
+            $opt.CreateNewInstance = $true
+            $opt.StopStartTriggers = $false
+            Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                -ResourceGroupName "$ResourceGroupName" `
+                -DataFactoryName "$DataFactoryName" `
+                -Location "$Location" -Option $opt
+        }
+        It 'New GP "adftools_deployment_state" should exist' {
+            $f = Get-AzDataFactoryV2 -ResourceGroupName $t.ResourceGroupName -DataFactoryName $t.DataFactoryName
+            $f.GlobalParameters.Keys.Contains("adftools_deployment_state") | Should -Be $true
+        }
+
+        It 'Should run successfully even when no Global Params are in target (exists) ADF' {
+            Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                -ResourceGroupName "$ResourceGroupName" `
+                -DataFactoryName "$DataFactoryName" `
+                -Location "$Location" -Option $opt
+        }
+    }
+
+    Describe 'Publish-AdfV2FromJson' -Tag 'Integration', 'IncrementalDeployment' {
+
+        BeforeEach {
+            Mock Stop-AzDataFactoryV2Trigger {
+                param ($ResourceGroupName, $DataFactoryName, $Name)
+            }
+            Mock Remove-AzDataFactoryV2Trigger {
+                param ($ResourceGroupName, $DataFactoryName, $Name)
+            }
+        }
+
+        It 'Should have 1 trigger active' {
+            Start-AzDataFactoryV2Trigger -ResourceGroupName $t.ResourceGroupName -DataFactoryName $t.DataFactoryName -Name 'TR_RunEveryDay' -Force
+            $t = Get-AzDataFactoryV2Trigger -ResourceGroupName $t.ResourceGroupName -DataFactoryName $t.DataFactoryName -Name 'TR_RunEveryDay'
+            $t.RuntimeState | Should -Be 'Started'
+        }
+
+        It 'Should disable and delete trigger when TriggerStartMethod = KeepPreviousState' {
+            Remove-Item -Path "$RootFolder\trigger\*" -Filter "*.json" -Force
+            $opt.DeleteNotInSource = $true
+            $opt.TriggerStopMethod = 'DeployableOnly'
+            $opt.TriggerStartMethod = 'KeepPreviousState'
+            Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                -ResourceGroupName "$ResourceGroupName" `
+                -DataFactoryName "$DataFactoryName" `
+                -Location "$Location" -Option $opt
+            Assert-MockCalled Stop-AzDataFactoryV2Trigger -Times 1
+            Assert-MockCalled Remove-AzDataFactoryV2Trigger -Times 1
+        }
+
+
+
+    }
 
 
 }

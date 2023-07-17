@@ -27,12 +27,10 @@ param
             }
             $targetAdf.GlobalParameters = $newGlobalParameters
 
-            # Write-Host "--- newGlobalParameters ---"
-            #$newGlobalParameters.Values | Out-Host
-
             if ($newGlobalParameters.Count -gt 0) {
                 Write-Verbose "Updating $($newGlobalParameters.Count) global parameters..."
-                Set-AzDataFactoryV2 -InputObject $targetAdf -Force | Out-Null
+                #Set-AzDataFactoryV2 -InputObject $targetAdf -Force | Out-Null
+                Set-GlobalParam($adf)
                 Write-Host "Update of $($newGlobalParameters.Count) global parameters complete."
             }
         }

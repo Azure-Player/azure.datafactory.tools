@@ -31,12 +31,14 @@ InModuleScope azure.datafactory.tools {
         }
 
         # Context 'When called and 3 triggers are in service' {
-        #     Mock Stop-AzDataFactoryV2Trigger { }
-        #     $adf = Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder "$RootFolder"
-        #     $adf.ResourceGroupName = "$ResourceGroupName";
-
+        #     BeforeAll {
+        #         Mock Stop-AzDataFactoryV2Trigger { }
+        #         $script:adf = Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder "$RootFolder"
+        #         $script:adf.ResourceGroupName = "$ResourceGroupName";
+        #         $script:adf.PublishOptions = New-AdfPublishOption
+        #     }
         #     It 'Should disable only those active' {
-        #           Stop-Triggers -adf $adf
+        #         Stop-Triggers -adf $adf
         #         $allTriggers = Get-AzDataFactoryV2Trigger -DataFactoryName $DataFactoryName -ResourceGroupName $ResourceGroupName
         #         $activeTriggers = $allTriggers | Where-Object { $_.RuntimeState -ne "Stopped" } | ToArray
         #         Assert-MockCalled Stop-AzDataFactoryV2Trigger -Times $activeTriggers.Count

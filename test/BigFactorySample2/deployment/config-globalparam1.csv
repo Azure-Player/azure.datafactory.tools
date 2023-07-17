@@ -2,3 +2,10 @@ type,name,path,value
 factory,BigFactorySample2,"$.properties.globalParameters.'GP-String'.value","This text has been replaced"
 factory,BigFactorySample2,"$.properties.globalParameters.'GP-Int'.value",2020
 factory,BigFactorySample2,"$.properties.globalParameters.'GP-Bool'.value",false
+factory,BigFactorySample2,"+$.properties.globalParameters.NewGlobalParam.value",2023
+factory,BigFactorySample2,"+$.properties.globalParameters.NewGlobalParam.type",int
+factory,BigFactorySample2,"+$.properties.globalParameters.envName.value",POC
+factory,BigFactorySample2,"+$.properties.globalParameters.envName.type",string
+#factory,BigFactorySample2,"+$.properties.globalParameters.NewArray.value","[1,""aaaaa"",5]"
+#factory,BigFactorySample2,"+$.properties.globalParameters.NewArray.type",array
+#factory,BigFactorySample2,"$.properties.globalParameters.'GP-Array'.value","[2,4,""XYZ"",1000]"

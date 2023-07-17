@@ -5,24 +5,60 @@ function Start-Triggers {
     )
     Write-Debug "BEGIN: Start-Triggers()"
 
-    [AdfObject[]] $activeTrigger = $adf.Triggers `
-    | Where-Object { $_.Body.properties.runtimeState -eq "Started" } | ToArray
-    Write-Host ("The number of triggers to start: " + $activeTrigger.Count)
+    Write-Host ("TriggerStartMethod = $($adf.PublishOptions.TriggerStartMethod)")
 
-    #Start active triggers - after cleanup efforts
-    $activeTrigger | ForEach-Object { 
-        Write-Host "- Enabling trigger: $($_.Name)"
-        [AdfObjectName] $oname = [AdfObjectName]::new("trigger.$($_.Name)")
-        $IsMatchExcluded = $oname.IsNameExcluded($adf.PublishOptions)
-        if ($IsMatchExcluded -and $adf.PublishOptions.DoNotStopStartExcludedTriggers) {
-            Write-host "- Excluded trigger: $($_.Name)" 
-        } else {
+    # Determine triggers to be started
+    if ($adf.PublishOptions.TriggerStartMethod -eq 'KeepPreviousState') {
+        $activeTriggers = $adf.ActiveTriggers | ToArray
+    } else {
+        $activeTriggers = $adf.Triggers `
+        | Where-Object { $_.Body.properties.runtimeState -eq "Started" } | ToArray
+    }
+
+    [System.Collections.ArrayList] $toBeStarted = @{}
+    if ($null -ne $activeTriggers -and $activeTriggers.Count -gt 0)
+    {
+        $activeTriggers | ForEach-Object { 
+            $isStart = $true
+            $triggerName = $_.Name
+            [AdfObjectName] $oname = [AdfObjectName]::new("trigger.$triggerName")
+            # Check whether a trigger is excluded
+            $IsMatchExcluded = $oname.IsNameExcluded($adf.PublishOptions)
+            if ($IsMatchExcluded -and $adf.PublishOptions.DoNotStopStartExcludedTriggers) {
+                Write-Host "- Excluded trigger: $triggerName" 
+                $isStart = $false
+            } 
+            # Check whether a trigger has been deleted
+            if ($isStart -and $adf.IsObjectDeleted("trigger.$triggerName")) {
+                Write-Host "- Deleted trigger: $triggerName" 
+                $isStart = $false
+            }
+            # Check whether a trigger has not been stopped    #-and $adf.PublishOptions.TriggerStartMethod -eq 'BasedOnSourceCode' `
+            if ($isStart -and $adf.PublishOptions.TriggerStopMethod  -eq 'DeployableOnly' `
+                         -and $adf.IsTriggerDisabled("$triggerName") -eq $false) {
+                Write-Host "- Trigger already started: $triggerName" 
+                $isStart = $false
+            }
+            if ($isStart) {
+                $toBeStarted.Add($triggerName)
+            }
+        }
+    }
+
+    Write-Host ("The number of triggers to start: " + $toBeStarted.Count)
+
+    # Start triggers
+    if ($toBeStarted.Count -gt 0)
+    {
+        Write-Host "Starting triggers:"
+        $toBeStarted | ForEach-Object { 
             Start-Trigger `
             -ResourceGroupName $adf.ResourceGroupName `
             -DataFactoryName $adf.Name `
-            -Name $_.Name `
+            -Name $_ `
             | Out-Null
         }
+        Write-Host "Complete starting triggers."
     }
 
     Write-Debug "END: Start-Triggers()"

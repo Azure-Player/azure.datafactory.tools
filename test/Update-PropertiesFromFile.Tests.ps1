@@ -262,6 +262,13 @@ InModuleScope azure.datafactory.tools {
                 $script:gp.Body.properties.globalParameters.'GP-Int'.value | Should -Be 2020
                 $script:gp.Body.properties.globalParameters.'GP-Bool'.value | Should -Be $False
             }
+            It 'Should contains new gp value & type added' {
+                $script:gp = Get-AdfObjectByName -adf $script:adf -name $script:adf.Factories[0].Name -type "factory"
+                $script:gp.Body.properties.globalParameters.'NewGlobalParam'.value | Should -Be 2023
+                $script:gp.Body.properties.globalParameters.'envName'.value | Should -Be "POC"
+                $script:gp.Body.properties.globalParameters.'NewGlobalParam'.type | Should -Be "int"
+                $script:gp.Body.properties.globalParameters.'envName'.type | Should -Be "string"
+            }
         }
     } 
 

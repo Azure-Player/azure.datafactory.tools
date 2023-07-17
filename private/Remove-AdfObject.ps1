@@ -68,6 +68,15 @@ function Remove-AdfObject {
                     -Force -ErrorVariable err -ErrorAction Stop | Out-Null
             }
             "Trigger" {
+                # Stop trigger if enabled before delete it
+                if ($obj.RuntimeState -eq 'Started') {
+                    Write-Verbose "Disabling trigger: $name..." 
+                    Stop-AzDataFactoryV2Trigger `
+                        -ResourceGroupName $ResourceGroupName `
+                        -DataFactoryName $DataFactoryName `
+                        -Name $name `
+                        -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+                }
                 Remove-AzDataFactoryV2Trigger `
                     -ResourceGroupName $ResourceGroupName `
                     -DataFactoryName $DataFactoryName `

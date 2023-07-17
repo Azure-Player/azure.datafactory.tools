@@ -22,7 +22,10 @@ class Adf {
     [AdfGlobalProp] $GlobalFactory = [AdfGlobalProp]::new()
     [AdfPublishOption] $PublishOptions
     $ArmTemplateJson
-    
+    [System.Collections.ArrayList] $ActiveTriggers = @{}
+    [System.Collections.ArrayList] $DisabledTriggerNames = @{}
+    [System.Collections.ArrayList] $DeletedObjectNames = @{}
+
     [System.Collections.ArrayList] AllObjects()
     {
         return $this.LinkedServices + $this.Pipelines + $this.DataSets + $this.DataFlows + $this.Triggers + $this.IntegrationRuntimes + $this.Factories + $this.ManagedVirtualNetwork + $this.ManagedPrivateEndpoints + $this.Credentials
@@ -52,6 +55,16 @@ class Adf {
             }
         }
         return $r
+    }
+
+    [Boolean] IsObjectDeleted([string] $ObjectName)
+    {
+        return $this.DeletedObjectNames -contains $ObjectName
+    }
+
+    [Boolean] IsTriggerDisabled([string] $ObjectName)
+    {
+        return $this.DisabledTriggerNames -contains $ObjectName
     }
 
     [System.Collections.ArrayList] GetUnusedDatasets()

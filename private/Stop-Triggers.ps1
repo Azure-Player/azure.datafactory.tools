@@ -10,30 +10,61 @@ function Stop-Triggers {
     if ($null -ne $triggersADF) 
     {
         # Goal: Stop all active triggers (<>Stopped) present in ADF service
-        $triggersToStop = $triggersADF | Where-Object { $_.RuntimeState -ne "Stopped" } | ToArray
+        $activeTriggers = $triggersADF | Where-Object { $_.RuntimeState -ne "Stopped" } | ToArray
+        $adf.activeTriggers = $activeTriggers       # Remember to use after the deployment when TriggerStartMethod = 'KeepPreviousState'
         $allAdfTriggersArray = $triggersADF | ToArray
-        Write-Host ("The number of triggers to stop: " + $triggersToStop.Count + " (out of $($allAdfTriggersArray.Count))")
+        Write-Host ("The number of active triggers: " + $activeTriggers.Count + " (out of $($allAdfTriggersArray.Count))")
+        Write-Host ("TriggerStopMethod = $($adf.PublishOptions.TriggerStopMethod)")
 
-        #Stop all triggers
-        if ($null -ne $triggersToStop -and $triggersToStop.Count -gt 0)
+        # Determine triggers to be stopped
+        [System.Collections.ArrayList] $toBeStopped = @{}
+        if ($null -ne $activeTriggers -and $activeTriggers.Count -gt 0)
         {
-            Write-Host "Stopping deployed triggers:"
-            $triggersToStop | ForEach-Object { 
-                [AdfObjectName] $oname = [AdfObjectName]::new("trigger.$($_.Name)")
-                $IsMatchExcluded = $oname.IsNameExcluded($adf.PublishOptions)
-                if ($IsMatchExcluded -and $adf.PublishOptions.DoNotStopStartExcludedTriggers) {
-                    Write-host "- Excluded trigger: $($_.Name)" 
-                } else {
-                    Stop-Trigger `
-                    -ResourceGroupName $adf.ResourceGroupName `
-                    -DataFactoryName $adf.Name `
-                    -Name $_.Name `
-                    | Out-Null
+            $activeTriggers | ForEach-Object { 
+                $deploy = $true
+                $triggerName = $_.Name
+                [AdfObjectName] $oname = [AdfObjectName]::new("trigger.$triggerName")
+                # Check whether a trigger is not for deployment
+                if ($adf.PublishOptions.TriggerStopMethod -eq 'DeployableOnly') {
+                    $sourceObject = Get-AdfObjectByName -adf $adf -name $triggerName -type 'Trigger'
+                    if ($null -eq $sourceObject -or $sourceObject.ToBeDeployed -eq $false) {
+                        Write-Host "- Ignored trigger: $triggerName"
+                        $deploy = $false
+                    }
+                }
+                # Check whether a trigger is excluded
+                if ($deploy) {
+                    $IsMatchExcluded = $oname.IsNameExcluded($adf.PublishOptions)
+                    if ($IsMatchExcluded -and $adf.PublishOptions.DoNotStopStartExcludedTriggers) {
+                        Write-Host "- Excluded trigger: $triggerName"
+                        $deploy = $false
+                    } 
+                }
+                if ($deploy) {
+                    $toBeStopped.Add($triggerName)
                 }
             }
-            Write-Host "Complete stopping deployed triggers"
         }
+        Write-Host ("The number of triggers to stop: " + $toBeStopped.Count)
 
+        # Stop triggers
+        if ($toBeStopped.Count -gt 0)
+        {
+            Write-Host "Stopping deployed triggers:"
+            $toBeStopped | ForEach-Object { 
+                Stop-Trigger `
+                -ResourceGroupName $adf.ResourceGroupName `
+                -DataFactoryName $adf.Name `
+                -Name $_ `
+                | Out-Null
+            }
+            Write-Host "Complete stopping deployed triggers."
+        }
+        $adf.DisabledTriggerNames = $toBeStopped
+    }
+    else 
+    {
+        Write-Host ("No remote triggers found.")
     }
 
     Write-Debug "END: Stop-Triggers()"

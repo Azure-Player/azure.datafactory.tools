@@ -17,8 +17,8 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
   - Triggers, 
   - Integration Runtimes
   - Managed Virtual Network
-  - Managed Private Endpoint
-  - Credential
+  - Managed Private Endpoints
+  - Credentials
 * Finding the **right order** for deploying objects (no more worrying about object names)
 * Built-in mechanism to replace, remove or add the properties with the indicated values (CSV and JSON file formats supported)
 * Stopping/starting triggers
@@ -38,6 +38,72 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
 * Build function to support validation of files, dependencies and config
 * Test connections (Linked Services)
 * Generates mermaid dependencies diagram to be used in MarkDown type of documents
+
+# Table of Content
+- [azure.datafactory.tools](#azuredatafactorytools)
+- [Table of Content](#table-of-content)
+- [Known issues](#known-issues)
+- [Overview](#overview)
+  - [Support](#support)
+- [How to start](#how-to-start)
+  - [Install-Module](#install-module)
+- [Publish Azure Data Factory](#publish-azure-data-factory)
+  - [Where is my code?](#where-is-my-code)
+- [Examples](#examples)
+  - [Other environments (stage)](#other-environments-stage)
+  - [Publish Options](#publish-options)
+    - [Includes \& Excludes rules in a file](#includes--excludes-rules-in-a-file)
+    - [Filtering file example](#filtering-file-example)
+    - [Using Publish Options in deployment](#using-publish-options-in-deployment)
+    - [Pattern (WildCard)](#pattern-wildcard)
+  - [Publishing objects from selected ADF's folder only](#publishing-objects-from-selected-adfs-folder-only)
+  - [Publishing Method](#publishing-method)
+- [How it works](#how-it-works)
+  - [Step: Create ADF (if not exist)](#step-create-adf-if-not-exist)
+  - [Step: Load files](#step-load-files)
+  - [Step: Pre-deployment](#step-pre-deployment)
+  - [Step: Replacing all properties environment-related](#step-replacing-all-properties-environment-related)
+    - [Column TYPE](#column-type)
+    - [Column NAME](#column-name)
+    - [Column PATH](#column-path)
+    - [Column VALUE](#column-value)
+      - [Using Tokens as dynamic values](#using-tokens-as-dynamic-values)
+    - [Stage parameter](#stage-parameter)
+    - [Stage value as environment code/name](#stage-value-as-environment-codename)
+    - [Stage value as full path to CSV config file](#stage-value-as-full-path-to-csv-config-file)
+    - [JSON format of Config file](#json-format-of-config-file)
+  - [Step: Deployment Plan](#step-deployment-plan)
+  - [Step: Stoping triggers](#step-stoping-triggers)
+  - [Step: Deployment of ADF objects](#step-deployment-of-adf-objects)
+  - [Step: Save deployment state](#step-save-deployment-state)
+  - [Step: Deleting objects not in source](#step-deleting-objects-not-in-source)
+  - [Step: Restarting triggers](#step-restarting-triggers)
+  - [Incremental Deployment](#incremental-deployment)
+    - [How it works?](#how-it-works-1)
+    - [Remember](#remember)
+- [Selective deployment, triggers and logic](#selective-deployment-triggers-and-logic)
+  - [Assumptions](#assumptions)
+    - [StopStartTriggers](#stopstarttriggers)
+    - [DoNotStopStartExcludedTriggers](#donotstopstartexcludedtriggers)
+    - [Excluded (collection)](#excluded-collection)
+    - [DoNotDeleteExcludedObjects](#donotdeleteexcludedobjects)
+- [Build/Test Azure Data Factory code](#buildtest-azure-data-factory-code)
+- [Test connection of Linked Service (preview)](#test-connection-of-linked-service-preview)
+  - [Test connection with Service Principal (SPN)](#test-connection-with-service-principal-spn)
+  - [Test connection with current Az PowerShell module context](#test-connection-with-current-az-powershell-module-context)
+- [Generate dependencies diagram](#generate-dependencies-diagram)
+- [Export ADF code to ArmTemplate](#export-adf-code-to-armtemplate)
+    - [Parameters:](#parameters)
+- [Publish ADF using ArmTemplate file(s) *(preview)*](#publish-adf-using-armtemplate-files-preview)
+    - [Limitations. No support for:](#limitations-no-support-for)
+- [Publish from Azure DevOps](#publish-from-azure-devops)
+  - [Using Publish Azure Data factory (task)](#using-publish-azure-data-factory-task)
+  - [Using Azure PowerShell (task)](#using-azure-powershell-task)
+- [Release Notes](#release-notes)
+- [Misc](#misc)
+  - [New feature requests](#new-feature-requests)
+
+
 
 # Known issues
 
@@ -149,7 +215,12 @@ $opt = New-AdfPublishOption
 * [Boolean] **DoNotStopStartExcludedTriggers** - specifies whether excluded triggers will be stopped before deployment (default: *false*)
 * [Boolean] **DoNotDeleteExcludedObjects** - specifies whether excluded objects can be removed. Applies when `DeleteNotInSource` is set to *True* only. (default: *true*) 
 * [Boolean] **IncrementalDeployment** - specifies whether Incremental Deployment mode is enabled (default: *false*) 
-
+* [Enum] **TriggerStopMethod** - determines which triggers should be stopped.  
+  Available values: `AllEnabled` (default) | `DeployableOnly`  
+  Find more about the above option in section [Step: Stoping triggers](#step-stoping-triggers)
+* [Enum] **TriggerStartMethod** - determines which triggers should be started.  
+  Available values: `BasedOnSourceCode` (default) | `KeepPreviousState`  
+  Find more about the above option in section [Step: Restarting triggers](#step-restarting-triggers)
 
 
 Subsequently, you can define the needed options:
@@ -413,16 +484,26 @@ See example below:
 type,name,path,value
 # As usual - this line only update value for connectionString:
 linkedService,BlobSampleData,typeProperties.connectionString,"DefaultEndpointsProtocol=https;AccountName=sqlplayer2019;EndpointSuffix=core.windows.net;"
+
 # MINUS means the desired action is to REMOVE encryptedCredential:
 linkedService,BlobSampleData,-typeProperties.encryptedCredential,
 # PLUS means the desired action is to ADD new property with associated value:
 linkedService,BlobSampleData,+typeProperties.accountKey,"$($Env:VARIABLE)"
 factory,BigFactorySample2,"$.properties.globalParameters.'Env-Code'.value","PROD"
+
 # Multiple following configurations for many files:
 dataset,DS_SQL_*,properties.xyz,ABC
+
 # Change a pipeline activity timeout using integer and name based indexers
 pipeline,PL_Demo,activities[1].typeProperties.waitTimeInSeconds,30
 pipeline,PL_Demo,activities["Copy Data"].typeProperties.waitTimeInSeconds,30
+
+# Update the value of existing Global Parameter:
+factory,BigFactorySample2,"$.properties.globalParameters.envName.value",POC
+
+# Create NEW Global Parameter:
+factory,BigFactorySample2,"+$.properties.globalParameters.NewGlobalParam.value",2023
+factory,BigFactorySample2,"+$.properties.globalParameters.NewGlobalParam.type",int
 ```
 
 > When you use `$` at the beginning of the path it refers to root element of the JSON file. 
@@ -540,7 +621,9 @@ Afterwards, if `IncrementalDeployment = true`, it excludes objects by comparing 
 💬 In log you'll see line: `STEP: Stopping triggers...`
 
 This block stops all triggers which must be stopped due to deployment.  
-Since version 0.30 you can better control which triggers you want to omit from stopping. Only need to add such triggers to `Excludes` list and set flag `DoNotStopStartExcludedTriggers` to *true*.
+By default the process stops **all active** triggers when `TriggerStopMethod = AllEnabled` (default setting).
+However, it makes sense to use option `TriggerStopMethod = DeployableOnly` when one does selective or incremental deployment which would omit some triggers from being stopped.  
+Another way to control which triggers you want to omit from stopping is by adding such triggers to `Excludes` list and set flag `DoNotStopStartExcludedTriggers` to *true*.
 
 > The step might be skipped when `StopStartTriggers = false` in *Publish Options*
 
@@ -553,9 +636,11 @@ The mechanism is smart enough to publish all objects in the right order, thence 
 > Find out *Publish Option* capabilities in terms of filtering objects intended to be deployed.
 
 
-## Step: Save deployment state (new in ver.1.4)
+## Step: Save deployment state
 
 💬 In log you'll see line: `STEP: Updating (incremental) deployment state...`
+
+> This is new feature (ver.1.4) in public preview.
 
 After the deployment, in this step the tool prepares the list of deployed objects and their hashes (MD5 algorithm). The array is wrap up in json format and stored as new global parameter `adftools_deployment_state` in factory file.  
 **Deployment State** speeds up future deployments by identifying objects have been changed since last time.
@@ -574,11 +659,14 @@ Since version 0.30 you can better control which objects you want to omit from re
 
 > The step might be skipped when `DeleteNotInSource = false` in *Publish Options*
 
-## Step: Restarting all triggers
+## Step: Restarting triggers
 
-💬 In log you'll see line: `STEP: Starting all triggers...`
+💬 In log you'll see line: `STEP: Starting triggers...`
 
-Restarting all triggers that should be enabled.
+Restarting all triggers that should be enabled.  
+Since v.1.6 you have more control of which triggers should be started. Use `TriggerStartMethod` in *Publish Option* to set one of the following values:
+- **BasedOnSourceCode** (default) - uses source files and config file entries to determine desired status of triggers
+- **KeepPreviousState** - statuses from source or config files are ignored. In this case, the process remembers statuses before deployment (when stopping triggers) and the restores those statuses after the deployment. The status will be "disable" (trigger stopped) for any newly created trigger.
 
 > The step might be skipped when `StopStartTriggers = false` in *Publish Options*
 

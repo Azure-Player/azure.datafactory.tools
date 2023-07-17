@@ -31,6 +31,7 @@ InModuleScope azure.datafactory.tools {
 
     BeforeAll {
         Remove-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -Force
+        Start-Sleep -Seconds 3
         #Invoke-Expression "explorer.exe '$TmpFolder'"
     }
     
