@@ -41,7 +41,7 @@ function Stop-Triggers {
                     } 
                 }
                 if ($deploy) {
-                    $toBeStopped.Add($triggerName)
+                    $toBeStopped.Add($triggerName) | Out-Null
                 }
             }
         }

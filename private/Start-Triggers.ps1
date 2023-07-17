@@ -40,7 +40,7 @@ function Start-Triggers {
                 $isStart = $false
             }
             if ($isStart) {
-                $toBeStarted.Add($triggerName)
+                $toBeStarted.Add($triggerName) | Out-Null
             }
         }
     }
