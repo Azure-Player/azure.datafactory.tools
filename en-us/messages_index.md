@@ -37,3 +37,4 @@ ADFT0028 | Expected format of name for 'FullName' input parameter is: objectType
 ADFT0029 | Unknown object type: *type*.
 ADFT0030 | AzType '$AzType' is not supported.
 ADFT0031 | Empty value in config file. Path: [*path*]. Check previous warnings.
+ADFT0032 | The process is exiting the function. Do fix the issue and run again.

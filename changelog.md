@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 * Catch InvalidOperation exception when reading empty FilterFilePath in New-AdfPublishOption.ps1 #338
 * Purview configuration gets overwritten when deploy Global Parameters using ADF deployment task #343
 * Incremental Deployment seems to not work when factory folder does not exist #346
+* The publish cmdlet tries to delete enabled (active) trigger (not in source) when TriggerStartMethod = KeepPreviousState #350
 
 ## [1.5.0] - 2023-06-18
 ### Added

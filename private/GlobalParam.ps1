@@ -24,6 +24,7 @@ function Get-GlobalParam([string]$ResourceGroupName, [string]$DataFactoryName)
   }
   catch {
     Write-Error -Exception $_.Exception
+    $response = ""  # Workaround when ADF service returns error 404 for newly created ADF
   }
   return $response
 }

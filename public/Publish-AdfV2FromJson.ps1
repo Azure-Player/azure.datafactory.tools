@@ -168,7 +168,7 @@ function Publish-AdfV2FromJson {
         }
 
         if ($null -eq $targetAdf) {
-            Write-Host "The process is exiting the function. Do fix the issue and run again."
+            Write-Host "ADFT0032: The process is exiting the function. Do fix the issue and run again."
             return 
         }
     }
