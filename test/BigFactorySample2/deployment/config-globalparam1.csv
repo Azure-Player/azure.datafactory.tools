@@ -6,3 +6,6 @@ factory,BigFactorySample2,"+$.properties.globalParameters.NewGlobalParam.value",
 factory,BigFactorySample2,"+$.properties.globalParameters.NewGlobalParam.type",int
 factory,BigFactorySample2,"+$.properties.globalParameters.envName.value",POC
 factory,BigFactorySample2,"+$.properties.globalParameters.envName.type",string
+#factory,BigFactorySample2,"+$.properties.globalParameters.NewArray.value","[1,""aaaaa"",5]"
+#factory,BigFactorySample2,"+$.properties.globalParameters.NewArray.type",array
+#factory,BigFactorySample2,"$.properties.globalParameters.'GP-Array'.value","[2,4,""XYZ"",1000]"
