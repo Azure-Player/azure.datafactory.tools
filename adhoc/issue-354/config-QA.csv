@@ -1,0 +1,36 @@
+type,name,path,value
+linkedService,LS_ADLS_strgbigroup,typeProperties.url,https://strgbigroup01qa.dfs.core.windows.net/
+linkedService,KV_AKV_BIGroup01,typeProperties.baseURL,https://test-qa.vault.azure.net/
+pipeline,Master DW,parameters.SendToEmail,"{'type': 'string', 'defaultValue': 'abc@test.com'}"
+pipeline,Master DW,parameters.ResourceGroup,"{'type': 'string', 'defaultValue': 'BI_ResourceGroup_QA'}"
+pipeline,Master DW,parameters.SQLServerName,"{'type': 'string', 'defaultValue': 'bpazuresqlserver-qa'}"
+pipeline,Master DW,parameters.DWDatabaseName,"{'type': 'string', 'defaultValue': 'DW-Facts'}"
+pipeline,Master DW,parameters.DWServiceTier,"{'type': 'string', 'defaultValue': 'Standard'}"
+pipeline,Master DW,parameters.DWComputeSize,"{'type': 'string', 'defaultValue': 'S12'}"
+pipeline,Master DW,parameters.DWComputeSizeReset,"{'type': 'string', 'defaultValue': 'S2'}"
+pipeline,Master DW,parameters.EnvironmentName,"{'type': 'string', 'defaultValue': 'QA'}"
+pipeline,Master Data Lake Stage,parameters.SendToEmail,"{'type': 'string', 'defaultValue': 'abc@test.com'}"
+pipeline,Master Data Lake Stage,parameters.ResourceGroup,"{'type': 'string', 'defaultValue': 'BI_ResourceGroup_QA'}"
+pipeline,Master Data Lake Stage,parameters.SQLServerName,"{'type': 'string', 'defaultValue': 'bpazuresqlserver-qa'}"
+pipeline,Master Data Lake Stage,parameters.DWDatabaseName,"{'type': 'string', 'defaultValue': 'DW-Facts'}"
+pipeline,Master Data Lake Stage,parameters.DWServiceTier,"{'type': 'string', 'defaultValue': 'Standard'}"
+pipeline,Master Data Lake Stage,parameters.DWComputeSize,"{'type': 'string', 'defaultValue': 'S12'}"
+pipeline,Master Data Lake Stage,parameters.DWComputeSizeReset,"{'type': 'string', 'defaultValue': 'S2'}"
+pipeline,PL_Refresh PBI Dataset,parameters.SecretVersion_TenantId,"{'type': 'string', 'defaultValue': ''}"
+pipeline,PL_Refresh PBI Dataset,parameters.SecretVersion_SPClientId,"{'type': 'string', 'defaultValue': ''}"
+pipeline,PL_Refresh PBI Dataset,parameters.SecretVersion_SPSecret,"{'type': 'string', 'defaultValue': ''}"
+pipeline,PL_Refresh PBI Dataset,parameters.KeyVaultDNSName,"{'type': 'string', 'defaultValue': 'https://test-qa.vault.azure.net/'}"
+pipeline,PL_Load Master Power BI,parameters.EnvironmentName,"{'type': 'string', 'defaultValue': 'QA'}"
+pipeline,PL_Load Master Power BI,parameters.SendToEmail,"{'type': 'string', 'defaultValue': 'abc@test.com'}"
+pipeline,PL_Load Master Power BI,parameters.KeyVaultDNSName,"{'type': 'string', 'defaultValue': 'https://test-qa.vault.azure.net/'}"
+trigger,Trigger_Daily,pipelines[0].parameters.ResourceGroup,BI_ResourceGroup_QA
+trigger,Trigger_Daily,pipelines[0].parameters.SQLServerName,bpazuresqlserver-qa
+trigger,Trigger_Daily,pipelines[0].parameters.DWDatabaseName,DW-Facts
+trigger,Trigger_Daily,pipelines[0].parameters.DWServiceTier,Standard
+trigger,Trigger_Daily,pipelines[0].parameters.DWComputeSize,S12
+trigger,Trigger_Daily,pipelines[0].parameters.SendToEmail,abc@test.com
+trigger,Trigger_Daily,pipelines[0].parameters.DWComputeSizeReset,S4
+trigger,Trigger_Daily,pipelines[0].parameters.StageComputeSizeReset,S2
+factory,ADF-BI_ResourceGroup_QA,+$.properties.globalParameters.envName.value,QA
+factory,ADF-BI_ResourceGroup_QA,+$.properties.globalParameters.envName.type,string
+# This is comment - the line will be omitted,,,
