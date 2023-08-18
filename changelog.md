@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.7.0] - 2023-08-17
+### Fixed
+* Deployment of Global Parameters might not work sometimes #354
+
 ## [1.6.3] - 2023-07-17
 ### Added
 * Stop and restart only changed triggers #264 #332
