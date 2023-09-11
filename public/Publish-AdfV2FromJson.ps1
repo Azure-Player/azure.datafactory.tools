@@ -150,7 +150,7 @@ function Publish-AdfV2FromJson {
             Write-Host "Azure Data Factory exists."
             if ($opt.IncrementalDeployment -and !$DryRun.IsPresent) {
                 Write-Host "Loading Deployment State from ADF..."
-                $ds.GetStateFromService($targetAdf) | Out-Null
+                $ds.Deployed = Get-StateFromService -targetAdf $targetAdf
             }
         }
         else {
@@ -231,7 +231,7 @@ function Publish-AdfV2FromJson {
             $fullName = $_.FullName()
             $newHash = $_.GetHash()
             $isUnchanged = $ds.Deployed.ContainsKey($fullName) -and $ds.Deployed[$fullName] -eq $newHash
-            Write-Debug "- $fullName ( $newHash ) = Unchanged: $isUnchanged"
+            Write-Host "- $fullName ( $newHash ) = Unchanged: $isUnchanged"
             if ($isUnchanged) {
                 Write-Verbose "- $fullName"
                 $_.ToBeDeployed = $false
@@ -269,6 +269,18 @@ function Publish-AdfV2FromJson {
     }
 
     Write-Host "===================================================================================";
+    Write-Host "STEP: Deleting objects not in source ..."
+    if ($opt.DeleteNotInSource -eq $true) {
+        $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
+        $adfIns.AllObjects() | ForEach-Object {
+            Remove-AdfObjectIfNotInSource -adfSource $adf -adfTargetObj $_ -adfInstance $adfIns
+        }
+        Write-Host "Deleted $($adf.DeletedObjectNames.Count) objects from ADF service."
+    } else {
+        Write-Host "Operation skipped as publish option 'DeleteNotInSource' = false"
+    }
+
+    Write-Host "===================================================================================";
     Write-Host "STEP: Updating (incremental) deployment state..."
     if ($opt.IncrementalDeployment) {
         if ($opt.DeployGlobalParams -eq $false) {
@@ -295,18 +307,6 @@ function Publish-AdfV2FromJson {
     {
         Write-Host "Incremental Deployment State will not be saved as publish option 'IncrementalDeployment' = false"
         Write-Host "Try this new feature to speed up the deployment process. Check out more in documentation."
-    }
-
-    Write-Host "===================================================================================";
-    Write-Host "STEP: Deleting objects not in source ..."
-    if ($opt.DeleteNotInSource -eq $true) {
-        $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
-        $adfIns.AllObjects() | ForEach-Object {
-            Remove-AdfObjectIfNotInSource -adfSource $adf -adfTargetObj $_ -adfInstance $adfIns
-        }
-        Write-Host "Deleted $($adf.DeletedObjectNames.Count) objects from ADF service."
-    } else {
-        Write-Host "Operation skipped as publish option 'DeleteNotInSource' = false"
     }
 
     Write-Host "===================================================================================";

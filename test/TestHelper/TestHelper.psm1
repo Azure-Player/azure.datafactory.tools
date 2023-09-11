@@ -230,7 +230,9 @@ function Get-TargetEnv {
     return $target
 }
 
-
+function IsPesterDebugMode {
+    return ($Output -eq 'Diagnostic');
+}
 
 
 Export-ModuleMember -Function `
@@ -241,4 +243,4 @@ Export-ModuleMember -Function `
     Get-AdfObjectFromFile, `
     Remove-ObjectPropertyFromFile, Edit-TextInFile, Edit-ObjectPropertyInFile, `
     Backup-File, Restore-File, `
-    Get-RootPath, Get-TargetEnv
+    Get-RootPath, Get-TargetEnv, IsPesterDebugMode
