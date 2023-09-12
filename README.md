@@ -386,9 +386,9 @@ graph LR;
   S20 --> S25[Deployment Plan]
 	S25 --> S30[Stop triggers];
 	S30 --> S40[Deployment];
-  S40 --> S45[Save Deployment State]
-	S45 --> S50[Delete objects];
-	S50 --> S60[Restart triggers];
+	S40 --> S50[Delete objects];
+  S50 --> S60[Save Deployment State];
+	S60 --> S70[Restart triggers];
 ```
 
 ## Step: Create ADF (if not exist)
@@ -640,8 +640,6 @@ The mechanism is smart enough to publish all objects in the right order, thence 
 
 💬 In log you'll see line: `STEP: Updating (incremental) deployment state...`
 
-> This is new feature (ver.1.4) in public preview.
-
 After the deployment, in this step the tool prepares the list of deployed objects and their hashes (MD5 algorithm). The array is wrap up in json format and stored as new global parameter `adftools_deployment_state` in factory file.  
 **Deployment State** speeds up future deployments by identifying objects have been changed since last time.
 
@@ -655,7 +653,7 @@ After the deployment, in this step the tool prepares the list of deployed object
 
 This process removes all objects from ADF service whom couldn't be found in the source (ADF code).  
 The mechanism is smart enough to dropping the objects in right order.  
-Since version 0.30 you can better control which objects you want to omit from removing. Only need to add such objects to `Excludes` list and set flag `DoNotDeleteExcludedObjects` to *true*. 
+Furthermore, you can better control which objects you want to omit from removing. Only need to add such objects to `Excludes` list and set flag `DoNotDeleteExcludedObjects` to *true*. 
 
 > The step might be skipped when `DeleteNotInSource = false` in *Publish Options*
 

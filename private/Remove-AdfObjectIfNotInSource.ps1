@@ -16,7 +16,7 @@ function Remove-AdfObjectIfNotInSource {
     {
         Write-Verbose "Object [$simtype].[$name] hasn't been found in the source - to be deleted."
         Remove-AdfObject -adfSource $adfSource -obj $adfTargetObj -adfInstance $adfInstance
-        $adf.DeletedObjectNames.Add("$type.$name")
+        $adfSource.DeletedObjectNames.Add("$simtype.$name")
     }
     else {
         Write-Verbose "Object [$simtype].[$name] is in the source - won't be delete."

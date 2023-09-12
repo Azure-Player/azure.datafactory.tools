@@ -28,27 +28,42 @@ class AdfDeploymentState {
                 }
             }
         }
+        # Remove deleted objects from Deployment State
+        $adf.DeletedObjectNames | ForEach-Object {
+            $this.Deployed = Remove-ItemFromCollection -col $this.Deployed -item $_
+            Write-Verbose "[DELETED] hash for $_"
+        }
         $this.LastUpdate = [System.DateTime]::UtcNow
         return $cnt;
     }
 
 
-    [hashtable] GetStateFromService ($targetAdf)
+    [Boolean] IsTriggerDisabled([string] $ObjectName)
     {
+        return $this.DisabledTriggerNames -contains $ObjectName
+    }
+
+}
+
+function Get-StateFromService {
+    [CmdletBinding()]
+    param ($targetAdf)
+
         $res = Get-GlobalParam -ResourceGroupName $targetAdf.ResourceGroupName -DataFactoryName $targetAdf.DataFactoryName
-        
+        $d = @{}
+
         try {
             $InputObject = $res.properties.adftools_deployment_state.value.Deployed
-            $this.Deployed = Convert-PSObjectToHashtable $InputObject
+            $d = Convert-PSObjectToHashtable $InputObject
         }
         catch {
             Write-Verbose $_.Exception
         }
 
-        return $this.Deployed
-    }
-
+        return $d
 }
+
+
 
 class AdfGlobalParam {
     $type = "Object"

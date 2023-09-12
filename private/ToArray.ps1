@@ -25,3 +25,19 @@ function Test-ErrorTermination {
 function Test-Exception {
   Throw 'Test error message'
 }
+
+function Remove-ItemFromCollection {
+  [CmdletBinding()]
+  param (
+      [parameter(Mandatory = $true)] [hashtable] $col,
+      [parameter(Mandatory = $true)] [string] $item
+  )
+
+  [hashtable] $newCol = @{}
+    $col.Keys | ForEach-Object {
+        if ($_ -ne $item) {
+            $newCol.Add($_, $col[$_])
+        }
+    }
+    return $newCol
+}

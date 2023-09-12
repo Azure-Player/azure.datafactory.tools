@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+
+## [1.8.0] - 2023-09-12
+### Fixed
+* Incremental re-deployment of deleted and recreated objects #355
+
 ## [1.7.0] - 2023-08-17
 ### Fixed
 * Deployment of Global Parameters might not work sometimes #354
