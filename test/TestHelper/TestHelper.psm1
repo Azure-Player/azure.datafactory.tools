@@ -218,11 +218,13 @@ function Get-TargetEnv {
         [String] $AdfOrigName
     )
 
+    $rootPath = Get-RootPath
     $target = @{
         ResourceGroupName = 'rg-devops-factory'
         DataFactoryOrigName = $AdfOrigName
         DataFactoryName = ""
         Location = "UK South"
+        SrcFolder = "$rootPath\$AdfOrigName"
     }
     $c = Get-AzContext
     $guid = $c.Subscription.Id.Substring(0,8)

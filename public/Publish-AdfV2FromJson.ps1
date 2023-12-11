@@ -320,8 +320,9 @@ function Publish-AdfV2FromJson {
     $elapsedTime = new-timespan $script:StartTime $(get-date)
     Write-Host "==============================================================================";
     Write-Host "   *****   Azure Data Factory files have been deployed successfully.   *****`n";
-    Write-Host "Data Factory name:  $DataFactoryName";
-    Write-Host "Region (Location):  $location";
+    Write-Host "  Data Factory name:  $DataFactoryName";
+    Write-Host "Resource Group name:  $ResourceGroupName";
+    Write-Host "  Region (Location):  $location";
     Write-Host ([string]::Format("     Elapsed time:  {0:d1}:{1:d2}:{2:d2}.{3:d3}`n", $elapsedTime.Hours, $elapsedTime.Minutes, $elapsedTime.Seconds, $elapsedTime.Milliseconds))
     Write-Host "==============================================================================";
 
