@@ -28,6 +28,7 @@ InModuleScope azure.datafactory.tools {
     $opt.IncrementalDeployment = $true
     $opt.StopStartTriggers = $false
     $script:gp = "" 
+    $script:dstate = [AdfDeploymentState]::new('1.0.0')
 
     $script:SrcFolder = "$PSScriptRoot\$($script:DataFactoryOrigName)"
     $script:TmpFolder = (New-TemporaryDirectory).FullName
@@ -58,21 +59,34 @@ InModuleScope azure.datafactory.tools {
                 }
             }
 
-            Mock Get-GlobalParam { 
-                $adfi = @{id='/.../ADF/globalParameters/default'; name='default'; type='Microsoft.DataFactory/factories/globalParameters'; properties='' }
-                $adfi.properties = $script:gp
-                if (IsPesterDebugMode) {
-                    Write-Host ($adfi | ConvertTo-Json -Depth 10) -BackgroundColor DarkGreen
-                }
-                return $adfi
-            }
+            # Mock Get-GlobalParam { 
+            #     $adfi = @{id='/.../ADF/globalParameters/default'; name='default'; type='Microsoft.DataFactory/factories/globalParameters'; properties='' }
+            #     $adfi.properties = $script:gp
+            #     if (IsPesterDebugMode) {
+            #         Write-Host ($adfi | ConvertTo-Json -Depth 10) -BackgroundColor DarkGreen
+            #     }
+            #     return $adfi
+            # }
 
-            Mock Set-GlobalParam { 
-                $adf = $PesterBoundParameters.adf
-                $script:gp = ($adf.GlobalFactory.body | ConvertFrom-Json).properties.globalParameters
+            # Mock Set-GlobalParam { 
+            #     $adf = $PesterBoundParameters.adf
+            #     $script:gp = ($adf.GlobalFactory.body | ConvertFrom-Json).properties.globalParameters
+            #     if (IsPesterDebugMode) {
+            #         Write-Host ($script:gp | ConvertTo-Json -Depth 10) -BackgroundColor DarkRed
+            #     }
+            # }
+
+            Mock Set-StateToStorage {
+                $script:dstate = $PesterBoundParameters.ds
                 if (IsPesterDebugMode) {
-                    Write-Host ($script:gp | ConvertTo-Json -Depth 10) -BackgroundColor DarkRed
+                    Write-Host ($script:dstate | ConvertTo-Json -Depth 10) -BackgroundColor DarkRed
                 }
+            }
+            Mock Get-StateFromStorage {
+            if (IsPesterDebugMode) {
+                Write-Host ($script:dstate | ConvertTo-Json -Depth 10) -BackgroundColor DarkGreen
+            }
+            return $script:dstate
             }
 
             Mock Remove-AzDataFactoryV2Pipeline {}
@@ -84,11 +98,11 @@ InModuleScope azure.datafactory.tools {
 
         It '"adftools_deployment_state" in GP should be created' {
             Publish-AdfV2FromJson @params
-            Should -Invoke -CommandName Set-GlobalParam -Times 1
+            Should -Invoke -CommandName Set-StateToStorage -Times 1
         }
         It 'New GP "adftools_deployment_state" should exist' {
-            Write-Host ($gp | ConvertTo-Json -Depth 10) -BackgroundColor DarkBlue
-            $script:ds1 = $gp.adftools_deployment_state.value
+            Write-Host ($dstate | ConvertTo-Json -Depth 10) -BackgroundColor DarkBlue
+            $script:ds1 = $ds
         }
         It '"adftools_deployment_state" should contain empty "Deployed"' {
             $ds1.Deployed | Should -BeNullOrEmpty
@@ -107,7 +121,8 @@ InModuleScope azure.datafactory.tools {
             Write-Host "*** DEPLOY FIRST TIME ***" -BackgroundColor DarkGreen
             Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "BlobSampleData.json" -Recurse:$true -Force 
             Publish-AdfV2FromJson @params
-            $ds2 = $gp.adftools_deployment_state.value
+            #$ds2 = $gp.adftools_deployment_state.value
+            $ds2 = $dstate
             Write-Host ($ds2 | ConvertTo-Json -Depth 5) -BackgroundColor Green
             $ds2.Deployed | Should -Not -BeNullOrEmpty
             $ds2.Deployed.Count | Should -Be 1
@@ -126,7 +141,8 @@ InModuleScope azure.datafactory.tools {
             Remove-Item -Path "$TmpFolder" -Include "BlobSampleData.json" -Recurse:$true -Force
             $opt.DeleteNotInSource = $true
             Publish-AdfV2FromJson @params
-            $ds3 = $gp.adftools_deployment_state.value
+            #$ds3 = $gp.adftools_deployment_state.value
+            $ds3 = $dstate
             #$ds3.Deployed.Count | Should -Be 0
             $ds3.Deployed | Should -BeNullOrEmpty
         }
