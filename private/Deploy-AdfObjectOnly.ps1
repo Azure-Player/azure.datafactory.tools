@@ -143,7 +143,7 @@ function Deploy-AdfObjectOnly {
         {
             $adf.GlobalFactory.GlobalParameters = $json
             $adf.GlobalFactory.body = $body
-            Update-GlobalParameters -adf $adf -targetAdf $targetAdf
+            Update-GlobalParameters -adf $adf
         }
         default
         {

@@ -2,8 +2,7 @@ function Update-GlobalParameters {
     [CmdletBinding()]
 param
 (
-    [Parameter(Mandatory)] [Adf] $adf,
-    [Parameter(Mandatory)] $targetAdf
+    [Parameter(Mandatory)] [Adf] $adf
 )
 
     Write-Debug "BEGIN: Update-GlobalParameters"
@@ -14,7 +13,10 @@ param
         Write-Verbose "Parsing JSON..."
         $globalFactoryObject = [Newtonsoft.Json.Linq.JObject]::Parse($adf.GlobalFactory.body)
 
-        $gpExist = Get-Member -InputObject $adf.GlobalFactory.GlobalParameters -name "properties" -Membertype "Properties"
+        $propertiesExist = Get-Member -InputObject $adf.GlobalFactory.GlobalParameters -name "properties" -Membertype "Properties"
+        if ($null -ne $propertiesExist) {
+            $gpExist = Get-Member -InputObject $adf.GlobalFactory.GlobalParameters.properties -name "globalParameters" -Membertype "Properties"
+        }
         if ($null -ne $gpExist)
         {
             $globalParametersObject = $globalFactoryObject.properties.globalParameters
