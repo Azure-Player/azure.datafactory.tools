@@ -1,0 +1,9 @@
+{
+	"name": "dev-weu-int-adf",
+	"properties": {
+		"globalConfigurations": {
+			"PipelineBillingEnabled": "true"
+		}
+	},
+	"location": "westeurope"
+}
