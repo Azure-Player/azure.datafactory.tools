@@ -151,7 +151,7 @@ function Publish-AdfV2FromJson {
             if ($opt.IncrementalDeployment -and !$DryRun.IsPresent) {
                 Write-Host "Loading Deployment State from ADF..."
                 #$ds.Deployed = Get-StateFromService -targetAdf $targetAdf
-                $ds = Get-StateFromStorage
+                $ds = Get-StateFromStorage -DataFactoryName $DataFactoryName
             }
         }
         else {

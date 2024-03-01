@@ -65,31 +65,59 @@ class AdfDeploymentState {
 
 function Get-StateFromStorage {
     [CmdletBinding()]
-    param ($DataFactoryName)
+    param (
+        [Parameter(Mandatory)] $DataFactoryName, 
+        [Parameter(Mandatory)] $LocationUri
+        )
 
-    $ds = [AdfDeploymentState]::new($verStr)
-    $ctx = New-AzStorageContext -UseConnectedAccount -StorageAccountName "sqlplayer2020"
-    $blob = Get-AzStorageBlobContent -Container "adftools" -Blob "$DataFactoryName.adfdeploymentstate.json" -Destination "adfdeploymentstate.json" -Force -Context $ctx
-    if ($blob) {
-        $txt = Get-Content -Path "adfdeploymentstate.json" -Raw -Encoding UTF8
-        Write-Host $txt
+    $Suffix = "adfdeploymentstate.json"
+    $ds = [AdfDeploymentState]::new("1.0.0")
+    $storageAccountName = Get-StorageAccountNameFromUri $LocationUri
+    $ctx = New-AzStorageContext -UseConnectedAccount -StorageAccountName $storageAccountName
+    $blob = [Microsoft.Azure.Storage.Blob.CloudBlockBlob]::new("$LocationUri/$DataFactoryName.$Suffix")
+    Write-Host " Ready to read file from storage - Uri: $($blob.Uri.AbsoluteUri)"
+    #$file = Get-AzStorageBlobContent -CloudBlob $blob -Destination $Suffix -Context $ctx            #-ErrorAction SilentlyContinue
+    #$blob = Get-AzStorageBlobContent -Container "adftools" -Blob "$DataFactoryName.$Suffix" -Destination $Suffix -Force -Context $ctx -ErrorAction SilentlyContinue
+    $file = Get-AzStorageBlobContent -Container $blob.Container.Name -Blob $blob.Name -Destination $Suffix -Context $ctx -Force           #-ErrorAction SilentlyContinue
+    if ($file) {
+        $txt = Get-Content -Path $Suffix -Raw -Encoding UTF8
+        Write-Host $txt -BackgroundColor Blue
         [AdfDeploymentState] $ds = $txt
+        Write-Host "Deployment State loaded from storage."
+    }
+    else {
+        Write-Host "No Deployment State found."
     }
     return $ds
 }
 
 function Set-StateToStorage {
     [CmdletBinding()]
-    param ($ds, $DataFactoryName)
+    param (
+        [Parameter(Mandatory)] $ds, 
+        [Parameter(Mandatory)] $DataFactoryName, 
+        [Parameter(Mandatory)] $LocationUri
+        )
 
+    $Suffix = "adfdeploymentstate.json"
     $dsjson = ConvertTo-Json $ds -Depth 5
     Write-Verbose "--- Deployment State: ---`r`n $dsjson"
 
-    Set-Content -Path "adfdeploymentstate.json" -Value $dsjson -Encoding UTF8
-    $ctx = New-AzStorageContext -UseConnectedAccount -StorageAccountName "sqlplayer2020"
-    Set-AzStorageBlobContent -Container "adftools" -File "adfdeploymentstate.json" -Context $ctx -Blob "$DataFactoryName.adfdeploymentstate.json" -Force
+    Set-Content -Path $Suffix -Value $dsjson -Encoding UTF8
+    $storageAccountName = Get-StorageAccountNameFromUri $LocationUri
+    $ctx = New-AzStorageContext -UseConnectedAccount -StorageAccountName $storageAccountName
+    $blob = [Microsoft.Azure.Storage.Blob.CloudBlob]::new("$LocationUri/$DataFactoryName.$Suffix")
+    $r = Set-AzStorageBlobContent -CloudBlob $blob -File $Suffix -Context $ctx -Force 
 
+    Write-Host "Deployment State saved to storage. Uri: $($r.BlobClient.Uri)"
 }
+
+# Function to get Storage Account name from URI
+function Get-StorageAccountNameFromUri($uri) {
+    $accountName = ($uri -split '\.')[0].Substring(8)  # Assumes URI starts with "https://"
+    return $accountName
+}
+
 
 
 

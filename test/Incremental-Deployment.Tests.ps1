@@ -4,6 +4,8 @@ BeforeDiscovery {
     $moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
 
     Import-Module -Name $moduleManifestPath -Force -Verbose:$false
+    $m = Get-Module -Name 'azure.datafactory.tools'
+    $script:verStr = $m.Version.ToString(2) + "." + $m.Version.Build.ToString("000");
 }
 
 InModuleScope azure.datafactory.tools {
@@ -28,7 +30,10 @@ InModuleScope azure.datafactory.tools {
     $opt.IncrementalDeployment = $true
     $opt.StopStartTriggers = $false
     $script:gp = "" 
-    $script:dstate = [AdfDeploymentState]::new('1.0.0')
+    $script:dstate = [AdfDeploymentState]::new($verStr)
+    $script:dstate.LastUpdate = [System.DateTime]::UtcNow
+    $script:dstateJson = $script:dstate | ConvertTo-Json
+    $script:uri = "https://sqlplayer2020.blob.core.windows.net/adftools/folder1"
 
     $script:SrcFolder = "$PSScriptRoot\$($script:DataFactoryOrigName)"
     $script:TmpFolder = (New-TemporaryDirectory).FullName
@@ -40,6 +45,22 @@ InModuleScope azure.datafactory.tools {
         DataFactoryName = "$DataFactoryName" 
         Location = "$Location" 
         Option = $opt
+    }
+
+
+    Describe 'When Incremental mode with storage provided' {
+        It 'Should return empty state when get for the first time' {
+            $b = Get-StateFromStorage -DataFactoryName $DataFactoryName -LocationUri $uri
+            #$blob | Should -BeNullOrEmpty
+        }
+        It 'Should save state to storage' {
+            Set-StateToStorage -ds $dstate -DataFactoryName $DataFactoryName -LocationUri $uri
+        }
+        It 'Should return the same value for state when read again' {
+            $b = Get-StateFromStorage -DataFactoryName $DataFactoryName -LocationUri $uri
+            $j = ($b | ConvertTo-Json)
+            $j | Should -Be $dstateJson
+        }
     }
 
     Describe 'When deploy ADF in Incremental mode' -Tag 'IncrementalDeployment', 'Unit' {
