@@ -1,0 +1,22 @@
+{
+	"name": "BigFactorySample2",
+	"properties": {
+		"globalParameters": {
+			"par_sftpHostArray": {
+				"type": "array",
+				"value": [
+					"10.192.64.48",
+					"10.192.64.38"
+				]
+			},
+			"par_sftpUsernameDictionary": {
+				"type": "object",
+				"value": {
+					"values": {
+						"MFT": "P_INT_SFTP_CF-AMIS-AM"
+					}
+				}
+			}
+		}
+	}
+}
