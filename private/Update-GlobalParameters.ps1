@@ -2,8 +2,7 @@ function Update-GlobalParameters {
     [CmdletBinding()]
 param
 (
-    [Parameter(Mandatory)] [Adf] $adf,
-    [Parameter(Mandatory)] $targetAdf
+    [Parameter(Mandatory)] [Adf] $adf
 )
 
     Write-Debug "BEGIN: Update-GlobalParameters"
