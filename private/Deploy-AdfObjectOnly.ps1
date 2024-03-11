@@ -134,7 +134,7 @@ function Deploy-AdfObjectOnly {
             New-AzResource `
             -ResourceType $resType `
             -ResourceGroupName $resourceGroupName `
-            -Name "$resName" `
+            -ResourceName "$resName" `
             -ApiVersion "2018-06-01" `
             -Properties $json `
             -IsFullObject -Force | Out-Null

@@ -33,9 +33,8 @@ function Start-Triggers {
                 Write-Host "- Deleted trigger: $triggerName" 
                 $isStart = $false
             }
-            # Check whether a trigger has not been stopped    #-and $adf.PublishOptions.TriggerStartMethod -eq 'BasedOnSourceCode' `
-            if ($isStart -and $adf.PublishOptions.TriggerStopMethod  -eq 'DeployableOnly' `
-                         -and $adf.IsTriggerDisabled("$triggerName") -eq $false) {
+            # Check whether a (target) trigger is already started
+            if ($isStart -and $adf.IsTargetTriggerStarted("$triggerName")) {
                 Write-Host "- Trigger already started: $triggerName" 
                 $isStart = $false
             }

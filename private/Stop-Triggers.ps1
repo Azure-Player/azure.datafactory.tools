@@ -13,6 +13,7 @@ function Stop-Triggers {
         $activeTriggers = $triggersADF | Where-Object { $_.RuntimeState -ne "Stopped" } | ToArray
         $adf.activeTriggers = $activeTriggers       # Remember to use after the deployment when TriggerStartMethod = 'KeepPreviousState'
         $allAdfTriggersArray = $triggersADF | ToArray
+        $adf.TargetTriggerNames = $allAdfTriggersArray
         Write-Host ("The number of active triggers: " + $activeTriggers.Count + " (out of $($allAdfTriggersArray.Count))")
         Write-Host ("TriggerStopMethod = $($adf.PublishOptions.TriggerStopMethod)")
 
@@ -57,10 +58,13 @@ function Stop-Triggers {
                 -DataFactoryName $adf.Name `
                 -Name $_ `
                 | Out-Null
+                
+                $TrName = $_
+                $adf.TargetTriggerNames | Where-Object { $_.Name -eq $TrName } | ForEach-Object { $_.RuntimeState = "Stopped" }
             }
             Write-Host "Complete stopping deployed triggers."
         }
-        $adf.DisabledTriggerNames = $toBeStopped
+        $adf.StoppedTriggerNames = $toBeStopped
     }
     else 
     {

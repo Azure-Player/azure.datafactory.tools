@@ -29,10 +29,13 @@ InModuleScope azure.datafactory.tools {
     $script:DoNotStopStartExcludedTriggers = $true
     Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "*.csv" -Recurse:$true -Force 
 
+    $script:TargetAdf = $null
+
     BeforeAll {
-        Remove-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -Force
-        Start-Sleep -Seconds 3
+        #Remove-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -Force
+        #Start-Sleep -Seconds 3
         #Invoke-Expression "explorer.exe '$TmpFolder'"
+        $DebugPreference = 'SilentlyContinue'
     }
     
 
@@ -55,10 +58,54 @@ InModuleScope azure.datafactory.tools {
         @{ Case = 'B12' ; DesiredState = 'Disabled'; CurrentState = 'Enabled' ; Mode = 'Excluded' ; StopStartTriggers = $false; ShouldThrow = $false; TrExistsAfter = 1 ; StateAfter = 'Enabled' }
 
         BeforeEach {
-            Mock Stop-Trigger { 
+            Mock Stop-Trigger {
                 param ($ResourceGroupName, $DataFactoryName, $Name)
-                Write-Host " --- Mocked function Stop-Trigger is here ---"
-                Stop-AzDataFactoryV2Trigger -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Name $Name -Force
+                $o = $script:TargetAdf.GetObjectByFullName("*triggers.$Name")
+                $o.RuntimeState = 'Stopped'
+            }
+            Mock Start-Trigger {
+                param ($ResourceGroupName, $DataFactoryName, $Name)
+                $o = $script:TargetAdf.GetObjectByFullName("*triggers.$Name")
+                $o.RuntimeState = 'Started'
+            }
+            Mock Stop-TargetTrigger {
+                param ($Name, $ResourceGroupName, $DataFactoryName)
+                #Stop-Trigger -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Name $Name
+                $o = $script:TargetAdf.GetObjectByFullName("*triggers.$Name")
+                $o.RuntimeState = 'Stopped'
+            }
+            Mock Start-TargetTrigger {
+                param ($Name, $ResourceGroupName, $DataFactoryName)
+                #Start-Trigger -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Name $Name
+                $o = $script:TargetAdf.GetObjectByFullName("*triggers.$Name")
+                $o.RuntimeState = 'Started'
+            }
+            Mock Set-AzDataFactoryV2 {
+                param ($ResourceGroupName, $DataFactoryName, $Location)
+                $script:TargetAdf = CreateTargetAdf
+                $script:TargetAdf.Name = $DataFactoryName
+                $script:TargetAdf.ResourceGroupName = $ResourceGroupName
+                $script:TargetAdf.Location = $Location
+                return $script:TargetAdf
+            }
+            Mock Get-AzDataFactoryV2 {
+                param ($ResourceGroupName, $Name)
+                return $script:TargetAdf
+            }
+            Mock Get-AzDataFactoryV2Trigger {
+                param ($ResourceGroupName, $DataFactoryName)
+                return $script:TargetAdf.GetObjectsByFullName("*triggers.*")
+            }
+            Mock New-AzResource {
+                param ($ResourceType, $ResourceGroupName, $ResourceName, $ApiVersion, $Properties, $IsFullObject)
+                $newRes = New-Object -TypeName "AdfObject"
+                $newRes.Name = ($ResourceName -split '/')[1]
+                $newRes.Type = $ResourceType
+                $script:TargetAdf.DeployObject($newRes)
+            }
+            Mock Get-SortedTriggers {
+                param ($DataFactoryName, $ResourceGroupName)
+                return $script:TargetAdf.AllObjects
             }
         }
 
@@ -99,6 +146,7 @@ InModuleScope azure.datafactory.tools {
             Edit-ObjectPropertyInFile $file "properties.typeProperties.recurrence.startTime" """$startTime"""
 
             $opt = New-AdfPublishOption
+            $opt.TriggerStopMethod = 'DeployableOnly'
             if ($Mode -eq 'Included') { $opt.Includes.Add("*.$triggerName", "") }
             if ($Mode -eq 'Excluded') { $opt.Excludes.Add("*.*", "") }
             $opt.StopStartTriggers = $StopStartTriggers

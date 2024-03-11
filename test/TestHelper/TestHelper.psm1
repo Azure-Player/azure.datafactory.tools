@@ -234,6 +234,15 @@ function IsPesterDebugMode {
     return ($Output -eq 'Diagnostic');
 }
 
+Write-Host "Importing MockDataFactory..."
+. ".\test\TestHelper\MockDataFactory.ps1"   # Move this later to Helper
+
+function CreateTargetAdf {
+    $TargetAdf = New-Object -TypeName "MockTargetAdf"
+    return $TargetAdf
+}
+
+
 
 Export-ModuleMember -Function `
     Convert-SecureStringToString, `
@@ -243,4 +252,4 @@ Export-ModuleMember -Function `
     Get-AdfObjectFromFile, `
     Remove-ObjectPropertyFromFile, Edit-TextInFile, Edit-ObjectPropertyInFile, `
     Backup-File, Restore-File, `
-    Get-RootPath, Get-TargetEnv, IsPesterDebugMode
+    Get-RootPath, Get-TargetEnv, IsPesterDebugMode, CreateTargetAdf

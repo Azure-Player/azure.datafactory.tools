@@ -38,11 +38,6 @@ class AdfDeploymentState {
     }
 
 
-    [Boolean] IsTriggerDisabled([string] $ObjectName)
-    {
-        return $this.DisabledTriggerNames -contains $ObjectName
-    }
-
 }
 
 function Get-StateFromService {
