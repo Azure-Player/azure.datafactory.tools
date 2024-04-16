@@ -18,8 +18,17 @@ class MockTargetAdf {
                 throw ("ADF simulation: Can't deploy trigger because its Started.")
             }
         } else {
-            $this.AllObjects.Add($o)
+            $this.AllObjects.Add($o) | Out-Null
         }
+    }
+
+    RemoveObject($fullName)
+    {
+        [System.Collections.ArrayList] $n = @{}
+        $this.AllObjects | ForEach-Object {
+            if (!($_.Name -like $fullName)) { $n.Add($_) | Out-Null }
+        }
+        $this.AllObjects = $n;
     }
 
     [bool] IsExist($fullName)

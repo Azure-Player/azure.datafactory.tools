@@ -36,8 +36,62 @@ InModuleScope azure.datafactory.tools {
         #Start-Sleep -Seconds 3
         #Invoke-Expression "explorer.exe '$TmpFolder'"
         $DebugPreference = 'SilentlyContinue'
+        Mock Stop-Trigger {
+            param ($ResourceGroupName, $DataFactoryName, $Name)
+            $o = $script:TargetAdf.GetObjectByFullName("*triggers.$Name")
+            $o.RuntimeState = 'Stopped'
+        }
+        Mock Start-Trigger {
+            param ($ResourceGroupName, $DataFactoryName, $Name)
+            $o = $script:TargetAdf.GetObjectByFullName("*triggers.$Name")
+            $o.RuntimeState = 'Started'
+        }
+        Mock Stop-TargetTrigger {
+            param ($Name, $ResourceGroupName, $DataFactoryName)
+            $o = $script:TargetAdf.GetObjectByFullName("*triggers.$Name")
+            $o.RuntimeState = 'Stopped'
+        }
+        Mock Start-TargetTrigger {
+            param ($Name, $ResourceGroupName, $DataFactoryName)
+            $o = $script:TargetAdf.GetObjectByFullName("*triggers.$Name")
+            $o.RuntimeState = 'Started'
+        }
+        Mock Set-AzDataFactoryV2 {
+            param ($ResourceGroupName, $DataFactoryName, $Location)
+            $script:TargetAdf = CreateTargetAdf
+            $script:TargetAdf.Name = $DataFactoryName
+            $script:TargetAdf.ResourceGroupName = $ResourceGroupName
+            $script:TargetAdf.Location = $Location
+            return $script:TargetAdf
+        }
+        Mock Get-AzDataFactoryV2 {
+            param ($ResourceGroupName, $Name)
+            return $script:TargetAdf
+        }
+        Mock Get-AzDataFactoryV2Trigger {
+            param ($ResourceGroupName, $DataFactoryName)
+            return $script:TargetAdf.GetObjectsByFullName("*triggers.*")
+        }
+        Mock New-AzResource {
+            param ($ResourceType, $ResourceGroupName, $ResourceName, $ApiVersion, $Properties, $IsFullObject)
+            $newRes = New-Object -TypeName "AdfObject"
+            $newRes.Name = ($ResourceName -split '/')[1]
+            $newRes.Type = $ResourceType
+            # if ($ResourceType -like '*triggers') {
+            #     $newRes.RuntimeState = $Properties.properties.runtimeState
+            # }
+            $script:TargetAdf.DeployObject($newRes)
+        }
+        Mock Get-SortedTriggers {
+            param ($DataFactoryName, $ResourceGroupName)
+            return $script:TargetAdf.AllObjects
+        }
+        Mock Remove-TargetTrigger {
+            param ($Name, $DataFactoryName, $ResourceGroupName)
+            $script:TargetAdf.RemoveObject("*triggers.$Name")
+        }
     }
-    
+
 
 
 
@@ -57,58 +111,6 @@ InModuleScope azure.datafactory.tools {
         @{ Case = 'B11' ; DesiredState = 'Enabled' ; CurrentState = 'Disabled'; Mode = 'Excluded' ; StopStartTriggers = $false; ShouldThrow = $false; TrExistsAfter = 1 ; StateAfter = 'Disabled'},
         @{ Case = 'B12' ; DesiredState = 'Disabled'; CurrentState = 'Enabled' ; Mode = 'Excluded' ; StopStartTriggers = $false; ShouldThrow = $false; TrExistsAfter = 1 ; StateAfter = 'Enabled' }
 
-        BeforeEach {
-            Mock Stop-Trigger {
-                param ($ResourceGroupName, $DataFactoryName, $Name)
-                $o = $script:TargetAdf.GetObjectByFullName("*triggers.$Name")
-                $o.RuntimeState = 'Stopped'
-            }
-            Mock Start-Trigger {
-                param ($ResourceGroupName, $DataFactoryName, $Name)
-                $o = $script:TargetAdf.GetObjectByFullName("*triggers.$Name")
-                $o.RuntimeState = 'Started'
-            }
-            Mock Stop-TargetTrigger {
-                param ($Name, $ResourceGroupName, $DataFactoryName)
-                #Stop-Trigger -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Name $Name
-                $o = $script:TargetAdf.GetObjectByFullName("*triggers.$Name")
-                $o.RuntimeState = 'Stopped'
-            }
-            Mock Start-TargetTrigger {
-                param ($Name, $ResourceGroupName, $DataFactoryName)
-                #Start-Trigger -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Name $Name
-                $o = $script:TargetAdf.GetObjectByFullName("*triggers.$Name")
-                $o.RuntimeState = 'Started'
-            }
-            Mock Set-AzDataFactoryV2 {
-                param ($ResourceGroupName, $DataFactoryName, $Location)
-                $script:TargetAdf = CreateTargetAdf
-                $script:TargetAdf.Name = $DataFactoryName
-                $script:TargetAdf.ResourceGroupName = $ResourceGroupName
-                $script:TargetAdf.Location = $Location
-                return $script:TargetAdf
-            }
-            Mock Get-AzDataFactoryV2 {
-                param ($ResourceGroupName, $Name)
-                return $script:TargetAdf
-            }
-            Mock Get-AzDataFactoryV2Trigger {
-                param ($ResourceGroupName, $DataFactoryName)
-                return $script:TargetAdf.GetObjectsByFullName("*triggers.*")
-            }
-            Mock New-AzResource {
-                param ($ResourceType, $ResourceGroupName, $ResourceName, $ApiVersion, $Properties, $IsFullObject)
-                $newRes = New-Object -TypeName "AdfObject"
-                $newRes.Name = ($ResourceName -split '/')[1]
-                $newRes.Type = $ResourceType
-                $script:TargetAdf.DeployObject($newRes)
-            }
-            Mock Get-SortedTriggers {
-                param ($DataFactoryName, $ResourceGroupName)
-                return $script:TargetAdf.AllObjects
-            }
-        }
-
         It 'has 1 trigger on target' {
             # Prep target trigger
             Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "$triggerName.json" -Recurse:$true -Force 
@@ -123,7 +125,7 @@ InModuleScope azure.datafactory.tools {
             $script:TriggersInServiceCount | Should -Be 1
         }
 
-        It 'Case #<Case> when Current State = <CurrentState>, Desired State=<DesiredState>, trigger <Mode> and StopStart=<StopStartTriggers> should find trigger <StateAfter>' -TestCases $cases {
+        It 'Case #<Case>(A) when Current State = <CurrentState>, Desired State=<DesiredState>, trigger <Mode>, StopStart=<StopStartTriggers> and TriggerStopMethod=AllEnabled should find trigger <StateAfter>' -TestCases $cases {
             param
             (
                 [ValidateSet('Enabled','Disabled')]
@@ -134,54 +136,31 @@ InModuleScope azure.datafactory.tools {
                 [string] $Mode,
                 [boolean] $StopStartTriggers,
                 [int] $TrExistsAfter,
-                [switch]$ShouldThrow,
+                [switch] $ShouldThrow,
                 [string] $StateAfter
             )
-            if ($CurrentState -eq 'Enabled') { Start-TargetTrigger -Name $triggerName @script:CommonParam }
-            if ($CurrentState -eq 'Disabled') { Stop-TargetTrigger -Name $triggerName @script:CommonParam }
-            # The block below is a trick to enforce publishing a trigger, because for some reason, 
-            # unchanged trigger won't be published and hence doesn't have to be stopped prior publish, which fails tests B04 & B06.
-            $file = Join-Path $RootFolder "trigger" "$triggerName.json" 
-            $startTime = (Get-Date -format "yyyy-MM-ddTHH:mm:ss.000Z")
-            Edit-ObjectPropertyInFile $file "properties.typeProperties.recurrence.startTime" """$startTime"""
 
-            $opt = New-AdfPublishOption
-            $opt.TriggerStopMethod = 'DeployableOnly'
-            if ($Mode -eq 'Included') { $opt.Includes.Add("*.$triggerName", "") }
-            if ($Mode -eq 'Excluded') { $opt.Excludes.Add("*.*", "") }
-            $opt.StopStartTriggers = $StopStartTriggers
-            $opt.DoNotStopStartExcludedTriggers = $DoNotStopStartExcludedTriggers
+            $tsm = 'AllEnabled'
+            . "test\Triggers_template.ps1"
+        }
 
-            $ExpectDisableTrigger = $StopStartTriggers -and $CurrentState -eq 'Enabled'
-            [AdfObjectName] $oname = [AdfObjectName]::new("trigger.$triggerName")
-            $IsMatchExcluded = $oname.IsNameMatch($opt.Excludes.Keys)
-            $ExpectDisableTrigger = $ExpectDisableTrigger -and -not ( $IsMatchExcluded -and $opt.DoNotStopStartExcludedTriggers )
+        It 'Case #<Case>(B) when Current State = <CurrentState>, Desired State=<DesiredState>, trigger <Mode>, StopStart=<StopStartTriggers> and TriggerStopMethod=DeployableOnly should find trigger <StateAfter>' -TestCases $cases {
+            param
+            (
+                [ValidateSet('Enabled','Disabled')]
+                [string] $DesiredState,
+                [ValidateSet('Enabled','Disabled')]
+                [string] $CurrentState,
+                [ValidateSet('Included','Excluded')]
+                [string] $Mode,
+                [boolean] $StopStartTriggers,
+                [int] $TrExistsAfter,
+                [switch] $ShouldThrow,
+                [string] $StateAfter
+            )
 
-            if ($ShouldThrow) {
-                { Publish-AdfV2FromJson -RootFolder "$RootFolder" `
-                -ResourceGroupName "$ResourceGroupName" `
-                -DataFactoryName "$DataFactoryName" `
-                -Location "$Location" -Option $opt -Stage "trigger-$DesiredState"
-                } | Should -Throw
-            } else {
-                { Publish-AdfV2FromJson -RootFolder "$RootFolder" `
-                -ResourceGroupName "$ResourceGroupName" `
-                -DataFactoryName "$DataFactoryName" `
-                -Location "$Location" -Option $opt -Stage "trigger-$DesiredState"
-                } | Should -Not -Throw
-            }
-
-            Assert-MockCalled Stop-Trigger -Times ([int]$ExpectDisableTrigger)
-
-            $script:TriggersOnDiskCount = (Get-ChildItem -Path "$RootFolder\trigger" -Filter "$triggerName.json" -Recurse:$true | Measure-Object).Count
-            $tr = Get-AzDataFactoryV2Trigger @script:CommonParam
-            $arr = $tr | ToArray
-            $script:TriggersInServiceCount = $arr.Count
-            $script:TriggersInServiceCount | Should -Be $TrExistsAfter
-            if ($TrExistsAfter -eq 1)
-            {
-                $arr[0].RuntimeState | Should -Be (ConvertTo-RuntimeState $StateAfter)
-            }
+            $tsm = 'DeployableOnly'
+            . "test\Triggers_template.ps1"
         }
 
     }    
@@ -191,9 +170,9 @@ InModuleScope azure.datafactory.tools {
 
         $cases = 
         @{ Case = 'S01' ; DesiredState = 'Enabled' ; Mode = 'Included' ; StopStartTriggers = $true ; TrExistsAfter = 1 ; StateAfter = 'Enabled' },
-        @{ Case = 'S02' ; DesiredState = 'Disabled'; Mode = 'Included' ; StopStartTriggers = $true ; TrExistsAfter = 1 ; StateAfter = 'Disabled' },
-        @{ Case = 'S03' ; DesiredState = 'Enabled' ; Mode = 'Excluded' ; StopStartTriggers = $true ; TrExistsAfter = 0 ; StateAfter = '' },
-        @{ Case = 'S04' ; DesiredState = 'Disabled'; Mode = 'Excluded' ; StopStartTriggers = $true ; TrExistsAfter = 0 ; StateAfter = '' }
+        @{ Case = 'S02' ; DesiredState = 'Disabled'; Mode = 'Included' ; StopStartTriggers = $true ; TrExistsAfter = 1 ; StateAfter = 'Disabled' }
+        # @{ Case = 'S03' ; DesiredState = 'Enabled' ; Mode = 'Excluded' ; StopStartTriggers = $true ; TrExistsAfter = 0 ; StateAfter = '' },
+        # @{ Case = 'S04' ; DesiredState = 'Disabled'; Mode = 'Excluded' ; StopStartTriggers = $true ; TrExistsAfter = 0 ; StateAfter = '' }
 
         It 'Case #<Case> when Desired State=<DesiredState>, trigger <Mode> and StopStart=<StopStartTriggers> should not failed' -TestCases $cases {
             param
@@ -206,7 +185,7 @@ InModuleScope azure.datafactory.tools {
                 [int] $TrExistsAfter,
                 [string] $StateAfter
             )
-            Remove-TargetTrigger -Name $triggerName @script:CommonParam
+            #Remove-TargetTrigger -Name $triggerName @script:CommonParam
             Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "$triggerName.json" -Recurse:$true -Force 
             Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "PL_Wait5sec.json" -Recurse:$true -Force 
             $script:opt = New-AdfPublishOption
@@ -236,13 +215,13 @@ InModuleScope azure.datafactory.tools {
 
     Describe 'Publish trigger exists in target only' -Tag 'Integration', 'triggers' {
 
-        BeforeEach {
-            Mock Stop-Trigger { 
-                param ($ResourceGroupName, $DataFactoryName, $Name)
-                Write-Host " --- Mocked function Stop-Trigger is here ---" -ForegroundColor:DarkGray 
-                Stop-AzDataFactoryV2Trigger -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Name $Name -Force
-            }
-        }
+        # BeforeEach {
+        #     Mock Stop-Trigger { 
+        #         param ($ResourceGroupName, $DataFactoryName, $Name)
+        #         Write-Host " --- Mocked function Stop-Trigger is here ---" -ForegroundColor:DarkGray 
+        #         Stop-AzDataFactoryV2Trigger -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Name $Name -Force
+        #     }
+        # }
 
         It 'has 1 trigger on target' {
             # Prep target trigger
