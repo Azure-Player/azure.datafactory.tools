@@ -59,5 +59,31 @@ InModuleScope azure.datafactory.tools {
     }
 
 
+    Describe 'Test-AdfCode' -Tag 'Unit' {
+        It 'Should not throw an error when wrong path to DF is provided' {
+            $DataFactoryName = "nullPathFactory"
+            $RootFolder = Join-Path -Path $PSScriptRoot -ChildPath $DataFactoryName
+            { 
+                $script:res = Test-AdfCode -RootFolder $RootFolder -ConfigPath $null
+            } | Should -Not -Throw
+        }
+    }
+
+    Describe 'Test-AdfCode' -Tag 'Unit' {
+        It 'Should not throw an error when Get-ChildItem Path parameter is null' {
+            $DataFactoryName = "adf2"
+            $RootFolder = Join-Path -Path $PSScriptRoot -ChildPath $DataFactoryName
+            
+            # Mock Get-ChildItem cmdlet to raise an error when Path parameter is null
+            Mock Get-ChildItem {
+                param($Path)
+                throw 'Cannot process argument because the value of argument "path" is not valid. Change the value of the "path" argument and run the operation again.'
+            } -ParameterFilter {$Path -eq $null}
+            
+            { 
+                $script:res = Test-AdfCode -RootFolder $RootFolder -ConfigPath $null
+            } | Should -Not -Throw
+        }
+    }
 
 }

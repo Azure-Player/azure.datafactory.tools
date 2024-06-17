@@ -35,6 +35,10 @@ function Test-AdfCode {
     $adfName = Split-Path -Path "$RootFolder" -Leaf
 
     Write-Host "=== Loading files from location: $RootFolder ..."
+    if (-not (Test-Path -Path $RootFolder)) {
+        Write-Error "Location doesn't exist: $RootFolder"
+        return $result
+    }
     $adf = Import-AdfFromFolder -FactoryName "$adfName" -RootFolder "$RootFolder" -ErrorAction "SilentlyContinue"
     $adf.PublishOptions = New-AdfPublishOption
     $ObjectsCount = $adf.AllObjects().Count
@@ -111,6 +115,7 @@ function Test-AdfCode {
 
 
     Write-Host "=== Validating config files ..."
+    $filePattern = $null
     if (!$ConfigPath) {
         $filePattern = Join-Path -Path $adf.Location -ChildPath 'deployment\*' 
         if (!(Test-Path $filePattern)) { $filePattern = $null }
@@ -118,24 +123,27 @@ function Test-AdfCode {
         $filePattern = $ConfigPath -split ','
     }
 
-    $files = Get-ChildItem -Path $filePattern -Include '*.csv','*.json'
-    $err = $null
-    $adf.PublishOptions.FailsWhenConfigItemNotFound = $True
-    $adf.PublishOptions.FailsWhenPathNotFound = $True
-    $files | ForEach-Object { 
-        try {
-            $FileName = $_.FullName
-            Write-Host "Checking config file: $FileName..."
-            Update-PropertiesFromFile -adf $adf -stage $FileName -ErrorVariable err -ErrorAction 'Stop' -dryRun:$True
+    if ($filePattern) {
+        $files = Get-ChildItem -Path $filePattern -Include '*.csv','*.json'
+        $err = $null
+        $adf.PublishOptions.FailsWhenConfigItemNotFound = $True
+        $adf.PublishOptions.FailsWhenPathNotFound = $True
+        $files | ForEach-Object { 
+            try {
+                $FileName = $_.FullName
+                Write-Host "Checking config file: $FileName..."
+                Update-PropertiesFromFile -adf $adf -stage $FileName -ErrorVariable err -ErrorAction 'Stop' -dryRun:$True
+            }
+            catch {
+                $result.ErrorCount += 1
+                Write-Host "ERROR: $($_.Exception.Message)" -ForegroundColor 'Red'
+                Write-Debug -Message $_.Exception
+                #$_.Exception
+            }
         }
-        catch {
-            $result.ErrorCount += 1
-            Write-Host "ERROR: $($_.Exception.Message)" -ForegroundColor 'Red'
-            Write-Debug -Message $_.Exception
-            #$_.Exception
-        }
+    } else {
+        Write-Host "ConfigPath is not set or Location doesn't exist. Skipping config files validation."
     }
-
 
     
     $msg = "Test code completed ($ObjectsCount objects)."
