@@ -7,7 +7,8 @@ class AdfObject {
     [Boolean] $ToBeDeployed = $true
     [Adf] $Adf
     [PSCustomObject] $Body
-
+    [string] $RuntimeState
+    
     [Boolean] AddDependant ([string]$name, [string]$refType)
     {
         $objType = $refType

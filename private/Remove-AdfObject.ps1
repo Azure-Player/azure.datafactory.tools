@@ -12,6 +12,9 @@ function Remove-AdfObject {
     $err = $null
     $ErrorMessage = $null
     $simtype = Get-SimplifiedType -Type $obj.GetType().Name
+    if ($simtype -eq 'AdfObject') {
+        $simtype = ConvertTo-AdfType -AzType $adfTargetObj.Type
+    }
 
     [AdfObjectName] $oname = [AdfObjectName]::new("$simType.$name")
     $IsExcluded = $oname.IsNameExcluded($adfSource.PublishOptions)

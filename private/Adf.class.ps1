@@ -22,8 +22,9 @@ class Adf {
     [AdfGlobalProp] $GlobalFactory = [AdfGlobalProp]::new()
     [AdfPublishOption] $PublishOptions
     $ArmTemplateJson
-    [System.Collections.ArrayList] $ActiveTriggers = @{}
-    [System.Collections.ArrayList] $DisabledTriggerNames = @{}
+    [System.Collections.ArrayList] $ActiveTriggers = @{}       # List of "started" triggers before deployment. Populated only when StartStopTriggers=True 
+    [System.Collections.ArrayList] $StoppedTriggerNames = @{}  # List of triggers have been stopped by "Stop-Triggers" cmdlet
+    [System.Collections.ArrayList] $TargetTriggerNames = @{}   # List of all triggers in target instance of ADF. Populated only when StartStopTriggers=True 
     [System.Collections.ArrayList] $DeletedObjectNames = @{}
 
     [System.Collections.ArrayList] AllObjects()
@@ -62,9 +63,29 @@ class Adf {
         return $this.DeletedObjectNames -contains $ObjectName
     }
 
-    [Boolean] IsTriggerDisabled([string] $ObjectName)
+    [Boolean] HasTriggerBeenStopped([string] $ObjectName)
     {
-        return $this.DisabledTriggerNames -contains $ObjectName
+        return $this.StoppedTriggerNames -contains $ObjectName
+    }
+
+    [Boolean] IsTargetTriggerStarted([string] $ObjectName)
+    {
+        $o = $this.TargetTriggerNames | Where-Object { $_.Name -eq $ObjectName }
+        return $null -ne $o -and $o.RuntimeState -eq 'Started'
+    }
+
+    SetTargetTriggerNames($allAdfTriggersArray) 
+    {
+        # Clone triggers with selected properties
+        $this.TargetTriggerNames.Clear()
+        $allAdfTriggersArray | ForEach-Object {
+            $trigger = $_
+            $clonedTrigger = [PSCustomObject]@{
+                Name = $trigger.Name
+                RuntimeState = $trigger.RuntimeState
+            }
+            $this.TargetTriggerNames.Add($clonedTrigger) | Out-Null
+        }
     }
 
     [System.Collections.ArrayList] GetUnusedDatasets()

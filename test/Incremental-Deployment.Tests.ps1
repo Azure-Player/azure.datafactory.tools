@@ -19,12 +19,11 @@ InModuleScope azure.datafactory.tools {
     $script:DataFactoryOrigName = $t.DataFactoryOrigName
     $script:DataFactoryName = $t.DataFactoryName
     $script:Location = $t.Location
-    $script:adfi = @{}  #Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName"
-    #$script:RootFolder = Join-Path $PSScriptRoot "BigFactorySample2"
-    $script:adf_remote = New-Object -TypeName AdfInstance
+    $script:adfi = @{}
+    $script:TargetAdf = $null
 
     $script:opt = New-AdfPublishOption
-    $opt.CreateNewInstance = $false
+    $opt.CreateNewInstance = $true
     $opt.IncrementalDeployment = $true
     $opt.StopStartTriggers = $false
     $script:gp = "" 
@@ -43,19 +42,29 @@ InModuleScope azure.datafactory.tools {
 
     Describe 'When deploy ADF in Incremental mode' -Tag 'IncrementalDeployment', 'Unit' {
         BeforeAll {
-            #Mock Get-AzDataFactoryV2 { return 'ADFInstance' }
 
-            Mock New-AzResource { } # optional
-            
-            Mock Deploy-AdfObjectOnly -Verifiable -ParameterFilter {$obj.Type -ne 'factory'} {
-                $obj = $PesterBoundParameters.obj
-                if ($obj.Type -eq "linkedService") {
-                    $ls = New-Object 'Microsoft.Azure.Management.DataFactory.Models.LinkedService' 
-                    $lsr = New-Object 'Microsoft.Azure.Management.DataFactory.Models.LinkedServiceResource' -ArgumentList $ls, $obj.FullName(), $obj.Name, 'Type'
-                    $o = New-Object 'Microsoft.Azure.Commands.DataFactoryV2.Models.PSLinkedService' -ArgumentList $lsr, $obj.Adf.ResourceGroupName, $obj.Adf.Name
-                    $adf_remote.LinkedServices.Add($o) | Out-Null
-                    $obj.Deployed = $true;
+            Mock Get-AzDataFactoryV2 {
+                param ($ResourceGroupName, $Name)
+                return $script:TargetAdf
+            }
+            Mock Set-AzDataFactoryV2 {
+                param ($ResourceGroupName, $DataFactoryName, $Location)
+                if ($null -eq $script:TargetAdf) {
+                    $script:TargetAdf = CreateTargetAdf
+                    $script:TargetAdf.Name = $DataFactoryName
+                    $script:TargetAdf.ResourceGroupName = $ResourceGroupName
+                    $script:TargetAdf.Location = $Location
                 }
+                return $script:TargetAdf
+            }
+        
+            Mock New-AzResource {
+                param ($ResourceType, $ResourceGroupName, $ResourceName, $ApiVersion, $Properties, $IsFullObject)
+                $newRes = New-Object -TypeName "AdfObject"
+                $newRes.Name = ($ResourceName -split '/')[1]
+                $newRes.Type = $ResourceType
+                $newRes.Body = $Properties
+                $script:TargetAdf.DeployObject($newRes)
             }
 
             Mock Get-GlobalParam { 
@@ -75,10 +84,16 @@ InModuleScope azure.datafactory.tools {
                 }
             }
 
-            Mock Remove-AzDataFactoryV2Pipeline {}
-
+            Mock Remove-AzDataFactoryV2LinkedService {
+                param ($ResourceGroupName, $DataFactoryName, $Name)
+                if ($script:TargetAdf) {
+                    $script:TargetAdf.RemoveObject("*linkedServices.$Name")
+                }
+            }
+            
             Mock Get-AdfFromService {
-                return $adf_remote
+                param ($FactoryName, $ResourceGroupName)
+                return $script:TargetAdf
             }
         }
 
@@ -111,15 +126,14 @@ InModuleScope azure.datafactory.tools {
             Write-Host ($ds2 | ConvertTo-Json -Depth 5) -BackgroundColor Green
             $ds2.Deployed | Should -Not -BeNullOrEmpty
             $ds2.Deployed.Count | Should -Be 1
-            Should -Invoke -CommandName Deploy-AdfObjectOnly -Times 1
+            Should -Invoke -CommandName New-AzResource -Times 1
         }
 
         It 'After redeployment: no deployment for untouched object' {
             Write-Host "*** DEPLOY SECOND TIME (OMIT) ***" -BackgroundColor DarkGreen
             Publish-AdfV2FromJson @params
-            Should -Invoke -CommandName Deploy-AdfObjectOnly -Times 0
+            Should -Invoke -CommandName New-AzResource -Times 0
         }
-
 
         # Test: Delete & redeploy - object disappears from adftools_deployment_state
         It 'Should remove item from "adftools_deployment_state" when object deleted' {
@@ -132,10 +146,6 @@ InModuleScope azure.datafactory.tools {
         }
 
     } 
-
-
-
-
 
 
 }

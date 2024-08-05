@@ -110,14 +110,11 @@ function Publish-TriggerIfNotExist {
         $DataFactoryName
     )
 
-    $tr = Get-AzDataFactoryV2Trigger -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Name $Name -ErrorAction:SilentlyContinue
+    $tr = Get-AzDataFactoryV2Trigger -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -TriggerName $Name #-ErrorAction:SilentlyContinue
     if ($null -eq $tr) {
-        Set-AzDataFactoryV2Trigger `
-        -ResourceGroupName $ResourceGroupName `
-        -DataFactoryName $DataFactoryName `
-        -Name $Name `
-        -DefinitionFile $FileName `
-        -Force
+        $f = $FileName.ToString()
+          Set-AzDataFactoryV2Trigger -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Name $Name -DefinitionFile $f
+        #-Force
     }
 }
 
@@ -234,6 +231,16 @@ function IsPesterDebugMode {
     return ($Output -eq 'Diagnostic');
 }
 
+Write-Host "Importing MockDataFactory..."
+$filePath = $PSScriptRoot | Join-Path -ChildPath 'MockDataFactory.ps1'
+. $filePath
+
+function CreateTargetAdf {
+    $TargetAdf = New-Object -TypeName "MockTargetAdf"
+    return $TargetAdf
+}
+
+
 
 Export-ModuleMember -Function `
     Convert-SecureStringToString, `
@@ -243,4 +250,4 @@ Export-ModuleMember -Function `
     Get-AdfObjectFromFile, `
     Remove-ObjectPropertyFromFile, Edit-TextInFile, Edit-ObjectPropertyInFile, `
     Backup-File, Restore-File, `
-    Get-RootPath, Get-TargetEnv, IsPesterDebugMode
+    Get-RootPath, Get-TargetEnv, IsPesterDebugMode, CreateTargetAdf
