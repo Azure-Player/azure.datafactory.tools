@@ -232,7 +232,8 @@ function IsPesterDebugMode {
 }
 
 Write-Host "Importing MockDataFactory..."
-. ".\test\TestHelper\MockDataFactory.ps1"
+$filePath = $PSScriptRoot | Join-Path -ChildPath 'MockDataFactory.ps1'
+. $filePath
 
 function CreateTargetAdf {
     $TargetAdf = New-Object -TypeName "MockTargetAdf"
