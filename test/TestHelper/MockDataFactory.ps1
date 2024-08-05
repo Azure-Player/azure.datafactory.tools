@@ -2,11 +2,13 @@ class MockTargetAdf {
     [string] $Name = ""
     [string] $ResourceGroupName = ""
     [string] $Location = ""
-    #[hashtable] $AllObjects = @{}
 
-    #[System.Collections.ArrayList] $Triggers = @{}
-    [System.Collections.ArrayList] $AllObjects = @{}
+    [System.Collections.ArrayList] $_Objects = @{}
 
+    [System.Collections.ArrayList] AllObjects()
+    {
+        return $this._Objects
+    }
 
     DeployObject($o)
     {
@@ -18,17 +20,20 @@ class MockTargetAdf {
                 throw ("ADF simulation: Can't deploy trigger because its Started.")
             }
         } else {
-            $this.AllObjects.Add($o) | Out-Null
+            $this._Objects.Add($o) | Out-Null
         }
     }
 
-    RemoveObject($fullName)
+    RemoveObject([string] $pattern)
     {
         [System.Collections.ArrayList] $n = @{}
-        $this.AllObjects | ForEach-Object {
-            if (!($_.Name -like $fullName)) { $n.Add($_) | Out-Null }
+        $this._Objects | ForEach-Object {
+            $oname = $_.FullName($false);
+            if (!($oname -like $pattern)) { 
+                $n.Add($_) | Out-Null 
+            }
         }
-        $this.AllObjects = $n;
+        $this._Objects = $n;
     }
 
     [bool] IsExist($fullName)
@@ -40,7 +45,7 @@ class MockTargetAdf {
     [PsObject] GetObjectByFullName([string] $pattern)
     {
         $r = $null
-        $this.AllObjects | ForEach-Object {
+        $this._Objects | ForEach-Object {
             $oname = $_.FullName($false);
             if ($oname -like $pattern) { 
                 $r = $_
@@ -52,7 +57,7 @@ class MockTargetAdf {
     [System.Collections.ArrayList] GetObjectsByFullName([string] $pattern)
     {
         [System.Collections.ArrayList] $r = @{}
-        $this.AllObjects | ForEach-Object {
+        $this._Objects | ForEach-Object {
             $oname = $_.FullName($false);
             if ($oname -like $pattern) { 
                 $r.Add($_)

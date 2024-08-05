@@ -1,11 +1,25 @@
 
+$file = Join-Path $RootFolder "trigger" "$triggerName.json"
+#The function below doesn't execute mocked functions (Get-AzDataFactoryV2Trigger), so we have to call them directly
+#Publish-TriggerIfNotExist -Name $triggerName -FileName $file @script:CommonParam
+#begin Publish-TriggerIfNotExist
+$tr = Get-AzDataFactoryV2Trigger -TriggerName $triggerName @script:CommonParam  #-ErrorAction:SilentlyContinue
+if ($null -eq $tr) {
+    $f = $file.ToString()
+    Set-AzDataFactoryV2Trigger -Name $triggerName -DefinitionFile $f @script:CommonParam
+    #-Force
+}
+#end Publish-TriggerIfNotExist
+
 if ($CurrentState -eq 'Enabled') { Start-TargetTrigger -Name $triggerName @script:CommonParam }
 if ($CurrentState -eq 'Disabled') { Stop-TargetTrigger -Name $triggerName @script:CommonParam }
 # The block below is a trick to enforce publishing a trigger, because for some reason, 
 # unchanged trigger won't be published and hence doesn't have to be stopped prior publish, which fails tests B04 & B06.
-$file = Join-Path $RootFolder "trigger" "$triggerName.json" 
-$startTime = (Get-Date -format "yyyy-MM-ddTHH:mm:ss.000Z")
-Edit-ObjectPropertyInFile $file "properties.typeProperties.recurrence.startTime" """$startTime"""
+# if ($triggerName) {
+#     $file = Join-Path $RootFolder "trigger" "$triggerName.json" 
+#     $startTime = (Get-Date -format "yyyy-MM-ddTHH:mm:ss.000Z")
+#     Edit-ObjectPropertyInFile $file "properties.typeProperties.recurrence.startTime" """$startTime"""
+# }
 
 $opt = New-AdfPublishOption
 $opt.TriggerStopMethod = $tsm
@@ -13,6 +27,7 @@ if ($Mode -eq 'Included') { $opt.Includes.Add("*.$triggerName", "") }
 if ($Mode -eq 'Excluded') { $opt.Excludes.Add("*.*", "") }
 $opt.StopStartTriggers = $StopStartTriggers
 $opt.DoNotStopStartExcludedTriggers = $DoNotStopStartExcludedTriggers
+$opt.DeleteNotInSource = $DeleteNIS
 
 $ExpectDisableTrigger = $StopStartTriggers -and $CurrentState -eq 'Enabled'
 [AdfObjectName] $oname = [AdfObjectName]::new("trigger.$triggerName")
@@ -23,13 +38,13 @@ if ($ShouldThrow) {
     { Publish-AdfV2FromJson -RootFolder "$RootFolder" `
     -ResourceGroupName "$ResourceGroupName" `
     -DataFactoryName "$DataFactoryName" `
-    -Location "$Location" -Option $opt -Stage "trigger-$DesiredState"
+    -Location "$Location" -Option $opt -Stage $stage
     } | Should -Throw
 } else {
     { Publish-AdfV2FromJson -RootFolder "$RootFolder" `
     -ResourceGroupName "$ResourceGroupName" `
     -DataFactoryName "$DataFactoryName" `
-    -Location "$Location" -Option $opt -Stage "trigger-$DesiredState"
+    -Location "$Location" -Option $opt -Stage $stage
     } | Should -Not -Throw
 }
 

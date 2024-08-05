@@ -11,7 +11,10 @@ function Remove-AdfObjectIfNotInSource {
     $name = $adfTargetObj.Name
     $type = $adfTargetObj.GetType().Name
     $simtype = Get-SimplifiedType -Type "$type"
-    $src = Get-AdfObjectByName -adf $adfSource -name $name -type $type
+    if ($type -eq 'AdfObject') {
+        $simtype = ConvertTo-AdfType -AzType $adfTargetObj.Type
+    }
+    $src = Get-AdfObjectByName -adf $adfSource -name $name -type $simtype
     if (!$src) 
     {
         Write-Verbose "Object [$simtype].[$name] hasn't been found in the source - to be deleted."

@@ -110,14 +110,11 @@ function Publish-TriggerIfNotExist {
         $DataFactoryName
     )
 
-    $tr = Get-AzDataFactoryV2Trigger -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Name $Name -ErrorAction:SilentlyContinue
+    $tr = Get-AzDataFactoryV2Trigger -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -TriggerName $Name #-ErrorAction:SilentlyContinue
     if ($null -eq $tr) {
-        Set-AzDataFactoryV2Trigger `
-        -ResourceGroupName $ResourceGroupName `
-        -DataFactoryName $DataFactoryName `
-        -Name $Name `
-        -DefinitionFile $FileName `
-        -Force
+        $f = $FileName.ToString()
+          Set-AzDataFactoryV2Trigger -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Name $Name -DefinitionFile $f
+        #-Force
     }
 }
 
@@ -235,7 +232,7 @@ function IsPesterDebugMode {
 }
 
 Write-Host "Importing MockDataFactory..."
-. ".\test\TestHelper\MockDataFactory.ps1"   # Move this later to Helper
+. ".\test\TestHelper\MockDataFactory.ps1"
 
 function CreateTargetAdf {
     $TargetAdf = New-Object -TypeName "MockTargetAdf"
