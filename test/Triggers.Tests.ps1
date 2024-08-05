@@ -174,7 +174,8 @@ InModuleScope azure.datafactory.tools {
             $script:tsm = 'AllEnabled'
             $script:stage = "trigger-$DesiredState"
             $script:DeleteNIS = $false
-            . "test\Triggers_template.ps1"
+            $filePath = $PSScriptRoot | Join-Path -ChildPath 'Triggers_template.ps1'
+            . $filePath
         }
 
         It 'Case #<Case>(B) when Current State = <CurrentState>, Desired State=<DesiredState>, trigger <Mode>, StopStart=<StopStartTriggers> and TriggerStopMethod=DeployableOnly should find trigger <StateAfter>' -TestCases $cases {
@@ -196,7 +197,8 @@ InModuleScope azure.datafactory.tools {
             $script:tsm = 'DeployableOnly'
             $script:stage = "trigger-$DesiredState"
             $script:DeleteNIS = $false
-            . "test\Triggers_template.ps1"
+            $filePath = $PSScriptRoot | Join-Path -ChildPath 'Triggers_template.ps1'
+            . $filePath
         }
 
     }    
@@ -323,10 +325,11 @@ InModuleScope azure.datafactory.tools {
                 -Location "$Location"
             Remove-Item -Path "$RootFolder\trigger\*.*" -Verbose:$false
             
-            #$script:triggerName = ''
+            $script:triggerName = 'TR_AlwaysDisabled'
             $script:tsm = 'AllEnabled'
             $script:stage = ''
-            . "test\Triggers_template.ps1"
+            $filePath = $PSScriptRoot | Join-Path -ChildPath 'Triggers_template.ps1'
+            . $filePath
 
         }
 
