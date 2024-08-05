@@ -70,8 +70,22 @@ class Adf {
 
     [Boolean] IsTargetTriggerStarted([string] $ObjectName)
     {
-        $o = $this.TargetTriggerNames | Where-Object { $_.Type -like '*triggers' -and $_.Name -eq $ObjectName }
+        $o = $this.TargetTriggerNames | Where-Object { $_.Name -eq $ObjectName }
         return $null -ne $o -and $o.RuntimeState -eq 'Started'
+    }
+
+    SetTargetTriggerNames($allAdfTriggersArray) 
+    {
+        # Clone triggers with selected properties
+        $this.TargetTriggerNames.Clear()
+        $allAdfTriggersArray | ForEach-Object {
+            $trigger = $_
+            $clonedTrigger = [PSCustomObject]@{
+                Name = $trigger.Name
+                RuntimeState = $trigger.RuntimeState
+            }
+            $this.TargetTriggerNames.Add($clonedTrigger) | Out-Null
+        }
     }
 
     [System.Collections.ArrayList] GetUnusedDatasets()
