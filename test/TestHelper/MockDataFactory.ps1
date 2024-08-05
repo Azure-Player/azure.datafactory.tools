@@ -10,6 +10,11 @@ class MockTargetAdf {
         return $this._Objects
     }
 
+    [string] DataFactoryName()
+    {
+        return $($this.Name)
+    }
+
     DeployObject($o)
     {
         $fullName = "$($o.type).$($o.name)"
