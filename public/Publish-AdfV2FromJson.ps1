@@ -150,7 +150,8 @@ function Publish-AdfV2FromJson {
             Write-Host "Azure Data Factory exists."
             if ($opt.IncrementalDeployment -and !$DryRun.IsPresent) {
                 Write-Host "Loading Deployment State from ADF..."
-                $ds.Deployed = Get-StateFromService -targetAdf $targetAdf
+                #$ds.Deployed = Get-StateFromService -targetAdf $targetAdf
+                $ds = Get-StateFromStorage -DataFactoryName $DataFactoryName
             }
         }
         else {
@@ -185,28 +186,28 @@ function Publish-AdfV2FromJson {
 
     Write-Debug ($adf | Format-List | Out-String)
 
-    Write-Host "===================================================================================";
-    Write-Host "STEP: Pre-deployment"
-    if ($opt.IncrementalDeployment -and $opt.DeployGlobalParams) {
-        Write-Host "Incremental Deployment Mode: Preparing..."
-        Write-Debug "Incremental Deployment Mode: Checking whether factory file exist..."
-        if ($adf.Factories.Count -eq 0) {
-            Write-Debug "Creating empty factory file..."
-            $EmptyFactoryFileBody = '{ "name": "'+ $adf.Name +'", "properties": { "globalParameters": {} } }'
-            $o = New-Object -TypeName "AdfObject"
-            $o.Adf = $Adf
-            $o.Name = $DataFactoryName
-            $o.Type = 'factory'
-            $o.Body = $EmptyFactoryFileBody | ConvertFrom-Json
-            $o.FileName = Save-AdfObjectAsFile -obj $o
-            $adf.GlobalFactory.FilePath = $o.FileName
-            $adf.GlobalFactory.body = $EmptyFactoryFileBody 
-            $adf.GlobalFactory.GlobalParameters = $o.Body.Properties.globalParameters
-            $adf.Factories.Add($o) | Out-Null
-            Write-Host ("Factories: 1 object created.")
-        }
-        Write-Host "Incremental Deployment Mode: Preparation Done"
-    }
+    # Write-Host "===================================================================================";
+    # Write-Host "STEP: Pre-deployment"
+    # if ($opt.IncrementalDeployment -and $opt.DeployGlobalParams) {
+    #     Write-Host "Incremental Deployment Mode: Preparing..."
+    #     Write-Debug "Incremental Deployment Mode: Checking whether factory file exist..."
+    #     if ($adf.Factories.Count -eq 0) {
+    #         Write-Debug "Creating empty factory file..."
+    #         $EmptyFactoryFileBody = '{ "name": "'+ $adf.Name +'", "properties": { "globalParameters": {} } }'
+    #         $o = New-Object -TypeName "AdfObject"
+    #         $o.Adf = $Adf
+    #         $o.Name = $DataFactoryName
+    #         $o.Type = 'factory'
+    #         $o.Body = $EmptyFactoryFileBody | ConvertFrom-Json
+    #         $o.FileName = Save-AdfObjectAsFile -obj $o
+    #         $adf.GlobalFactory.FilePath = $o.FileName
+    #         $adf.GlobalFactory.body = $EmptyFactoryFileBody 
+    #         $adf.GlobalFactory.GlobalParameters = $o.Body.Properties.globalParameters
+    #         $adf.Factories.Add($o) | Out-Null
+    #         Write-Host ("Factories: 1 object created.")
+    #     }
+    #     Write-Host "Incremental Deployment Mode: Preparation Done"
+    # }
 
     Write-Host "===================================================================================";
     Write-Host "STEP: Replacing all properties environment-related..."
@@ -283,26 +284,32 @@ function Publish-AdfV2FromJson {
     Write-Host "===================================================================================";
     Write-Host "STEP: Updating (incremental) deployment state..."
     if ($opt.IncrementalDeployment) {
-        if ($opt.DeployGlobalParams -eq $false) {
-            Write-Warning "Incremental Deployment State will not be saved as publish option 'DeployGlobalParams' = false"
-        } else {
-            Write-Debug "Deployment State -> SetStateFromAdf..."
-            $ds.SetStateFromAdf($adf)
-            $dsjson = ConvertTo-Json $ds -Depth 5
-            Write-Verbose "--- Deployment State: ---`r`n $dsjson"
-            $gp = [AdfGlobalParam]::new($ds)
-            $report = new-object PsObject -Property @{
-                Updated = 0
-                Added = 0
-                Removed = 0
-            }
-            Update-PropertiesForObject -o $adf.Factories[0] -action 'add' -path 'globalParameters.adftools_deployment_state' -value $gp -name 'type' -type 'factory' -report $report
+        # if ($opt.DeployGlobalParams -eq $false) {
+        #     Write-Warning "Incremental Deployment State will not be saved as publish option 'DeployGlobalParams' = false"
+        # } else {
+        Write-Debug "Deployment State -> SetStateFromAdf..."
+        $ds.SetStateFromAdf($adf)
+        # $dsjson = ConvertTo-Json $ds -Depth 5
+        # Write-Verbose "--- Deployment State: ---`r`n $dsjson"
+        #$gp = [AdfGlobalParam]::new($ds)
+        # $report = new-object PsObject -Property @{
+        #     Updated = 0
+        #     Added = 0
+        #     Removed = 0
+        # }
+        # Update-PropertiesForObject -o $adf.Factories[0] -action 'add' -path 'globalParameters.adftools_deployment_state' -value $gp -name 'type' -type 'factory' -report $report
+    
+        #Write-Verbose "Redeploying Global Parameters..."
+        #$adf.Factories[0].Deployed = $false
+        #$adf.Factories[0].ToBeDeployed = $true
+        #Deploy-AdfObject -obj $adf.Factories[0]
+        # }
         
-            Write-Verbose "Redeploying Global Parameters..."
-            $adf.Factories[0].Deployed = $false
-            #$adf.Factories[0].ToBeDeployed = $true
-            Deploy-AdfObject -obj $adf.Factories[0]
-        }
+        # https://learn.microsoft.com/en-us/azure/storage/blobs/blob-powershell
+        # Set-Content -Path "adfdeploymentstate.json" -Value $dsjson -Encoding UTF8
+        # $ctx = New-AzStorageContext -UseConnectedAccount -StorageAccountName "sqlplayer2020"
+        # Set-AzStorageBlobContent -Container "adftools" -File "adfdeploymentstate.json" -Context $ctx -Blob "$DataFactoryName.adfdeploymentstate.json" -Force
+        Set-StateToStorage -ds $ds -DataFactoryName $DataFactoryName
     } else 
     {
         Write-Host "Incremental Deployment State will not be saved as publish option 'IncrementalDeployment' = false"
@@ -320,8 +327,9 @@ function Publish-AdfV2FromJson {
     $elapsedTime = new-timespan $script:StartTime $(get-date)
     Write-Host "==============================================================================";
     Write-Host "   *****   Azure Data Factory files have been deployed successfully.   *****`n";
-    Write-Host "Data Factory name:  $DataFactoryName";
-    Write-Host "Region (Location):  $location";
+    Write-Host "  Data Factory name:  $DataFactoryName";
+    Write-Host "Resource Group name:  $ResourceGroupName";
+    Write-Host "  Region (Location):  $location";
     Write-Host ([string]::Format("     Elapsed time:  {0:d1}:{1:d2}:{2:d2}.{3:d3}`n", $elapsedTime.Hours, $elapsedTime.Minutes, $elapsedTime.Seconds, $elapsedTime.Milliseconds))
     Write-Host "==============================================================================";
 

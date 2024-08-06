@@ -82,6 +82,36 @@ InModuleScope azure.datafactory.tools {
     Describe 'Publish-AdfV2FromJson' -Tag 'Integration', 'IncrementalDeployment' {
 
         BeforeEach {
+            $VerbosePreference = 'Continue'
+            Mock Deploy-AdfObject {
+                param ($obj)
+                if ($obj.Type -eq 'factory') {
+                    if ($obj.Body.properties.globalParameters | Get-Member -MemberType NoteProperty -Name 'adftools_deployment_state') {
+                        $ds = (Get-Content -Path "test\misc\adftools_deployment_state.json" -Raw -Encoding 'utf8') | ConvertFrom-Json
+                        for ($i = 1000; $i -lt 3001; $i++) {
+                            Add-ObjectProperty -obj $ds -path "Deployed.pipeline$i" -value "00000000000000000000000000000000"
+                        }
+                        $obj.Body.properties.globalParameters.adftools_deployment_state.type = "object"
+                        $obj.Body.properties.globalParameters.adftools_deployment_state.value = $ds
+                        Save-AdfObjectAsFile -obj $obj
+                    }
+                    Deploy-AdfObjectOnly -obj $obj
+                }
+            }
+        }
+        It 'Should deploy successfully even big size of global parameters' { 
+            $opt.StopStartTriggers = $false
+            Publish-AdfV2FromJson -RootFolder "$RootFolder" `
+                -ResourceGroupName "$ResourceGroupName" `
+                -DataFactoryName "$DataFactoryName" `
+                -Location "$Location" -Option $opt
+        }
+
+    }
+
+    Describe 'Publish-AdfV2FromJson' -Tag 'Integration', 'IncrementalDeployment' {
+
+        BeforeEach {
             Mock Stop-AzDataFactoryV2Trigger {
                 param ($ResourceGroupName, $DataFactoryName, $Name)
             }
@@ -99,6 +129,7 @@ InModuleScope azure.datafactory.tools {
         It 'Should disable and delete trigger when TriggerStartMethod = KeepPreviousState' {
             Remove-Item -Path "$RootFolder\trigger\*" -Filter "*.json" -Force
             $opt.DeleteNotInSource = $true
+            $opt.StopStartTriggers = $true
             $opt.TriggerStopMethod = 'DeployableOnly'
             $opt.TriggerStartMethod = 'KeepPreviousState'
             Publish-AdfV2FromJson -RootFolder "$RootFolder" `
