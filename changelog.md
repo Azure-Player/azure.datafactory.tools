@@ -4,10 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [1.10.0] - 2024-08-08
+## [1.10.1] - 2024-08-08
+### Fixed
+* Incremental deploy feature causes payload limit issue #374
+
+## [1.10.0] - 2024-08-06
 ### Fixed
 * Trigger Activation Failure Post-Selective Deployment when TriggerStopMethod = `DeployableOnly` #386
-* Incremental deploy feature causes payload limit issue #374
 
 ## [1.9.1] - 2024-06-17
 ### Fixed
