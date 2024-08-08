@@ -142,6 +142,12 @@ function Publish-AdfV2FromJson {
         $opt = New-AdfPublishOption
     }
     
+    if ([string]::IsNullOrEmpty($opt.IncrementalDeploymentStorageUri) -and $opt.IncrementalDeployment)
+    {
+        Write-Warning "ADFT0033: Incremental Deployment Option DISABLED as Storage Uri is not provided."
+        $opt.IncrementalDeployment = $false
+    }
+
     if (!$DryRun.IsPresent) {
         Write-Host "STEP: Verifying whether ADF exists..."
 
@@ -149,9 +155,8 @@ function Publish-AdfV2FromJson {
         if ($targetAdf) {
             Write-Host "Azure Data Factory exists."
             if ($opt.IncrementalDeployment -and !$DryRun.IsPresent) {
-                Write-Host "Loading Deployment State from ADF..."
-                #$ds.Deployed = Get-StateFromService -targetAdf $targetAdf
-                $ds = Get-StateFromStorage -DataFactoryName $DataFactoryName
+                Write-Host "Loading Deployment State from Storage..."
+                $ds = Get-StateFromStorage -DataFactoryName $DataFactoryName -LocationUri $opt.IncrementalDeploymentStorageUri
             }
         }
         else {
@@ -309,7 +314,7 @@ function Publish-AdfV2FromJson {
         # Set-Content -Path "adfdeploymentstate.json" -Value $dsjson -Encoding UTF8
         # $ctx = New-AzStorageContext -UseConnectedAccount -StorageAccountName "sqlplayer2020"
         # Set-AzStorageBlobContent -Container "adftools" -File "adfdeploymentstate.json" -Context $ctx -Blob "$DataFactoryName.adfdeploymentstate.json" -Force
-        Set-StateToStorage -ds $ds -DataFactoryName $DataFactoryName
+        Set-StateToStorage -ds $ds -DataFactoryName $DataFactoryName -LocationUri $opt.IncrementalDeploymentStorageUri
     } else 
     {
         Write-Host "Incremental Deployment State will not be saved as publish option 'IncrementalDeployment' = false"

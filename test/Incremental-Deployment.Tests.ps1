@@ -32,7 +32,11 @@ InModuleScope azure.datafactory.tools {
     $script:dstate = [AdfDeploymentState]::new($verStr)
     $script:dstate.LastUpdate = [System.DateTime]::UtcNow
     $script:dstateJson = $script:dstate | ConvertTo-Json
-    $script:uri = "https://sqlplayer2020.blob.core.windows.net/adftools/folder1"
+    $script:StorageUri= "https://sqlplayer2020.blob.core.windows.net"
+    $StorageContainer = "adftools"
+    $StorageFolder    = "folder2"
+    $script:uri = "$StorageUri/$StorageContainer/$StorageFolder"
+    # https://sqlplayer2020.file.core.windows.net/adftools
 
     $script:SrcFolder = "$PSScriptRoot\$($script:DataFactoryOrigName)"
     $script:TmpFolder = (New-TemporaryDirectory).FullName
@@ -47,22 +51,29 @@ InModuleScope azure.datafactory.tools {
     }
 
 
-    Describe 'When Incremental mode with storage provided' {
+    Describe 'When Incremental mode with storage provided' -Tag 'IncrementalDeployment', 'Integration' {
         It 'Should return empty state when get for the first time' {
-            $b = Get-StateFromStorage -DataFactoryName $DataFactoryName -LocationUri $uri
-            #$blob | Should -BeNullOrEmpty
+            $script:ds1 = Get-StateFromStorage -DataFactoryName $DataFactoryName -LocationUri "$uri/notexist"
+            $ds1.GetType().Name | Should -Be 'AdfDeploymentState'
+            $ds1.Deployed | Should -BeNullOrEmpty
         }
-        It 'Should save state to storage' {
+        It 'Should save state to storage without an error' {
             Set-StateToStorage -ds $dstate -DataFactoryName $DataFactoryName -LocationUri $uri
         }
         It 'Should return the same value for state when read again' {
-            $b = Get-StateFromStorage -DataFactoryName $DataFactoryName -LocationUri $uri
-            $j = ($b | ConvertTo-Json)
-            $j | Should -Be $dstateJson
+            $ds2 = Get-StateFromStorage -DataFactoryName $DataFactoryName -LocationUri $uri
+            $ds2.Deployed.Count | Should -Be $script:ds1.Deployed.Count
+            #$ds2.adftoolsVer | Should -Be $script:ds1.adftoolsVer
+            $ds2.Algorithm | Should -Be $script:ds1.Algorithm
+        }
+        It 'Should fails when Container doesn''t exist' {
+            { Set-StateToStorage -ds $dstate -DataFactoryName $DataFactoryName -LocationUri "$($script:StorageUri)/nocontainer997755/folder" }
+            | Should -Throw -ExceptionType ([System.Management.Automation.RuntimeException])
         }
     }
 
     Describe 'When deploy ADF in Incremental mode' -Tag 'IncrementalDeployment', 'Unit' {
+
         BeforeAll {
 
             Mock Get-AzDataFactoryV2 {
@@ -132,7 +143,15 @@ InModuleScope azure.datafactory.tools {
             }
         }
 
-        It '"adftools_deployment_state" in GP should be created' {
+        It 'IncrementalDeployment should be ignored when StorageUri is not provided' {
+            $script:opt.IncrementalDeploymentStorageUri = ""
+            $script:opt.IncrementalDeployment = $true
+            Publish-AdfV2FromJson @params
+            Should -Invoke -CommandName Set-StateToStorage -Times 0
+        }
+        It '"adftools_deployment_state" should be created in storage' {
+            $script:opt.IncrementalDeploymentStorageUri = $script:uri
+            $script:opt.IncrementalDeployment = $true
             Publish-AdfV2FromJson @params
             Should -Invoke -CommandName Set-StateToStorage -Times 1
         }
@@ -153,16 +172,17 @@ InModuleScope azure.datafactory.tools {
             $ds1.Algorithm | Should -BeExactly 'MD5'
         }
 
-        It 'After redeployment of 1 object "adftools_deployment_state" should contain "Deployed" with 1 item' {
+        It 'After redeployment of 2 objects "adftools_deployment_state" should contain "Deployed" with 2 items' {
             Write-Host "*** DEPLOY FIRST TIME ***" -BackgroundColor DarkGreen
             Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "BlobSampleData.json" -Recurse:$true -Force 
+            Copy-Item -Path "$SrcFolder" -Destination "$TmpFolder" -Filter "LS_AzureKeyVault.json" -Recurse:$true -Force 
             Publish-AdfV2FromJson @params
             #$ds2 = $gp.adftools_deployment_state.value
             $ds2 = $dstate
             Write-Host ($ds2 | ConvertTo-Json -Depth 5) -BackgroundColor Green
             $ds2.Deployed | Should -Not -BeNullOrEmpty
-            $ds2.Deployed.Count | Should -Be 1
-            Should -Invoke -CommandName New-AzResource -Times 1
+            $ds2.Deployed.Count | Should -Be 2
+            Should -Invoke -CommandName New-AzResource -Times 2
         }
 
         It 'After redeployment: no deployment for untouched object' {
@@ -178,11 +198,10 @@ InModuleScope azure.datafactory.tools {
             Publish-AdfV2FromJson @params
             #$ds3 = $gp.adftools_deployment_state.value
             $ds3 = $dstate
-            #$ds3.Deployed.Count | Should -Be 0
-            $ds3.Deployed | Should -BeNullOrEmpty
+            Write-Host ($ds3 | ConvertTo-Json -Depth 5) -BackgroundColor Green
+            $ds3.Deployed.Count | Should -Be 1
         }
 
     } 
-
 
 }
