@@ -61,7 +61,6 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
 - [How it works](#how-it-works)
   - [Step: Create ADF (if not exist)](#step-create-adf-if-not-exist)
   - [Step: Load files](#step-load-files)
-  - [Step: Pre-deployment](#step-pre-deployment)
   - [Step: Replacing all properties environment-related](#step-replacing-all-properties-environment-related)
     - [Column TYPE](#column-type)
     - [Column NAME](#column-name)
@@ -215,6 +214,7 @@ $opt = New-AdfPublishOption
 * [Boolean] **DoNotStopStartExcludedTriggers** - specifies whether excluded triggers will be stopped before deployment (default: *false*)
 * [Boolean] **DoNotDeleteExcludedObjects** - specifies whether excluded objects can be removed. Applies when `DeleteNotInSource` is set to *True* only. (default: *true*) 
 * [Boolean] **IncrementalDeployment** - specifies whether Incremental Deployment mode is enabled (default: *false*) 
+* [String] **IncrementalDeploymentStorageUri** - indicates Azure Storage where the latest deployment state file is stored (no default) 
 * [Enum] **TriggerStopMethod** - determines which triggers should be stopped.  
   Available values: `AllEnabled` (default) | `DeployableOnly`  
   Find more about the above option in section [Step: Stoping triggers](#step-stoping-triggers)
@@ -398,7 +398,8 @@ graph LR;
 You must have appropriate permission to create new instance.  
 *Location* parameter is required for this action.
 
-If ADF does exist and `IncrementalDeployment` is ON, the process gets Global Parameters to load latest **Deployment State** from ADF.
+If ADF does exist and `IncrementalDeployment` is ON, the process loads latest **Deployment State** from Storage.
+Note: The above flag will be disabled when related parameter (`IncrementalDeploymentStorageUri`) is empty.
 
 ## Step: Load files
 
@@ -406,15 +407,6 @@ If ADF does exist and `IncrementalDeployment` is ON, the process gets Global Par
 
 This step reads all local (json) files from a given directory (`rootfolder`).
 
-
-## Step: Pre-deployment
-
-💬 In log you'll see line: `STEP: Pre-deployment`
-
-It prepares new (empty) file in `factory` folder if such file doesn't exist.  
-The file is needed for further steps to keep Deployment State in Global Parameter.
-
-> This step is enable only when `IncrementalDeployment` is ON and `DeployGlobalParams` is ON. 
 
 ## Step: Replacing all properties environment-related
 
@@ -640,11 +632,12 @@ The mechanism is smart enough to publish all objects in the right order, thence 
 
 💬 In log you'll see line: `STEP: Updating (incremental) deployment state...`
 
-After the deployment, in this step the tool prepares the list of deployed objects and their hashes (MD5 algorithm). The array is wrap up in json format and stored as new global parameter `adftools_deployment_state` in factory file.  
+After the deployment, in this step the tool prepares the list of deployed objects and their hashes (MD5 algorithm). 
+The array is wrap up in json format and stored as blob file `{ADF-Name}.adftools_deployment_state.json` in provided Storage.  
 **Deployment State** speeds up future deployments by identifying objects have been changed since last time.
 
-> The step might be skipped when `IncrementalDeployment = false` OR `DeployGlobalParams = false` in *Publish Options*.   
-> You'll see warning in the console (log) when only `IncrementalDeployment = true`.
+> The step might be skipped when `IncrementalDeployment = false` in *Publish Options*.   
+> You'll see warning in the console (log) when `IncrementalDeployment = true` and `IncrementalDeploymentStorageUri` is empty.
 
 
 ## Step: Deleting objects not in source
@@ -670,26 +663,29 @@ Since v.1.6 you have more control of which triggers should be started. Use `Trig
 
 ## Incremental Deployment
 
-> This is new feature (ver.1.4) in public preview.
+> This is new feature (ver.1.4) in public preview. Since ver.1.10 the process doesn't use ADF Global Parameter to keep Deployment State data. You must provide Storage URL instead.
 
 Usually the deployment process takes some time as it must go through all object (files) and send them via REST API to be deployed. The more objects in ADF the longer process takes.  
 In order to speed up the deployment process, you may want to use new switch `IncrementalDeployment` (new in *Publish Options*) to enable smart process of identify and deploy only objects that have been changed since last deployment.  
 
 ### How it works?
-It uses **Deployment State** kept in one of Global Parameters and is save/read to/from ADF service.  
+It uses **Deployment State** kept in as json file and is write/read to/from Azure BLOB Storage.  
 When the mode is ON, the process does a few additional steps across entire deployment process:
-1. Reads Global Parameters from ADF (when not newly created) to get previous **Deployment State**
+1. Reads Deployment State (json file) from Storage to get previous **Deployment State**
 2. Identifies which objects are unchanged and excludes them from deployment 
 3. Calculates MD5 hashes of deployed objects and merges them to previous **Deployment State**
-4. Saves **Deployment State** as `adftools_deployment_state` global parameter
+4. Saves **Deployment State** as `{ADFName}.adftools_deployment_state.json` file in Storage
+
+> Note: In order to use this feature, the following option parameters must be set:
+> - `IncrementalDeployment` = `True` 
+> - `IncrementalDeploymentStorageUri` =  `https://sqlplayer2020.file.core.windows.net/adftools` (example)
 
 ### Remember
 * Incremental Deployment assumes that no one changes ADF objects manually in the cloud
-* You must deploy Global Parameters in order to save Deployment State
 * Objects' hashes are calculate after update of properties. If you change config for an object - it will be deploy
 * If you want to redeploy all objects again, you've got two options:
   * Set `IncrementalDeployment = false` OR
-  * Delete manually `adftools_deployment_state` global parameter in target ADF service
+  * Delete Deployment State (json) file manually from provided Storage account's location
 
 
 # Selective deployment, triggers and logic

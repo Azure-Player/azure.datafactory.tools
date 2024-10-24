@@ -23,6 +23,7 @@ class AdfPublishOption {
     [Boolean] $DoNotStopStartExcludedTriggers = $false
     [Boolean] $DoNotDeleteExcludedObjects = $true
     [Boolean] $IncrementalDeployment = $false
+    [String] $IncrementalDeploymentStorageUri = ''
     [TriggerStopTypes] $TriggerStopMethod = [TriggerStopTypes]::AllEnabled
     [TriggerStartTypes] $TriggerStartMethod = [TriggerStartTypes]::BasedOnSourceCode
 }

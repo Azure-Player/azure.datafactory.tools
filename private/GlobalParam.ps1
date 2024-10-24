@@ -64,6 +64,7 @@ function Set-GlobalParam([Adf] $adf)
   }
   catch {
     Write-Error -Exception $_.Exception
+    $response = ""
   }
   return $response
 }
