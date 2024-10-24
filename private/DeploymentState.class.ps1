@@ -40,24 +40,6 @@ class AdfDeploymentState {
 
 }
 
-# function Get-StateFromService {
-#     [CmdletBinding()]
-#     param ($targetAdf)
-
-#         $res = Get-GlobalParam -ResourceGroupName $targetAdf.ResourceGroupName -DataFactoryName $targetAdf.DataFactoryName
-#         $d = @{}
-
-#         try {
-#             $InputObject = $res.properties.adftools_deployment_state.value.Deployed
-#             $d = Convert-PSObjectToHashtable $InputObject
-#         }
-#         catch {
-#             Write-Verbose $_.Exception
-#         }
-
-#         return $d
-# }
-
 function Get-StateFromStorage {
     [CmdletBinding()]
     param (
@@ -73,16 +55,13 @@ function Get-StateFromStorage {
     $storageContext = New-AzStorageContext -UseConnectedAccount -StorageAccountName $storageAccountName
     $blob = [Microsoft.Azure.Storage.Blob.CloudBlockBlob]::new("$LocationUri/$DataFactoryName.$Suffix")
     Write-Host "Ready to read file from storage: $($blob.Uri.AbsoluteUri)"
-    #$file = Get-AzStorageBlobContent -CloudBlob $blob -Destination $Suffix -Context $ctx            #-ErrorAction SilentlyContinue
-    #$blob = Get-AzStorageBlobContent -Container "adftools" -Blob "$DataFactoryName.$Suffix" -Destination $Suffix -Force -Context $ctx -ErrorAction SilentlyContinue
-    #$FileContent = $blob.DownloadText()
 
     $storageContainer = Get-AzStorageContainer -Name $blob.Container.Name -Context $storageContext
     $folder = $blob.Parent.Prefix
     $FileRef = $storageContainer.CloudBlobContainer.GetBlockBlobReference("$folder$DataFactoryName.$Suffix")
     if ($FileRef.Exists()) {
         $FileContent = $FileRef.DownloadText()
-        Write-Host $FileContent -BackgroundColor Blue
+        #Write-Host $FileContent -BackgroundColor Blue
         $json = $FileContent | ConvertFrom-Json
         $ds.Deployed = Convert-PSObjectToHashtable $json.Deployed
         $ds.adftoolsVer = $json.adftoolsVer
@@ -124,16 +103,3 @@ function Get-StorageAccountNameFromUri($uri) {
     return $accountName
 }
 
-
-
-
-# class AdfGlobalParam {
-#     $type = "Object"
-#     $value = $null
-
-#     AdfGlobalParam ($value) 
-#     {
-#         $this.value = $value
-#     }
-
-# }
