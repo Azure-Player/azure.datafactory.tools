@@ -60,8 +60,15 @@ InModuleScope azure.datafactory.tools {
 
 
     Describe 'Test-AdfCode' -Tag 'Unit' {
-        It 'Should not throw an error when wrong path to DF is provided' {
+        It 'Should throw an error when wrong path to DF is provided' {
             $DataFactoryName = "nullPathFactory"
+            $RootFolder = Join-Path -Path $PSScriptRoot -ChildPath $DataFactoryName
+            { 
+                $script:res = Test-AdfCode -RootFolder $RootFolder -ConfigPath $null
+            } | Should -Throw
+        }
+        It 'Should not throw an error when correct path to DF is provided but ConfigPath is null' {
+            $DataFactoryName = "adf2"
             $RootFolder = Join-Path -Path $PSScriptRoot -ChildPath $DataFactoryName
             { 
                 $script:res = Test-AdfCode -RootFolder $RootFolder -ConfigPath $null
