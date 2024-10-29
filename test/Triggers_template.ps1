@@ -1,5 +1,5 @@
 
-$file = Join-Path $RootFolder "trigger" "$triggerName.json"
+$file = (Join-Path -Path $RootFolder -ChildPath "trigger") | Join-Path -ChildPath "$triggerName.json"
 #The function below doesn't execute mocked functions (Get-AzDataFactoryV2Trigger), so we have to call them directly
 #Publish-TriggerIfNotExist -Name $triggerName -FileName $file @script:CommonParam
 #begin Publish-TriggerIfNotExist
