@@ -12,7 +12,9 @@ Param(
     [Switch]$InstallModules
 )
 
+Write-Host " ========= ENVIRONMENT =========="
 Write-Host "Host Name: $($Host.name)"
+Write-Host "PowerShell Version: $($PSVersionTable.PSVersion)"
 
 $rootPath = Switch ($Host.name) {
 	'Visual Studio Code Host' { split-path $psEditor.GetEditorContext().CurrentFile.Path }
@@ -25,8 +27,8 @@ $folder = Split-Path $rootPath -Parent
 
 Write-Host "Setting new location: $folder"
 Push-Location "$folder"
-Get-Location | Out-Host
-
+Get-Location
+Write-Host " ========= ENVIRONMENT =========="
 
 # Add the module location to the value of the PSModulePath environment variable
 #$p = [Environment]::GetEnvironmentVariable("PSModulePath")

@@ -66,10 +66,11 @@ InModuleScope azure.datafactory.tools {
                 -DataFactoryName "$DataFactoryName" `
                 -Location "$Location" -Option $opt
         }
-        It 'New GP "adftools_deployment_state" should exist' {
-            $f = Get-AzDataFactoryV2 -ResourceGroupName $t.ResourceGroupName -DataFactoryName $t.DataFactoryName
-            $f.GlobalParameters.Keys.Contains("adftools_deployment_state") | Should -Be $true
-        }
+        # This is no longer valid as new version keep state in Storage, not in ADF
+        # It 'New GP "adftools_deployment_state" should exist' {
+        #     $f = Get-AzDataFactoryV2 -ResourceGroupName $t.ResourceGroupName -DataFactoryName $t.DataFactoryName
+        #     $f.GlobalParameters.Keys.Contains("adftools_deployment_state") | Should -Be $true
+        # }
 
         It 'Should run successfully even when no Global Params are in target (exists) ADF' {
             Publish-AdfV2FromJson -RootFolder "$RootFolder" `

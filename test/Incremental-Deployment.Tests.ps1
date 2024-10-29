@@ -68,7 +68,7 @@ InModuleScope azure.datafactory.tools {
         }
         It 'Should fails when Container doesn''t exist' {
             { Set-StateToStorage -ds $dstate -DataFactoryName $DataFactoryName -LocationUri "$($script:StorageUri)/nocontainer997755/folder" }
-            | Should -Throw -ExceptionType ([System.Management.Automation.RuntimeException])
+            | Should -Throw -ExceptionType ([Microsoft.Azure.Storage.StorageException])
         }
     }
 
