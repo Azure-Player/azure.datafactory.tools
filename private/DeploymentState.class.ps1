@@ -61,7 +61,11 @@ function Get-StateFromStorage {
     $FileRef = $storageContainer.CloudBlobContainer.GetBlockBlobReference("$folder$DataFactoryName.$Suffix")
     if ($FileRef.Exists()) {
         $FileContent = $FileRef.DownloadText()
-        #Write-Host $FileContent -BackgroundColor Blue
+        # $FileRef.DownloadText() | Set-Content $Suffix
+        # $FileContent = Get-Content $Suffix -Encoding 'UTF8'
+        # foreach ($line in $FileContent) {
+        #     Write-Debug $line
+        # }
         $json = $FileContent | ConvertFrom-Json
         $ds.Deployed = Convert-PSObjectToHashtable $json.Deployed
         $ds.adftoolsVer = $json.adftoolsVer

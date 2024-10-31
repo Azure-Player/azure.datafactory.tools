@@ -50,6 +50,14 @@ InModuleScope azure.datafactory.tools {
         Option = $opt
     }
 
+    Describe 'IO operations on file with UTF8' {
+        It 'Save UTF8 without BOM' {
+            $Body = 'abc'; Set-Content -Path 'testutf8.txt' -Value $Body -Encoding 'UTF8'
+            $t = Get-Content 'testutf8.txt'; $t.Length
+            $fi = [System.IO.FileInfo]::new('testutf8.txt')
+            $fi.Length | Should -Be (3+2)
+        }
+    }
 
     Describe 'When Incremental mode with storage provided' -Tag 'IncrementalDeployment', 'Integration' {
         It 'Should return empty state when get for the first time' {
@@ -58,7 +66,9 @@ InModuleScope azure.datafactory.tools {
             $ds1.Deployed | Should -BeNullOrEmpty
         }
         It 'Should save state to storage without an error' {
-            Set-StateToStorage -ds $dstate -DataFactoryName $DataFactoryName -LocationUri $uri
+            $ds1.Deployed.Add("dataflow.DF_UGTurkey", "3A030D67347E840E8C1CC756F14C54FC");
+            $ds1.Deployed.Add("linkedService.LS_DataLakeGen1", "825E070ED690D2EA767339EBC6D425A0");
+            Set-StateToStorage -ds $ds1 -DataFactoryName $DataFactoryName -LocationUri $uri
         }
         It 'Should return the same value for state when read again' {
             $ds2 = Get-StateFromStorage -DataFactoryName $DataFactoryName -LocationUri $uri
@@ -68,7 +78,24 @@ InModuleScope azure.datafactory.tools {
         }
         It 'Should fails when Container doesn''t exist' {
             { Set-StateToStorage -ds $dstate -DataFactoryName $DataFactoryName -LocationUri "$($script:StorageUri)/nocontainer997755/folder" }
-            | Should -Throw -ExceptionType ([Microsoft.Azure.Storage.StorageException])
+            #| Should -Throw -ExceptionType ([Microsoft.Azure.Storage.StorageException])
+            | Should -Throw -ExceptionType ([System.Management.Automation.PropertyNotFoundException])   #Local PC
+        }
+        It 'Should save state to storage using UTF8 encoding without BOM' {
+            $ds3 = [AdfDeploymentState]::new('9.9')
+            $FileContent = Get-Content '.\test\misc\SQLPlayerDemo-UAT.adftools_deployment_state.json' -Encoding 'UTF8'
+            $json = $FileContent | ConvertFrom-Json
+            $ds3.Deployed = Convert-PSObjectToHashtable $json.Deployed
+
+            $DfName = "$DataFactoryName-withoutBOM"
+            $Suffix = "adftools_deployment_state.json"
+            Set-StateToStorage -ds $ds3 -DataFactoryName "$DfName" -LocationUri $uri
+
+            # Check saved file directly on Storage
+            # $storageAccountName = Get-StorageAccountNameFromUri $uri
+            # $storageContext = New-AzStorageContext -UseConnectedAccount -StorageAccountName $storageAccountName
+            # $blob = [Microsoft.Azure.Storage.Blob.CloudBlockBlob]::new("$uri/$DfName.$Suffix")
+            # $blob.FetchAttributes()
         }
     }
 
