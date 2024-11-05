@@ -92,7 +92,7 @@ function Set-StateToStorage {
     $dsjson = ConvertTo-Json $ds -Depth 5
     Write-Verbose "--- Deployment State: ---`r`n $dsjson"
 
-    Save-ContentUTF8 -Path $Suffix -Value $dsjson
+    Save-ContentUTF8 -Path $localFile -Value $dsjson
     $storageAccountName = Get-StorageAccountNameFromUri $LocationUri
     $storageContext = New-AzStorageContext -UseConnectedAccount -StorageAccountName $storageAccountName
     $blob = [Microsoft.Azure.Storage.Blob.CloudBlob]::new("$LocationUri/$DataFactoryName.$localFile")
