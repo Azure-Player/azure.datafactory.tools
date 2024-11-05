@@ -92,7 +92,7 @@ function Set-StateToStorage {
     $dsjson = ConvertTo-Json $ds -Depth 5
     Write-Verbose "--- Deployment State: ---`r`n $dsjson"
 
-    Set-Content -Path $Suffix -Value $dsjson -Encoding UTF8
+    Save-ContentUTF8 -Path $Suffix -Value $dsjson
     $storageAccountName = Get-StorageAccountNameFromUri $LocationUri
     $storageContext = New-AzStorageContext -UseConnectedAccount -StorageAccountName $storageAccountName
     $blob = [Microsoft.Azure.Storage.Blob.CloudBlob]::new("$LocationUri/$DataFactoryName.$Suffix")
@@ -107,3 +107,7 @@ function Get-StorageAccountNameFromUri($uri) {
     return $accountName
 }
 
+function Save-ContentUTF8($Path, $Value) {
+    $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False  # with BOM-less
+    [System.IO.File]::WriteAllLines($Path, $Value, $Utf8NoBomEncoding)
+}

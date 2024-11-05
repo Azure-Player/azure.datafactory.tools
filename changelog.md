@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.11.1] - 2024-11-05
+### Fixed
+* Fixed saving deployment state file with UTF8 BOM-less regardless of PS version #425
+
 ## [1.11.0] - 2024-10-29
 ### Fixed / Added
 * Incremental deploy feature causes payload limit issue #374
