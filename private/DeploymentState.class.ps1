@@ -88,15 +88,15 @@ function Set-StateToStorage {
         [Parameter(Mandatory)] $LocationUri
         )
 
-    $Suffix = "adftools_deployment_state.json"
+    $localFile = "adftools_deployment_state.json"
     $dsjson = ConvertTo-Json $ds -Depth 5
     Write-Verbose "--- Deployment State: ---`r`n $dsjson"
 
     Save-ContentUTF8 -Path $Suffix -Value $dsjson
     $storageAccountName = Get-StorageAccountNameFromUri $LocationUri
     $storageContext = New-AzStorageContext -UseConnectedAccount -StorageAccountName $storageAccountName
-    $blob = [Microsoft.Azure.Storage.Blob.CloudBlob]::new("$LocationUri/$DataFactoryName.$Suffix")
-    $r = Set-AzStorageBlobContent -ClientTimeoutPerRequest 5 -ServerTimeoutPerRequest 5 -CloudBlob $blob -File $Suffix -Context $storageContext -Force
+    $blob = [Microsoft.Azure.Storage.Blob.CloudBlob]::new("$LocationUri/$DataFactoryName.$localFile")
+    $r = Set-AzStorageBlobContent -ClientTimeoutPerRequest 5 -ServerTimeoutPerRequest 5 -CloudBlob $blob -File $localFile -Context $storageContext -Force
 
     Write-Host "Deployment State saved to storage: $($r.BlobClient.Uri)"
 }
@@ -110,4 +110,6 @@ function Get-StorageAccountNameFromUri($uri) {
 function Save-ContentUTF8($Path, $Value) {
     $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False  # with BOM-less
     [System.IO.File]::WriteAllLines($Path, $Value, $Utf8NoBomEncoding)
+    $fullPath = Resolve-Path $Path
+    Write-Debug "End:Save-ContentUTF8: Saved UTF8 file to location: $fullPath"
 }

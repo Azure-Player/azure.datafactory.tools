@@ -86,7 +86,8 @@ InModuleScope azure.datafactory.tools {
         }
         It 'Should save state to storage using UTF8 encoding without BOM' {
             $ds3 = [AdfDeploymentState]::new('9.9')
-            $FileContent = Get-Content '.\test\misc\SQLPlayerDemo-UAT.adftools_deployment_state.json' -Encoding 'UTF8'
+            $file = Join-Path -Path $PSScriptRoot -ChildPath 'misc\SQLPlayerDemo-UAT.adftools_deployment_state.json'
+            $FileContent = Get-Content $file -Encoding 'UTF8'
             $json = $FileContent | ConvertFrom-Json
             $ds3.Deployed = Convert-PSObjectToHashtable $json.Deployed
 
