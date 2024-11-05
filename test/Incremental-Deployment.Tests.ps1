@@ -52,10 +52,11 @@ InModuleScope azure.datafactory.tools {
 
     Describe 'IO operations on file with UTF8' {
         It 'Save UTF8 without BOM' {
-            $Body = 'abc'; Set-Content -Path 'testutf8.txt' -Value $Body -Encoding 'UTF8'
-            $t = Get-Content 'testutf8.txt'; $t.Length
-            $fi = [System.IO.FileInfo]::new('testutf8.txt')
-            $fi.Length | Should -Be (3+2)
+            $Body = 'abc Nowiński'; 
+            $filePath = 'testutf8.txt'
+            Save-ContentUTF8 -Path $filePath -Value $Body
+            $fileBytes = [System.IO.File]::ReadAllBytes($filePath)
+            $fileBytes.Length | Should -Be 15
         }
     }
 
@@ -78,8 +79,8 @@ InModuleScope azure.datafactory.tools {
         }
         It 'Should fails when Container doesn''t exist' {
             { Set-StateToStorage -ds $dstate -DataFactoryName $DataFactoryName -LocationUri "$($script:StorageUri)/nocontainer997755/folder" }
-            #| Should -Throw -ExceptionType ([Microsoft.Azure.Storage.StorageException])
-            | Should -Throw -ExceptionType ([System.Management.Automation.PropertyNotFoundException])   #Local PC
+            | Should -Throw -ExceptionType ([Microsoft.Azure.Storage.StorageException])
+            #| Should -Throw -ExceptionType ([System.Management.Automation.PropertyNotFoundException])   #Local PC
         }
         It 'Should save state to storage using UTF8 encoding without BOM' {
             $ds3 = [AdfDeploymentState]::new('9.9')
