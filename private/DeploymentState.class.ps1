@@ -94,8 +94,9 @@ function Set-StateToStorage {
 
     Save-ContentUTF8 -Path $localFile -Value $dsjson
     #$fullFilePath = Resolve-Path $localFile
-    Write-Host "Testing file: $localFile"
-    Test-Path $localFile
+    $isExist = Test-Path $localFile
+    Write-Host "Tested file location: $localFile  (result: $isExist)"
+    ls
     $storageAccountName = Get-StorageAccountNameFromUri $LocationUri
     $storageContext = New-AzStorageContext -UseConnectedAccount -StorageAccountName $storageAccountName
     $blob = [Microsoft.Azure.Storage.Blob.CloudBlob]::new("$LocationUri/$DataFactoryName.$localFile")
