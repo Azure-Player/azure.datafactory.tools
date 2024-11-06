@@ -92,16 +92,14 @@ function Set-StateToStorage {
     $dsjson = ConvertTo-Json $ds -Depth 5
     Write-Verbose "--- Deployment State: ---`r`n $dsjson"
 
-    Save-ContentUTF8 -Path $localFile -Value $dsjson
-    #$fullFilePath = Resolve-Path $localFile
-    $isExist = Test-Path $localFile
-    Write-Host "Tested file location: $localFile  (result: $isExist)"
+    $fullFilePath = Save-ContentUTF8 -Path $localFile -Value $dsjson
+    $isExist = Test-Path $fullFilePath
+    Write-Host "Tested file location: $fullFilePath  (result: $isExist)"
     Write-Host "Current location: $(Get-Location)"
-    ls | ForEach-Object { Write-Host $_ }
     $storageAccountName = Get-StorageAccountNameFromUri $LocationUri
     $storageContext = New-AzStorageContext -UseConnectedAccount -StorageAccountName $storageAccountName
     $blob = [Microsoft.Azure.Storage.Blob.CloudBlob]::new("$LocationUri/$DataFactoryName.$localFile")
-    $r = Set-AzStorageBlobContent -ClientTimeoutPerRequest 5 -ServerTimeoutPerRequest 5 -CloudBlob $blob -File $localFile -Context $storageContext -Force
+    $r = Set-AzStorageBlobContent -ClientTimeoutPerRequest 5 -ServerTimeoutPerRequest 5 -CloudBlob $blob -File $fullFilePath -Context $storageContext -Force
 
     Write-Host "Deployment State saved to storage: $($r.BlobClient.Uri)"
 }
@@ -113,8 +111,15 @@ function Get-StorageAccountNameFromUri($uri) {
 }
 
 function Save-ContentUTF8($Path, $Value) {
-    Write-Host "Save-ContentUTF8::Begin: $Path $Value"
+    Write-Debug "Save-ContentUTF8::Begin: $Path $Value"
+    $fullPath = Resolve-NonExistPath -Path $Path    #.NET function (WriteAllLines) requires full path, otherwise "default" location != PS default location
+    Write-Debug "Save-ContentUTF8::fullPath: $fullPath"
     $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False  # with BOM-less
-    [System.IO.File]::WriteAllLines($Path, $Value, $Utf8NoBomEncoding)
-    Write-Host "Save-ContentUTF8::End: Saved UTF8 file to location: $Path"
+    [System.IO.File]::WriteAllLines($fullPath, $Value, $Utf8NoBomEncoding)
+    Write-Debug "Save-ContentUTF8::End: Saved UTF8 file to location: $Path"
+    return $fullPath
+}
+
+function Resolve-NonExistPath($Path) {
+    return $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Path)
 }

@@ -52,27 +52,21 @@ InModuleScope azure.datafactory.tools {
 
     Describe 'IO operations on file with UTF8' {
 
-        BeforeAll {
-            $TempFolder = (New-TemporaryDirectory).FullName
-            Set-Location -Path $TempFolder
-        }
-
         It 'Test temp path' {
             Test-Path -Path (Get-Location) | Should -Be $True
         }
-
+        
         It 'Save UTF8 without BOM' {
             $Body = 'abc Nowiński'; 
             $filePath = '~$testutf8.txt'
-            Save-ContentUTF8 -Path $filePath -Value $Body
+            $fullPath = Save-ContentUTF8 -Path $filePath -Value $Body
 
             $isExist = Test-Path $filePath
             $isExist | Should -Be $true
             Write-Host "Tested file location: $filePath  (result: $isExist)"
             Write-Host "Current location: $(Get-Location)"
-            ls | ForEach-Object { Write-Host $_ }
 
-            $fileBytes = [System.IO.File]::ReadAllBytes($filePath)
+            $fileBytes = [System.IO.File]::ReadAllBytes($fullPath)
             ($fileBytes | ForEach-Object { "{0:X2}" -f $_ }) -join " "
             $eolLength = 1; if ($IsWindows) { $eolLength = 2 }
             $fileBytes.Length | Should -Be @(13 + $eolLength)   # Windows - 15, Linux 14 (EOL - 1 or 2 characters)
