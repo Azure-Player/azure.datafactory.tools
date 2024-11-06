@@ -52,11 +52,6 @@ InModuleScope azure.datafactory.tools {
 
     Describe 'IO operations on file with UTF8' {
 
-        BeforeAll {
-            $TempFolder = (New-TemporaryDirectory).FullName
-            Set-Location -Path $TempFolder
-        }
-
         It 'Test temp path' {
             Test-Path -Path (Get-Location) | Should -Be $True
         }
