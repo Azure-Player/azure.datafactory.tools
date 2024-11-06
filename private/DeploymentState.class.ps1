@@ -96,7 +96,8 @@ function Set-StateToStorage {
     #$fullFilePath = Resolve-Path $localFile
     $isExist = Test-Path $localFile
     Write-Host "Tested file location: $localFile  (result: $isExist)"
-    ls
+    Write-Host "Current location: $(Get-Location)"
+    ls | ForEach-Object { Write-Host $_ }
     $storageAccountName = Get-StorageAccountNameFromUri $LocationUri
     $storageContext = New-AzStorageContext -UseConnectedAccount -StorageAccountName $storageAccountName
     $blob = [Microsoft.Azure.Storage.Blob.CloudBlob]::new("$LocationUri/$DataFactoryName.$localFile")
