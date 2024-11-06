@@ -93,10 +93,11 @@ function Set-StateToStorage {
     Write-Verbose "--- Deployment State: ---`r`n $dsjson"
 
     Save-ContentUTF8 -Path $localFile -Value $dsjson
+    $fullFilePath = Resolve-Path $localFile
     $storageAccountName = Get-StorageAccountNameFromUri $LocationUri
     $storageContext = New-AzStorageContext -UseConnectedAccount -StorageAccountName $storageAccountName
     $blob = [Microsoft.Azure.Storage.Blob.CloudBlob]::new("$LocationUri/$DataFactoryName.$localFile")
-    $r = Set-AzStorageBlobContent -ClientTimeoutPerRequest 5 -ServerTimeoutPerRequest 5 -CloudBlob $blob -File $localFile -Context $storageContext -Force
+    $r = Set-AzStorageBlobContent -ClientTimeoutPerRequest 5 -ServerTimeoutPerRequest 5 -CloudBlob $blob -File $fullFilePath -Context $storageContext -Force
 
     Write-Host "Deployment State saved to storage: $($r.BlobClient.Uri)"
 }

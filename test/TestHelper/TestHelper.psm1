@@ -24,7 +24,9 @@ function Convert-SecureStringToString
 function New-TemporaryDirectory {
     $parent = [System.IO.Path]::GetTempPath()
     $name = 'ADFTools-' + [System.IO.Path]::GetRandomFileName()
-    New-Item -ItemType Directory -Path (Join-Path $parent $name)
+    $fullTmpPath = Join-Path $parent $name
+    New-Item -ItemType Directory -Path $fullTmpPath
+    Write-Host "Created folder: $fullTmpPath"
 }
 
 
