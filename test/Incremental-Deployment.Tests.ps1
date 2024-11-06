@@ -97,8 +97,8 @@ InModuleScope azure.datafactory.tools {
             $ds2.Algorithm | Should -Be $script:ds1.Algorithm
         }
         It 'Should fails when Container doesn''t exist' {
-            { Set-StateToStorage -ds $dstate -DataFactoryName $DataFactoryName -LocationUri "$($script:StorageUri)/nocontainer997755/folder" }
-            | Should -Throw #-ExceptionType ([System.ArgumentException])
+            { Set-StateToStorage -ds $dstate -DataFactoryName $DataFactoryName -LocationUri "$($script:StorageUri)/nocontainer997755/folder" } | Should -Throw
+            #-ExceptionType ([System.ArgumentException])
             #| Should -Throw -ExceptionType ([Microsoft.Azure.Storage.StorageException])
             #| Should -Throw -ExceptionType ([System.Management.Automation.PropertyNotFoundException])   #Local PC
         }
