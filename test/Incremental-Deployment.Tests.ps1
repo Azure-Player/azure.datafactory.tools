@@ -57,6 +57,10 @@ InModuleScope azure.datafactory.tools {
             Set-Location -Path $TempFolder
         }
 
+        It 'Test temp path' {
+            Test-Path -Path (Get-Location) | Should -Be $True
+        }
+
         It 'Save UTF8 without BOM' {
             $Body = 'abc Nowiński'; 
             $filePath = '~$testutf8.txt'
