@@ -65,6 +65,13 @@ InModuleScope azure.datafactory.tools {
             $Body = 'abc Nowiński'; 
             $filePath = '~$testutf8.txt'
             Save-ContentUTF8 -Path $filePath -Value $Body
+
+            $isExist = Test-Path $filePath
+            $isExist | Should -Be $true
+            Write-Host "Tested file location: $filePath  (result: $isExist)"
+            Write-Host "Current location: $(Get-Location)"
+            ls | ForEach-Object { Write-Host $_ }
+
             $fileBytes = [System.IO.File]::ReadAllBytes($filePath)
             ($fileBytes | ForEach-Object { "{0:X2}" -f $_ }) -join " "
             $eolLength = 1; if ($IsWindows) { $eolLength = 2 }
