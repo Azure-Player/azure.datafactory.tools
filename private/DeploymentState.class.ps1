@@ -61,7 +61,11 @@ function Get-StateFromStorage {
     $FileRef = $storageContainer.CloudBlobContainer.GetBlockBlobReference("$folder$DataFactoryName.$Suffix")
     if ($FileRef.Exists()) {
         $FileContent = $FileRef.DownloadText()
-        #Write-Host $FileContent -BackgroundColor Blue
+        # $FileRef.DownloadText() | Set-Content $Suffix
+        # $FileContent = Get-Content $Suffix -Encoding 'UTF8'
+        # foreach ($line in $FileContent) {
+        #     Write-Debug $line
+        # }
         $json = $FileContent | ConvertFrom-Json
         $ds.Deployed = Convert-PSObjectToHashtable $json.Deployed
         $ds.adftoolsVer = $json.adftoolsVer
@@ -84,15 +88,18 @@ function Set-StateToStorage {
         [Parameter(Mandatory)] $LocationUri
         )
 
-    $Suffix = "adftools_deployment_state.json"
+    $localFile = "adftools_deployment_state.json"
     $dsjson = ConvertTo-Json $ds -Depth 5
     Write-Verbose "--- Deployment State: ---`r`n $dsjson"
 
-    Set-Content -Path $Suffix -Value $dsjson -Encoding UTF8
+    $fullFilePath = Save-ContentUTF8 -Path $localFile -Value $dsjson
+    $isExist = Test-Path $fullFilePath
+    Write-Host "Tested file location: $fullFilePath  (result: $isExist)"
+    Write-Host "Current location: $(Get-Location)"
     $storageAccountName = Get-StorageAccountNameFromUri $LocationUri
     $storageContext = New-AzStorageContext -UseConnectedAccount -StorageAccountName $storageAccountName
-    $blob = [Microsoft.Azure.Storage.Blob.CloudBlob]::new("$LocationUri/$DataFactoryName.$Suffix")
-    $r = Set-AzStorageBlobContent -ClientTimeoutPerRequest 5 -ServerTimeoutPerRequest 5 -CloudBlob $blob -File $Suffix -Context $storageContext -Force
+    $blob = [Microsoft.Azure.Storage.Blob.CloudBlob]::new("$LocationUri/$DataFactoryName.$localFile")
+    $r = Set-AzStorageBlobContent -ClientTimeoutPerRequest 5 -ServerTimeoutPerRequest 5 -CloudBlob $blob -File $fullFilePath -Context $storageContext -Force
 
     Write-Host "Deployment State saved to storage: $($r.BlobClient.Uri)"
 }
@@ -103,3 +110,16 @@ function Get-StorageAccountNameFromUri($uri) {
     return $accountName
 }
 
+function Save-ContentUTF8($Path, $Value) {
+    Write-Debug "Save-ContentUTF8::Begin: $Path $Value"
+    $fullPath = Resolve-NonExistPath -Path $Path    #.NET function (WriteAllLines) requires full path, otherwise "default" location != PS default location
+    Write-Debug "Save-ContentUTF8::fullPath: $fullPath"
+    $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False  # with BOM-less
+    [System.IO.File]::WriteAllLines($fullPath, $Value, $Utf8NoBomEncoding)
+    Write-Debug "Save-ContentUTF8::End: Saved UTF8 file to location: $Path"
+    return $fullPath
+}
+
+function Resolve-NonExistPath($Path) {
+    return $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Path)
+}
