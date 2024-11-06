@@ -113,7 +113,8 @@ function Get-StorageAccountNameFromUri($uri) {
 }
 
 function Save-ContentUTF8($Path, $Value) {
+    Write-Host "Save-ContentUTF8::Begin: $Path $Value"
     $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False  # with BOM-less
     [System.IO.File]::WriteAllLines($Path, $Value, $Utf8NoBomEncoding)
-    Write-Debug "End:Save-ContentUTF8: Saved UTF8 file to location: $Path"
+    Write-Host "Save-ContentUTF8::End: Saved UTF8 file to location: $Path"
 }
