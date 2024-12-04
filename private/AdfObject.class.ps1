@@ -91,7 +91,7 @@ class AdfObject {
     }
 
     static $AllowedTypes = @('integrationRuntime', 'pipeline', 'dataset', 'dataflow', 'linkedService', 'trigger', 'factory', 'managedVirtualNetwork', 'managedPrivateEndpoint', 'credential')
-    static $IgnoreTypes  = @('notebook', 'BigDataPool')
+    static $IgnoreTypes  = @('notebook', 'BigDataPool', 'sparkJobDefinition')
 
     static AssertType ([string] $Type)
     {

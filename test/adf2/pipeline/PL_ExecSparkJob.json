@@ -1,0 +1,43 @@
+{
+    "name": "PL_ExecSparkJob",
+    "properties": {
+        "activities": [
+            {
+                "name": "Exec Spark Job",
+                "type": "SparkJob",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "sparkJob": {
+                        "referenceName": {
+                            "value": "weewferfref",
+                            "type": "Expression"
+                        },
+                        "type": "SparkJobDefinitionReference"
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "LS_AzureSynapseArtifacts1",
+                    "type": "LinkedServiceReference"
+                }
+            }
+        ],
+        "variables": {
+            "va": {
+                "type": "Array",
+                "defaultValue": [
+                    "[{\"A\":\"B\", \"C\",\"D\"}]"
+                ]
+            }
+        },
+        "annotations": []
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}

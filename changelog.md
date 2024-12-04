@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.11.2] - 2024-12-04
+### Fixed
+* Unknown object type: SparkJobDefinition #428 by adding the type to the ignored list
+
 ## [1.11.1] - 2024-11-06
 ### Fixed
 * Fixed saving deployment state file with UTF8 BOM-less regardless of PS version #425
