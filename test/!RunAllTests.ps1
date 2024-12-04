@@ -69,7 +69,9 @@ try {
     $configuration = [PesterConfiguration]::Default
     $configuration.Run.Exit = $true
     $configuration.Should.ErrorAction = 'Continue'
-    $configuration.CodeCoverage.Enabled = $false
+    $configuration.CodeCoverage.Enabled = $true
+    $configuration.CodeCoverage.OutputFormat = 'JaCoCo'
+    $configuration.CodeCoverage.OutputPath = "$folder\CodeCoverage.xml"
     $configuration.TestResult.OutputFormat = "NUnitXml"
     $configuration.TestResult.OutputPath = "$folder\TEST-Results.xml"
     $configuration.TestResult.Enabled = $true
