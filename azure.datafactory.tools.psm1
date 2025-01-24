@@ -39,7 +39,8 @@ if ($null -ne $module -and $module.Version -lt [System.Version]$minVer)
 } 
 elseif ($null -eq $module) 
 {
-    Write-Host "Importing module $module (> $minVer)..."
+    Write-Host "Importing module $moduleName (> $minVer)..."
     Import-Module -Name $moduleName -MinimumVersion "$minVer" -Scope Global
-    Write-Host "Module imported."
+    $module = Get-Module $moduleName
+    Write-Host "Module $ModuleName (v.$($module.Version)) imported."
 }
