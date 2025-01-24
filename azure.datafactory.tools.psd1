@@ -12,7 +12,7 @@
     RootModule = 'azure.datafactory.tools.psm1'
     
     # Version number of this module.
-    ModuleVersion = '1.11.2'
+    ModuleVersion = '1.12.0'
     
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -27,7 +27,7 @@
     CompanyName = 'SQLPlayer'
     
     # Copyright statement for this module
-    Copyright = '(c) 2020-2024 Kamil Nowinski. All rights reserved.'
+    Copyright = '(c) 2020-2025 Kamil Nowinski. All rights reserved.'
     
     # Description of the functionality provided by this module
     Description = 'PowerShell module to help with CI&CD for Azure Data Factory, mainly to publish to ADF service in multiple environments. Check https://github.com/Azure-Player/azure.datafactory.tools/ & https://azureplayer.net/adf/'
