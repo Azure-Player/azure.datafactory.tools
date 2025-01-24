@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.12.0] - NEXT
+### Added
+* Error during the import when required Az.Resource module is not loaded #336
+* Az.DataFactory module is required to import adftools
+
 ## [1.11.2] - 2024-12-04
 ### Fixed
 * Unknown object type: SparkJobDefinition #428 by adding the type to the ignored list
