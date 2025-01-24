@@ -1,4 +1,6 @@
-Select-AzSubscription -SubscriptionName 'Microsoft Azure Sponsorship'
+$SubscriptionName = 'Microsoft Azure Sponsorship'
+if ($null -eq (Get-AzContext)) { Connect-AzAccount }
+Select-AzSubscription -SubscriptionName $SubscriptionName
 Get-AzContext
 
 . .\adhoc\~~Load-all-cmdlets-locally.ps1   # Load to this session
@@ -14,7 +16,7 @@ $json = $body | ConvertFrom-Json
 
 
 #$resType = Get-AzureResourceType $obj.Type
-$DataFactoryName = "$testAdf-17274af2"
+$DataFactoryName = "$testAdf-7d6cdb5f"
 $ResourceGroupName = 'rg-devops-factory'
 $resType = 'Microsoft.DataFactory/factories/credentials'
 $resName = "$DataFactoryName/credential1"
@@ -28,7 +30,7 @@ New-AzResource `
 -IsFullObject -Force 
 
 # ------------------------------------------------------------
-Select-AzSubscription -SubscriptionName 'MVP'
+Select-AzSubscription -SubscriptionName $SubscriptionName
 
 # Delete credential
 $adfi = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName"
@@ -48,3 +50,6 @@ $adf = Import-AdfFromFolder -FactoryName "$DataFactoryName" -RootFolder "$testPa
 Remove-AdfObjectIfNotInSource -adfSource $adf -adfTargetObj $adfIns.Credentials[0] -adfInstance $adfIns
 
 $adfIns.Credentials[0].Name
+
+
+Import-Module ".\azure.datafactory.tools.psd1" -Force

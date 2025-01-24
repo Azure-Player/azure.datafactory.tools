@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 * Error during the import when required Az.Resource module is not loaded #336
 * Az.DataFactory module is required to import adftools
+### Fixed
+* Error when deleting credentials #403
 
 ## [1.11.2] - 2024-12-04
 ### Fixed
