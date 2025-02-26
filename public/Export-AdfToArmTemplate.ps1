@@ -9,7 +9,7 @@ function Export-AdfToArmTemplate {
         [parameter(Mandatory = $false)] 
         [String] $ResourceGroup = 'abcxyz',
         [parameter(Mandatory = $false)] 
-        [String] $AdfUtilitiesVersion = '0.1.6',
+        [String] $AdfUtilitiesVersion = '1.0.2',
         [parameter(Mandatory = $false)] 
         [String] $OutputFolder = 'ArmTemplate'
     )
