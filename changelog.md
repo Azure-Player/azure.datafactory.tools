@@ -4,11 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [1.12.0] - NEXT
+## [1.12.0] - 2025-03-20
 ### Added
 * Error during the import when required Az.Resource module is not loaded #336
 * Az.DataFactory module is required to import adftools
-* Added function `Set-AdfToolsAuthToken` to enable changing URL to API when target environment is different than default Global Azure #356
+* Added function `Set-AdfToolsAuthToken` to enable changing URL to API when target environment is different than default Global Azure #356 #441
 ### Fixed
 * Error when deleting credentials #403
 
