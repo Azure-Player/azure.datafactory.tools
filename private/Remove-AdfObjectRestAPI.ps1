@@ -13,7 +13,7 @@ function Remove-AdfObjectRestAPI {
         'Content-Type'  = 'application/json'
         'Authorization' = 'Bearer ' + $token.Token
     }
-    $url = "https://management.azure.com$($adfi.DataFactoryId)/$type_plural/$($name)?api-version=2018-06-01"
+    $url = "https://management.azure.com$($adfInstance.Id)/$type_plural/$($name)?api-version=2018-06-01"
 
     # Delete given object via Rest API
     $r = Invoke-RestMethod -Method 'DELETE' -Uri $url -Headers $authHeader -ContentType "application/json"

@@ -41,7 +41,8 @@ function Get-LinkedServiceBody(
 )
 {
   Write-Debug "BEGIN: Get-LinkedServiceBody()"
-  $ADFEndpoint = "https://management.azure.com/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.DataFactory/factories/$DataFactoryName/linkedservices/$($LinkedServiceName)?api-version=2018-06-01"
+  $ADFEndpoint = "$BaseApiUrl/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.DataFactory/factories/$DataFactoryName/linkedservices/$($LinkedServiceName)?api-version=2018-06-01"
+  Write-Debug "Get-LinkedServiceBody:Request preparing to URL: $ADFEndpoint"
 
   $request = @{
       ContentType = 'application/json'
@@ -93,7 +94,8 @@ function Test-LinkedServiceConnection(
 
   $body = Get-LinkedServiceBody -LinkedServiceName $LinkedServiceName -DataFactoryName $DataFactoryName -ResourceGroupName $ResourceGroupName -BearerToken $bearerToken -SubscriptionID $SubscriptionID
 
-  $AzureEndpoint = "https://management.azure.com/subscriptions/$SubscriptionID/resourcegroups/$ResourceGroupName/providers/Microsoft.DataFactory/factories/$DataFactoryName/testConnectivity?api-version=2018-06-01"
+  $AzureEndpoint = "$BaseApiUrl/subscriptions/$SubscriptionID/resourcegroups/$ResourceGroupName/providers/Microsoft.DataFactory/factories/$DataFactoryName/testConnectivity?api-version=2018-06-01"
+  Write-Debug "Test-LinkedServiceConnection:Request preparing to URL: $AzureEndpoint"
 
   if ($Params) {
     Write-Verbose "Found input parameters for this Linked Service, adding to the API request..."

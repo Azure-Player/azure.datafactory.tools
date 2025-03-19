@@ -36,7 +36,7 @@ InModuleScope azure.datafactory.tools {
     Describe 'Export-AdfToArmTemplate' -Tag 'Unit' {
 
         It 'Should exist' {
-            { Get-Command -Name 'Publish-AdfV2UsingArm' -ErrorAction Stop } | Should -Not -Throw
+            { Get-Command -Name 'Export-AdfToArmTemplate' -ErrorAction Stop } | Should -Not -Throw
         }
         It 'Should completed successfully' {
             { Export-AdfToArmTemplate -RootFolder $script:RootFolder } | Should -Not -Throw
