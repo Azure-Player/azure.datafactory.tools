@@ -12,7 +12,9 @@ function Get-GlobalParam([string]$ResourceGroupName, [string]$DataFactoryName)
       'Authorization'='Bearer ' + $token.AccessToken
   }
 
-  $restUri = "https://management.azure.com/subscriptions/$SubscriptionID/resourcegroups/$ResourceGroupName/providers/Microsoft.DataFactory/factories/$DataFactoryName/globalParameters/default?api-version=2018-06-01"
+  $restUri = "$BaseApiUrl/subscriptions/$SubscriptionID/resourcegroups/$ResourceGroupName/providers/Microsoft.DataFactory/factories/$DataFactoryName/globalParameters/default?api-version=2018-06-01"
+  Write-Debug "Get-GlobalParam:Request preparing to URL: $restUri"
+
   $params = @{
       Headers = $authHeader
       Method = 'GET'
@@ -51,7 +53,8 @@ function Set-GlobalParam([Adf] $adf)
     ""properties"": $gp
   }"
 
-  $restUri = "https://management.azure.com/subscriptions/$SubscriptionID/resourcegroups/$ResourceGroupName/providers/Microsoft.DataFactory/factories/$DataFactoryName/globalParameters/default?api-version=2018-06-01"
+  $restUri = "$BaseApiUrl/subscriptions/$SubscriptionID/resourcegroups/$ResourceGroupName/providers/Microsoft.DataFactory/factories/$DataFactoryName/globalParameters/default?api-version=2018-06-01"
+  Write-Debug "Set-GlobalParam:Request preparing to URL: $restUri"
   $params = @{
       Headers = $authHeader
       Body = $body

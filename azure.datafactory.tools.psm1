@@ -30,6 +30,7 @@ if (Test-Path -Path "$PSScriptRoot\public" -ErrorAction Ignore)
     }
 }
 
+$script:BaseApiUrl = "https://management.azure.com"
 $moduleName = 'Az.DataFactory'
 $module = Get-Module $moduleName
 $minVer = "1.10.0"
