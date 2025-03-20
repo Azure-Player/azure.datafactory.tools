@@ -53,12 +53,12 @@
     # Modules that must be imported into the global environment prior to importing this module
     RequiredModules = @(
         @{ 
-           ModuleName = 'Az.Resources' 
-           ModuleVersion = '6.5.0'
+           ModuleName = 'Az.Resources';
+           ModuleVersion = '6.5.0';
         }, 
         @{
-           ModuleName = 'Az.DataFactory'
-           ModuleVersion = '1.16.0' 
+           ModuleName = 'Az.DataFactory';
+           ModuleVersion = '1.16.0';
         }
     )
     
