@@ -51,7 +51,16 @@
     # ProcessorArchitecture = ''
     
     # Modules that must be imported into the global environment prior to importing this module
-    RequiredModules = @('Az.Resources', 'Az.DataFactory')
+    RequiredModules = @(
+        @{ 
+           ModuleName = 'Az.Resources' 
+           ModuleVersion = '6.5.0'
+        },
+        { 
+           ModuleName = 'Az.DataFactory'
+           ModuleVersion = '1.16.0' 
+        }
+    )
     
     # Assemblies that must be loaded prior to importing this module
     # RequiredAssemblies = @()
