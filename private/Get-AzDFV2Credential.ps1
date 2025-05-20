@@ -6,7 +6,7 @@ function Get-AzDFV2Credential {
     Write-Debug "BEGIN: Get-AzDFV2Credential"
 
     # Retrieve all credentials via API without parsing
-    $token = Get-AzAccessToken -ResourceUrl $script:BaseApiUrl
+    $token = Get-AzAccessToken -ResourceUrl $script:BaseApiUrl -AsSecureString
     # With Az.Accounts 5.x, the token is a SecureString. Convert it to plain text before using.
     $plainToken = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
         [Runtime.InteropServices.Marshal]::SecureStringToBSTR($token.Token)

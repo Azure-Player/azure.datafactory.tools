@@ -16,10 +16,14 @@ $rg      = 'rg-datafactory'
 $adfName = 'SQLPlayerDemo'
 
 # Retrieve all datasets via API without parsing
-$token = Get-AzAccessToken -ResourceUrl 'https://management.azure.com'
+$token = Get-AzAccessToken -ResourceUrl 'https://management.azure.com' -AsSecureString
+# With Az.Accounts 5.x, the token is a SecureString. Convert it to plain text before using.
+$plainToken = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+    [Runtime.InteropServices.Marshal]::SecureStringToBSTR($token.Token)
+)
 $authHeader = @{
     'Content-Type'  = 'application/json'
-    'Authorization' = 'Bearer ' + $token.Token
+    'Authorization' = 'Bearer ' + $plainToken
 }
 $adf = Get-AzDataFactoryV2 -ResourceGroupName $rg -DataFactoryName $adfName
 $adf

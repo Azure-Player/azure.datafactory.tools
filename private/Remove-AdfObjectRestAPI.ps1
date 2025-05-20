@@ -8,7 +8,7 @@ function Remove-AdfObjectRestAPI {
 
     Write-Debug "BEGIN: Remove-AdfObjectRestAPI()"
 
-    $token = Get-AzAccessToken -ResourceUrl $script:BaseApiUrl
+    $token = Get-AzAccessToken -ResourceUrl $script:BaseApiUrl -AsSecureString
     # With Az.Accounts 5.x, the token is a SecureString. Convert it to plain text before using.
     $plainToken = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
         [Runtime.InteropServices.Marshal]::SecureStringToBSTR($token.Token)
