@@ -6,12 +6,16 @@ function Get-AzDFV2Credential {
     Write-Debug "BEGIN: Get-AzDFV2Credential"
 
     # Retrieve all credentials via API without parsing
-    $token = Get-AzAccessToken -ResourceUrl 'https://management.azure.com'
+    $token = Get-AzAccessToken -ResourceUrl $script:BaseApiUrl
+    # With Az.Accounts 5.x, the token is a SecureString. Convert it to plain text before using.
+    $plainToken = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+        [Runtime.InteropServices.Marshal]::SecureStringToBSTR($token.Token)
+    )
     $authHeader = @{
         'Content-Type'  = 'application/json'
-        'Authorization' = 'Bearer ' + $token.Token
+        'Authorization' = 'Bearer ' + $plainToken
     }
-    $url = "https://management.azure.com$($adfi.DataFactoryId)/credentials?api-version=2018-06-01"
+    $url = "$($script:BaseApiUrl)$($adfi.DataFactoryId)/credentials?api-version=2018-06-01"
 
     # Retrieve all credentials via Rest API
     $r = Invoke-RestMethod -Method 'GET' -Uri $url -Headers $authHeader -ContentType "application/json"

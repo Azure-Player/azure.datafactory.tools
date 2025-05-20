@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.13.0] - 2025-05-20
+### Fixed
+* Adopted to breaking change in Az.Accounts v5.0 with Get-AzAccessToken that doesn't support String anymore #449
+
 ## [1.12.0] - 2025-03-20
 ### Added
 * Error during the import when required Az.Resource module is not loaded #336
