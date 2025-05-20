@@ -19,23 +19,22 @@ $adf = Get-AzDataFactoryV2 -ResourceGroupName $ResourceGroupName -DataFactoryNam
 $adf
 
 # Retrieve all credentials via API without parsing
-$token = Get-AzAccessToken -ResourceUrl 'https://management.azure.com' -AsSecureString
-# With Az.Accounts 5.x, the token is a SecureString. Convert it to plain text before using.
-$plainToken = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
-    [Runtime.InteropServices.Marshal]::SecureStringToBSTR($token.Token)
-)
-$authHeader = @{
-    'Content-Type'  = 'application/json'
-    'Authorization' = 'Bearer ' + $plainToken
-}
 $url = "https://management.azure.com$($adf.DataFactoryId)/credentials?api-version=2018-06-01"
 $url
 
 # Retrieve credentials one by one via Az.DataFactory module
 $ErrorActionPreference = 'Stop'
 
-$r = Invoke-RestMethod -Method Get -Uri $url -Headers $authHeader
-$items = $r.Value
+#$r = Invoke-RestMethod -Method Get -Uri $url -Headers $authHeader
+#$items = $r.Value
+
+$r = Invoke-AzRestMethod -Method 'Get' -Uri $url
+if ($r.StatusCode -ne 200) {
+    Write-Host -Message "Unexpected response code: $($r.StatusCode) from the API." -Level Error
+    return $null
+}
+$items = ($r.Content | ConvertFrom-Json).value
+
 foreach ($i in $items) {
     Write-Host "--- Credential: $($i.name) ..."
     ConvertTo-Json $i -Depth 50 
