@@ -8,19 +8,13 @@ function Remove-AdfObjectRestAPI {
 
     Write-Debug "BEGIN: Remove-AdfObjectRestAPI()"
 
-    $token = Get-AzAccessToken -ResourceUrl $script:BaseApiUrl -AsSecureString
-    # With Az.Accounts 5.x, the token is a SecureString. Convert it to plain text before using.
-    $plainToken = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
-        [Runtime.InteropServices.Marshal]::SecureStringToBSTR($token.Token)
-    )
-    $authHeader = @{
-        'Content-Type'  = 'application/json'
-        'Authorization' = 'Bearer ' + $plainToken
-    }
     $url = "$($script:BaseApiUrl)$($adfInstance.Id)/$type_plural/$($name)?api-version=2018-06-01"
 
     # Delete given object via Rest API
-    $r = Invoke-RestMethod -Method 'DELETE' -Uri $url -Headers $authHeader -ContentType "application/json"
+    $r = Invoke-AzRestMethod -Method 'DELETE' -Uri $url #-Headers $authHeader -ContentType "application/json"
+    if ($r.StatusCode -ne 200) {
+        Write-Error -Message "Unexpected response code: $($r.StatusCode) from the API."
+    }
 
     Write-Debug "END: Remove-AdfObjectRestAPI()"
 }
