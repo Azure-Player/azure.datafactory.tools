@@ -1,23 +1,40 @@
+Get-AzContext
+Connect-AzAccount 
 Select-AzSubscription -SubscriptionName 'Microsoft Azure Sponsorship'
 
+# Display PowerShell version information
+$PSVersionTable
+
+Get-Module
+Update-Module Az.Accounts
+Import-Module Az.Accounts
+Install-Module Az.DataFactory -Scope CurrentUser
+Import-Module Az.DataFactory
+
+
 $testAdf = 'BigFactorySample2'
-$DataFactoryName = "$testAdf-17274af2"
+$DataFactoryName = "$testAdf-7d6cdb5f"
 $ResourceGroupName = 'rg-devops-factory'
 $adf = Get-AzDataFactoryV2 -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName
 $adf
 
 # Retrieve all credentials via API without parsing
-$token = Get-AzAccessToken -ResourceUrl 'https://management.azure.com'
+$token = Get-AzAccessToken -ResourceUrl 'https://management.azure.com' -AsSecureString
+# With Az.Accounts 5.x, the token is a SecureString. Convert it to plain text before using.
+$plainToken = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+    [Runtime.InteropServices.Marshal]::SecureStringToBSTR($token.Token)
+)
 $authHeader = @{
     'Content-Type'  = 'application/json'
-    'Authorization' = 'Bearer ' + $token.Token
+    'Authorization' = 'Bearer ' + $plainToken
 }
 $url = "https://management.azure.com$($adf.DataFactoryId)/credentials?api-version=2018-06-01"
 $url
 
 # Retrieve credentials one by one via Az.DataFactory module
 $ErrorActionPreference = 'Stop'
-$r = Invoke-RestMethod -Method Get -Uri $url -Headers $authHeader -ContentType "application/json"
+
+$r = Invoke-RestMethod -Method Get -Uri $url -Headers $authHeader
 $items = $r.Value
 foreach ($i in $items) {
     Write-Host "--- Credential: $($i.name) ..."
