@@ -16,7 +16,13 @@ $rg      = 'rg-datafactory'
 $adfName = 'SQLPlayerDemo'
 
 # Retrieve all datasets via API without parsing
-$token = Get-AzAccessToken -ResourceUrl 'https://management.azure.com'
+try {
+    # First attempt with -AsPlainText parameter (newer Az modules)
+    $token = Get-AzAccessToken -ResourceUrl 'https://management.azure.com' -AsPlainText -ErrorAction Stop
+} catch {
+    # Fallback for older Az modules that don't support -AsPlainText
+    $token = Get-AzAccessToken -ResourceUrl 'https://management.azure.com'
+}
 $authHeader = @{
     'Content-Type'  = 'application/json'
     'Authorization' = 'Bearer ' + $token.Token
