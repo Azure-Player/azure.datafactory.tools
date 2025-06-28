@@ -32,6 +32,10 @@
       {
         "name": "$.properties.typeProperties.recurrence.startTime",
         "value": "2020-06-01T23:22:11.000Z"
+      },
+      {
+        "name": "$.properties.typeProperties.recurrence.schedule.minutes",
+        "value": "@(0,15,30,45)"
       }
     ]
-  }
+}
