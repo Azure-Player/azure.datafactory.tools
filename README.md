@@ -432,6 +432,8 @@ pipeline,PL_CopyMovies,activities[0].outputs[0].parameters.BlobContainer,UAT
 pipeline,PL_CopyMovies_with_param,parameters.DstBlobContainer.defaultValue,UAT
 pipeline,PL_Wait_Dynamic,parameters.WaitInSec,"{'type': 'int32','defaultValue': 22}"
 # This is comment - the line will be omitted
+trigger,TR_RunEveryDay,"$.properties.typeProperties.recurrence.schedule.minutes","@(0,15,30,45)"
+factory,BigFactorySample2,"$.properties.globalParameters.'GP-Array'.value","2,4,""XYZ"",1000"
 ```
 > You can replace any property with that method.
 

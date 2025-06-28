@@ -299,7 +299,7 @@ InModuleScope azure.datafactory.tools {
                 $script:ls.Body.properties.typeProperties.baseUrl | Should -Be "https://keyvault-$($Env:ProjectName)-$($Env:Environment).vault.azure.net/"
                 $script:ls = Get-AdfObjectByName -adf $script:adf -name "TR_RunEveryDay" -type "trigger"
                 $script:ls.Body.properties.typeProperties.recurrence.startTime | Should -Be "2020-06-01T23:22:11.000Z"
-
+                $script:ls.Body.properties.typeProperties.recurrence.schedule.minutes | Should -Be @(0,15,30,45)
                 Get-Member -InputObject $script:lsdbr.Body.properties.typeProperties -name "encryptedCredential" -Membertype "Properties" | Should -Be $null
             }
         }

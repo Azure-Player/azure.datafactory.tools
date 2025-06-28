@@ -5,3 +5,4 @@ linkedService,LS_AzureDatabricks,"$.properties.typeProperties.domain","https://$
 linkedService,LS_AzureDatabricks,"-$.properties.typeProperties.encryptedCredential",
 linkedService,LS_AzureKeyVault,"$.properties.typeProperties.baseUrl","https://keyvault-$($Env:ProjectName)-$($Env:Environment).vault.azure.net/"
 trigger,TR_RunEveryDay,"$.properties.typeProperties.recurrence.startTime","2020-06-01T23:22:11.000"
+trigger,TR_RunEveryDay,"$.properties.typeProperties.recurrence.schedule.minutes","@(0,15,30,45)"
