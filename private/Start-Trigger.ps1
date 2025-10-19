@@ -19,6 +19,8 @@ function Start-Trigger {
                 -DataFactoryName $DataFactoryName `
                 -Name $Name `
                 -Force | Out-Null
+            # If successful, break out of the loop
+            break
         }
         catch {
             if ($i -lt $attempts)
