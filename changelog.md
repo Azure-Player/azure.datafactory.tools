@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [1.13.1] - 2025-10-19
 ### Fixed
 * Fixed trigger start retry logic to exit immediately on successful start instead of running all 5 attempts #465
+* Fixed CSV parametrization line count reporting when CSV contains empty lines #446
 
 ## [1.13.0] - 2025-05-20
 ### Fixed

@@ -2,6 +2,8 @@ BeforeDiscovery {
     $ModuleRootPath = $PSScriptRoot | Split-Path -Parent
     $moduleManifestName = 'azure.datafactory.tools.psd1'
     $moduleManifestPath = Join-Path -Path $ModuleRootPath -ChildPath $moduleManifestName
+    # Ensure ErrorActionPreference is set to 'Stop' so Write-Error throws in the module
+    $global:ErrorActionPreference = 'Stop'
 
     Import-Module -Name $moduleManifestPath -Force -Verbose:$false
 }
@@ -38,9 +40,15 @@ InModuleScope azure.datafactory.tools {
                 } | Should -Throw -ExceptionType ([System.Data.DataException])
             }
             It 'Validation should fail if the file contains incorrect type of object' {
-                {
+                $caughtException = $null
+                try {
                     Read-CsvConfigFile -Path ( Join-Path -Path $script:ConfigFolder -ChildPath "config-badtype.csv" )
-                } | Should -Throw -ExceptionType ([System.Data.DataException])
+                } catch {
+                    $caughtException = $_.Exception
+                }
+                $caughtException | Should -Not -Be $null
+                $caughtException.GetType() | Should -Be ([System.Data.DataException])
+                $caughtException.Message | Should -BeLike "ADFT0022: Config file, row 4 :*"
             }
             It 'Validation should complete even if the file contains commented and empty lines' {
                 {
