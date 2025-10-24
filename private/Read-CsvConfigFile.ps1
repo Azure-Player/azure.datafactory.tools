@@ -22,19 +22,36 @@ function Read-CsvConfigFile {
     if ($csv.Count -eq 1) {
         Write-Warning "Config file is empty."
     }
+    
+    # Get actual line numbers for accurate error reporting
+    $fileLines = Get-Content $configFileName
     $i = 0
     $csv | ForEach-Object {
         if ($i -gt 0 -and !$_.type.StartsWith("#") ) {
-            if ($_.type -eq "" -or $null -eq $_.type) { Write-Error -Exception ([System.Data.DataException]::new("ADFT0021: Config file, row $i : Value in column 'Type' is empty."))    }
-            if ($_.type -notin $ADF_FOLDERS)          { Write-Error -Exception ([System.Data.DataException]::new("ADFT0022: Config file, row $i : Type ($($_.type)) is not supported.")) }
-            if ($_.name -eq "" -or $null -eq $_.name) { Write-Error -Exception ([System.Data.DataException]::new("ADFT0023: Config file, row $i : Value in column 'Name' is empty."))    }
-            if ($_.path -eq "" -or $null -eq $_.path) { Write-Error -Exception ([System.Data.DataException]::new("ADFT0024: Config file, row $i : Value in column 'Path' is empty."))    }
-            if ($_.value -eq "" -or $null -eq $_.value) { 
-                if (!$_.path.StartsWith('-')) {
-                    Write-Warning -Message "Config file, row $i : Value in column 'Value' is empty." 
+            # Find the actual line number by counting non-empty, non-comment lines up to current CSV row
+            $actualLineNumber = 1  # Start with header line
+            $csvRowCount = 0
+            for ($lineIndex = 1; $lineIndex -lt $fileLines.Count; $lineIndex++) {
+                $line = $fileLines[$lineIndex].Trim()
+                if ($line -ne "" -and !$line.StartsWith("#")) {
+                    $csvRowCount++
+                    if ($csvRowCount -eq $i) {
+                        $actualLineNumber = $lineIndex + 1  # Convert to 1-based line number
+                        break
+                    }
                 }
             }
-            if ($null -ne $_.empty) { Write-Error -Exception ([System.Data.DataException]::new("ADFT0025: Config file, row $i has too many columns.")) }
+            
+            if ($_.type -eq "" -or $null -eq $_.type) { Write-Error -Exception ([System.Data.DataException]::new("ADFT0021: Config file, row $actualLineNumber : Value in column 'Type' is empty."))    }
+            if ($_.type -notin $ADF_FOLDERS)          { Write-Error -Exception ([System.Data.DataException]::new("ADFT0022: Config file, row $actualLineNumber : Type ($($_.type)) is not supported.")) }
+            if ($_.name -eq "" -or $null -eq $_.name) { Write-Error -Exception ([System.Data.DataException]::new("ADFT0023: Config file, row $actualLineNumber : Value in column 'Name' is empty."))    }
+            if ($_.path -eq "" -or $null -eq $_.path) { Write-Error -Exception ([System.Data.DataException]::new("ADFT0024: Config file, row $actualLineNumber : Value in column 'Path' is empty."))    }
+            if ($_.value -eq "" -or $null -eq $_.value) { 
+                if (!$_.path.StartsWith('-')) {
+                    Write-Warning -Message "Config file, row $actualLineNumber : Value in column 'Value' is empty." 
+                }
+            }
+            if ($null -ne $_.empty) { Write-Error -Exception ([System.Data.DataException]::new("ADFT0025: Config file, row $actualLineNumber has too many columns.")) }
         }
         $i++
     }
