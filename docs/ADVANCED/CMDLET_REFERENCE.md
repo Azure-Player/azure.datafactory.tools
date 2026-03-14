@@ -1,4 +1,4 @@
-# API Reference
+# Cmdlet Reference
 
 **Related:** [Publishing Workflow](../GUIDE/PUBLISHING.md) | [Main Documentation](../../README.md)
 

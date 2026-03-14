@@ -44,7 +44,7 @@ Convert ADF code to ARM templates for infrastructure-as-code deployments.
 ### [Azure DevOps Integration](ADVANCED/DEVOPS_INTEGRATION.md)
 Build multi-stage CI/CD pipelines with approval gates and environment promotions.
 
-### [API Reference](ADVANCED/API_REFERENCE.md)
+### [Cmdlet Reference](ADVANCED/CMDLET_REFERENCE.md)
 Complete reference of all PowerShell cmdlets and configuration options.
 
 ---
@@ -63,7 +63,7 @@ Complete reference of all PowerShell cmdlets and configuration options.
 | Understand what will deploy | [Generate Dependencies](FEATURES/DEPENDENCIES_DIAGRAM.md) |
 | Test connections automatically | [Test Linked Services](FEATURES/LINKED_SERVICE_TESTING.md) |
 | Automate in Azure DevOps | [DevOps Integration](ADVANCED/DEVOPS_INTEGRATION.md) |
-| View all functions/options | [API Reference](ADVANCED/API_REFERENCE.md) |
+| View all functions/options | [Cmdlet Reference](ADVANCED/CMDLET_REFERENCE.md) |
 
 ---
 
@@ -186,7 +186,7 @@ Speeds up deployments by tracking object hashes and deploying only changes.
 - **Want to filter objects?** → [Publish Options](GUIDE/PUBLISH_OPTIONS.md)
 - **Environment-specific values?** → [Configuration](GUIDE/CONFIGURATION.md)
 - **Advanced scenarios?** → [Selective Deployment](GUIDE/SELECTIVE_DEPLOYMENT.md)
-- **API details?** → [API Reference](ADVANCED/API_REFERENCE.md)
+- **API details?** → [Cmdlet Reference](ADVANCED/CMDLET_REFERENCE.md)
 
 ---
 
