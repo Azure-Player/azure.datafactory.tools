@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 ### Fixed
 * Fixed DryRun not loading deployment state from storage for hash comparison #476
+* README.md updated and new Structured Documentation created
 
 ## [1.14.0] - 2025-10-24
 ### Added
