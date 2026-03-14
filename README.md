@@ -6,6 +6,10 @@
 # azure.datafactory.tools
 <img style="float: right;" src="./images/logo512.png" width="200px">
 
+> 📚 **New Structured Documentation Available!**  
+> We've reorganized the documentation into focused guides. **Start here:** [📖 Structured Documentation](docs/README.md)  
+> Or jump directly to: [Getting Started](docs/GETTING_STARTED.md) | [Publishing Guide](docs/GUIDE/PUBLISHING.md) | [API Reference](docs/ADVANCED/API_REFERENCE.md)
+
 PowerShell module to help simplify Azure Data Factory CI/CD processes. This module was created to meet the demand for a quick and trouble-free deployment of an Azure Data Factory instance to another environment.  
 The main advantage of the module is the ability to publish all the Azure Data Factory service code from JSON files by calling one method. The module supports now:  
 * Creation of Azure Data Factory, if it doesn't exist
