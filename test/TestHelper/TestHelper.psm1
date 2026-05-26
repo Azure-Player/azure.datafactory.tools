@@ -226,6 +226,9 @@ function Get-TargetEnv {
         SrcFolder = "$rootPath\$AdfOrigName"
     }
     $c = Get-AzContext
+    if ($null -eq $c) {
+        throw "No active Azure context found. Run Connect-AzAccount before executing integration tests."
+    }
     $guid = $c.Subscription.Id.Substring(0,8)
     $target.DataFactoryName = $AdfOrigName + "-$guid"
     return $target

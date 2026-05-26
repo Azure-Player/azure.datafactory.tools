@@ -7,9 +7,10 @@ function Get-AzDFV2Credential {
 
     # Retrieve all credentials via API without parsing
     $token = Get-AzAccessToken -ResourceUrl 'https://management.azure.com'
+    $tokenStr = [System.Net.NetworkCredential]::new('', $token.Token).Password
     $authHeader = @{
         'Content-Type'  = 'application/json'
-        'Authorization' = 'Bearer ' + $token.Token
+        'Authorization' = 'Bearer ' + $tokenStr
     }
     $url = "https://management.azure.com$($adfi.DataFactoryId)/credentials?api-version=2018-06-01"
 
