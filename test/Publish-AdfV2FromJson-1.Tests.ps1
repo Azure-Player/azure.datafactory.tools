@@ -34,6 +34,17 @@ InModuleScope azure.datafactory.tools {
                 -Location $script:Location -DataFactoryName $script:DataFactoryName -Option $o
         }
 
+        It 'adf2 Should deploy credential1 to ADF service' {
+            $script:RootFolder = Join-Path $PSScriptRoot "adf2"
+            $o = New-AdfPublishOption
+            $o.StopStartTriggers = $false
+            $o.Includes.Add("credential.credential1", "")
+            Publish-AdfV2FromJson -RootFolder $script:RootFolder -ResourceGroupName $script:ResourceGroupName `
+                -Location $script:Location -DataFactoryName $script:DataFactoryName -Option $o
+            $adfIns = Get-AdfFromService -FactoryName $script:DataFactoryName -ResourceGroupName $script:ResourceGroupName
+            $adfIns.Credentials | Where-Object { $_.Name -eq 'credential1' } | Should -Not -BeNullOrEmpty
+        }
+
     }
 
 }
