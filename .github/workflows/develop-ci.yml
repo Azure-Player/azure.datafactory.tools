@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  checks: write        # required by test-reporter
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -27,9 +28,17 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
         enable-AzPSSession: true
 
-    - name: Run Azure PowerShell script
+    - name: Run All Unit and Integration Tests
       uses: azure/powershell@v2
       with:
         inlineScript: |
           test/!RunAllTests.ps1 -folder '${{ github.workspace }}/' -TestFilenameFilter "*" -InstallModules
         azPSVersion: "latest"
+
+    - name: Publish Pester Test Results
+      uses: dorny/test-reporter@v1
+      if: always()          # run even when tests fail
+      with:
+        name: Pester Tests
+        path: TEST-Results.xml
+        reporter: java-junit   # NUnit XML is compatible with this reporter
