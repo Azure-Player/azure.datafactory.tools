@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.15.0] - 2026-05-26
+### Fixed
+* Starting blob event trigger fails with 'Resource cannot be updated during provisioning' - now waits for provisioning to complete before retrying #484, #474, #463
+
+## [1.14.0] - 2025-10-24
+### Added
+* New input parameters for Get-AdfDocDiagram function: Include, Exclude.
+
+## [1.13.1] - 2025-10-19
+### Fixed
+* Fixed trigger start retry logic to exit immediately on successful start instead of running all 5 attempts #465
+* Fixed CSV parametrization line count reporting when CSV contains empty lines #446
+
+## [1.13.0] - 2025-05-20
+### Fixed
+* Adopted to breaking change in Az.Accounts v5.0 with Get-AzAccessToken that doesn't support String anymore #449
+
 ## [1.12.0] - 2025-03-20
 ### Added
 * Error during the import when required Az.Resource module is not loaded #336
