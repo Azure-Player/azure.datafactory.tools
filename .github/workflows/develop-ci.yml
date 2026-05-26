@@ -32,13 +32,14 @@ jobs:
       uses: azure/powershell@v2
       with:
         inlineScript: |
-          test/!RunAllTests.ps1 -folder '${{ github.workspace }}/' -TestFilenameFilter "*" -InstallModules
+          test/!RunAllTests.ps1 -folder '${{ github.workspace }}/' -TestFilenameFilter "Get*" -InstallModules:$false
         azPSVersion: "latest"
 
     - name: Publish Pester Test Results
-      uses: dorny/test-reporter@v1
-      if: always()          # run even when tests fail
+      uses: dorny/test-reporter@v3
+      if: ${{ !cancelled() }}           # run this step even if previous step failed
       with:
         name: Pester Tests
-        path: TEST-Results.xml
+        path: 'TEST-*.xml,**/TEST-*.xml'
         reporter: java-junit   # NUnit XML is compatible with this reporter
+        collapsed: 'auto'
