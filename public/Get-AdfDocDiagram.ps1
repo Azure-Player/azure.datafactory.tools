@@ -11,6 +11,12 @@ Object of adf class represents all adf objects from code.
 .PARAMETER direction
 Diagram direction: LR - Left to Right (default), TD - Top to Down
 
+.PARAMETER exclude
+Array of object names to exclude from diagram. Wildcards are supported.
+
+.PARAMETER include
+Array of object names to include in diagram. Wildcards are supported. If this parameter is used, only the specified objects and their dependencies will be included in the diagram.
+
 .EXAMPLE
 $RootFolder = "c:\GitHub\AdfName\"
 $adf = Import-AdfFromFolder -RootFolder $RootFolder -FactoryName 'whatever'
@@ -32,7 +38,10 @@ function Get-AdfDocDiagram {
         [Adf] $adf,
 
         [ValidateSet("LR", "TD")]
-        [String] $direction = 'LR'
+        [String] $direction = 'LR',
+
+        [Array] $exclude = $null, 
+        [Array] $include = $null
     )
     Write-Debug "BEGIN: Get-AdfDocDiagram(adf=$adf, direction=$direction)"
 
@@ -42,12 +51,25 @@ function Get-AdfDocDiagram {
     
     $adf.AllObjects() | ForEach-Object {
         $o = $_
+        $n1 = $o.FullName().Replace(' ', '_')
+        Write-Verbose "Analyse: $($o.FullName())"
         foreach ($d in $o.DependsOn) {
-            $n1 = $o.FullName().Replace(' ', '_')
             $n2 = $d.Replace(' ', '_')
             $n2 = $n2.ToLower()[0] + $n2.Substring(1)
-            $line = "$n1 --> $n2"
-            $diag += $line + "`n"
+            Write-Verbose "- $d"
+            $show = $true
+            if ($include) {
+                 $show = ($include | ForEach-Object { if ($n1 -ilike $_ -or $n2 -ilike $_) {1} else {0} } | Measure-Object -Maximum).Maximum -gt 0
+            } else 
+            {
+                 $show = -not ($exclude | ForEach-Object { if ($n1 -ilike $_ -or $n2 -ilike $_) {1} else {0} } | Measure-Object -Maximum).Maximum -gt 0
+            }
+            if ($show) {
+              $line = "$n1 --> $n2"
+              $diag += $line + "`n"
+            } else {
+                Write-Verbose "$d - excluded."
+            }
         }
     }
     $diag += ":::"

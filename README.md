@@ -40,6 +40,9 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
 * Generates mermaid dependencies diagram to be used in MarkDown type of documents
 
 # Table of Content
+<details close>
+<summary>Expand/Collapse</summary>
+
 - [azure.datafactory.tools](#azuredatafactorytools)
 - [Table of Content](#table-of-content)
 - [Known issues](#known-issues)
@@ -101,6 +104,13 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
 - [Release Notes](#release-notes)
 - [Misc](#misc)
   - [New feature requests](#new-feature-requests)
+
+</details>
+
+> 📚 **New Structured Documentation Available!**  
+> We've reorganized the documentation into focused guides.  
+**Start here:** [📖 Structured Documentation](docs/README.md)  
+> Or jump directly to: [Getting Started](docs/GETTING_STARTED.md) | [Publishing Guide](docs/GUIDE/PUBLISHING.md) | [Cmdlet Reference](docs/ADVANCED/CMDLET_REFERENCE.md)
 
 
 

@@ -150,7 +150,8 @@ function Publish-AdfV2UsingArm {
         $o.Adf = $adf
         $o.Body = $_
         $adf.Pipelines.Add($o)
-        $collectionName = $ArmType.Substring(32)
+        
+        $collectionName = ConvertTo-AdfCollection $ArmType
         Invoke-Expression "`$adf.$collectionName.Add(`$o)"
     }
     if ($armParam.parameters.factoryName.value -ne $DataFactoryName) {

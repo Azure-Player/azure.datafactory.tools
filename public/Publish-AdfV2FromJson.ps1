@@ -154,10 +154,6 @@ function Publish-AdfV2FromJson {
         $targetAdf = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName" -ErrorAction:Ignore
         if ($targetAdf) {
             Write-Host "Azure Data Factory exists."
-            if ($opt.IncrementalDeployment -and !$DryRun.IsPresent) {
-                Write-Host "Loading Deployment State from Storage..."
-                $ds = Get-StateFromStorage -DataFactoryName $DataFactoryName -LocationUri $opt.IncrementalDeploymentStorageUri
-            }
         }
         else {
             $msg = "Azure Data Factory instance does not exist."
@@ -175,11 +171,17 @@ function Publish-AdfV2FromJson {
 
         if ($null -eq $targetAdf) {
             Write-Host "ADFT0032: The process is exiting the function. Do fix the issue and run again."
-            return 
+            return
         }
     }
     else {
         Write-Host "DRY RUN: Skipping ADF existence verification..."
+    }
+
+    # Load deployment state from storage for incremental deployment (needed for both DryRun and actual deployment)
+    if ($opt.IncrementalDeployment) {
+        Write-Host "Loading Deployment State from Storage..."
+        $ds = Get-StateFromStorage -DataFactoryName $DataFactoryName -LocationUri $opt.IncrementalDeploymentStorageUri
     }
 
     Write-Host "===================================================================================";

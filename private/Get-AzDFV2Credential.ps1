@@ -12,13 +12,17 @@ function Get-AzDFV2Credential {
         'Content-Type'  = 'application/json'
         'Authorization' = 'Bearer ' + $tokenStr
     }
-    $url = "https://management.azure.com$($adfi.DataFactoryId)/credentials?api-version=2018-06-01"
+    $url = "$($script:BaseApiUrl)$($adfi.DataFactoryId)/credentials?api-version=2018-06-01"
 
     # Retrieve all credentials via Rest API
-    $r = Invoke-RestMethod -Method 'GET' -Uri $url -Headers $authHeader -ContentType "application/json"
+    $r = Invoke-AzRestMethod -Method 'GET' -Uri $url
+    if ($r.StatusCode -ne 200) {
+        Write-Error -Message "Unexpected response code: $($r.StatusCode) from the API."
+        return $null
+    }
 
     [System.Collections.ArrayList] $items = @{}
-    $r.value | ForEach-Object { $i = [AdfPSCredential]::New($_); $items.Add($i) | Out-Null; }
+    ($r.Content | ConvertFrom-Json).value | ForEach-Object { $i = [AdfPSCredential]::New($_); $items.Add($i) | Out-Null; }
 
     Write-Debug "END: Get-AzDFV2Credential()"
     return $items

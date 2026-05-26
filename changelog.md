@@ -5,18 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [1.15.0] - 2026-05-26
-
 ### Added
-
 * Credential type of ADF objects is now supported for deployment via REST API
-
 ### Fixed
 * Starting blob event trigger fails with 'Resource cannot be updated during provisioning' - now waits for provisioning to complete before retrying #484, #474, #463
 * Fixed REST API calls failing with 401 Unauthorized due to Az.Accounts 5.x returning SecureString from Get-AzAccessToken
+* Fixed DryRun not loading deployment state from storage for hash comparison #476
+* README.md updated and new Structured Documentation created
 
 ## [1.14.0] - 2025-10-24
 ### Added
-* New input parameters for Get-AdfDocDiagram function: Include, Exclude.
+* New input parameters for `Get-AdfDocDiagram` function: Include, Exclude.
 
 ## [1.13.1] - 2025-10-19
 ### Fixed
