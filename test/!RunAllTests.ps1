@@ -70,7 +70,7 @@ try {
     $configuration.Run.Exit = $true
     $configuration.Should.ErrorAction = 'Continue'
     $configuration.CodeCoverage.Enabled = $false
-    $configuration.TestResult.OutputFormat = "NUnitXml"
+    $configuration.TestResult.OutputFormat = "JUnitXml"
     $configuration.TestResult.OutputPath = "$folder\TEST-Results.xml"
     $configuration.TestResult.Enabled = $true
     $configuration.Output.Verbosity = 'Detailed'

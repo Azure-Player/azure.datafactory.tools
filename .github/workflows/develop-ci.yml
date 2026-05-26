@@ -41,5 +41,5 @@ jobs:
       with:
         name: Pester Tests
         path: 'TEST-*.xml,**/TEST-*.xml'
-        reporter: dotnet-nunit   # NUnit XML is compatible with this reporter
+        reporter: java-junit   # NUnit XML is compatible with this reporter
         collapsed: 'auto'
