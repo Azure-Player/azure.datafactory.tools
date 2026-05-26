@@ -31,5 +31,5 @@ jobs:
       uses: azure/powershell@v2
       with:
         inlineScript: |
-          test/!RunAllTests.ps1 -folder '${{ github.workspace }}/' -TestFilenameFilter "*"
+          test/!RunAllTests.ps1 -folder '${{ github.workspace }}/' -TestFilenameFilter "*" -InstallModules
         azPSVersion: "latest"
