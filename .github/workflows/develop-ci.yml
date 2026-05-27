@@ -20,16 +20,16 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Login via Az module
-      uses: azure/login@v2
+      uses: azure/login@v3
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
         enable-AzPSSession: true
 
     - name: Run All Unit and Integration Tests
-      uses: azure/powershell@v2
+      uses: azure/powershell@v3
       with:
         inlineScript: |
           test/!RunAllTests.ps1 -folder '${{ github.workspace }}/' -TestFilenameFilter "Get*" -InstallModules:$false -ResultOutputFormat "JUnitXml"
