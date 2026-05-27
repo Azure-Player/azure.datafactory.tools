@@ -1,0 +1,23 @@
+name: Publish to PS Gallery
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Publish module to PowerShell Gallery
+      shell: pwsh
+      env:
+        PSGALLERY_API_KEY: ${{ secrets.PSGALLERY_API_KEY }}
+      run: |
+        $isPreview = '${{ github.ref_name }}' -ne 'master'
+        Write-Host "Branch: ${{ github.ref_name }} | Preview: $isPreview"
+        ./tools/Publish-ToGallery.ps1 -IsPreview:$isPreview -NuGetApiKey $env:PSGALLERY_API_KEY
