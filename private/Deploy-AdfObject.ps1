@@ -31,7 +31,7 @@ function Deploy-AdfObject {
                 if ($adf.PublishOptions.IgnoreLackOfReferencedObject -eq $true) {
                     Write-Warning "ADFT0006: Referenced object [$type].[$name] was not found. No error raised as user wanted to carry on."
                 } else {
-                    Write-Error "ADFT0005: Referenced object [$type].[$name] was not found."
+                    throw "ADFT0005: Referenced object [$type].[$name] was not found."
                 }
             } elseif ($type -notin [AdfObject]::IgnoreTypes) {
                 Deploy-AdfObject -obj $depobj

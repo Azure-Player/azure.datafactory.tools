@@ -73,7 +73,7 @@ function Deploy-AdfObjectOnly {
                 -Force | Out-Null
             }
             else {
-                Write-Error "ADFT0012: Deployment for this kind of Integration Runtime is not supported yet."
+                throw "ADFT0012: Deployment for this kind of Integration Runtime is not supported yet."
             }
         }
         'linkedService'
@@ -155,7 +155,7 @@ function Deploy-AdfObjectOnly {
         }
         default
         {
-            Write-Error "ADFT0013: Type $($obj.Type) is not supported."
+            throw "ADFT0013: Type $($obj.Type) is not supported."
         }
     }
 

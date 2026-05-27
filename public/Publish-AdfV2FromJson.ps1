@@ -272,16 +272,16 @@ function Publish-AdfV2FromJson {
             $adf.Factories[0].ToBeDeployed = $false
         }
     }
-    $adf.AllObjects() | ForEach-Object {
-        Deploy-AdfObject -obj $_
+    foreach ($obj in $adf.AllObjects()) {
+        Deploy-AdfObject -obj $obj
     }
 
     Write-Host "===================================================================================";
     Write-Host "STEP: Deleting objects not in source ..."
     if ($opt.DeleteNotInSource -eq $true) {
         $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
-        $adfIns.AllObjects() | ForEach-Object {
-            Remove-AdfObjectIfNotInSource -adfSource $adf -adfTargetObj $_ -adfInstance $adfIns
+        foreach ($targetObj in $adfIns.AllObjects()) {
+            Remove-AdfObjectIfNotInSource -adfSource $adf -adfTargetObj $targetObj -adfInstance $adfIns
         }
         Write-Host "Deleted $($adf.DeletedObjectNames.Count) objects from ADF service."
     } else {
