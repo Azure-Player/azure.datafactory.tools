@@ -8,6 +8,9 @@ Param(
     [Parameter(Mandatory=$false)]
     [Switch]$MajorRelease,
 
+    [Parameter(Mandatory=$false)]
+    [string]$ResultOutputFormat = "NUnitXml",
+
     [Parameter(Mandatory=$true)]
     [Switch]$InstallModules
 )

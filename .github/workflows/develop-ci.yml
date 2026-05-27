@@ -32,7 +32,7 @@ jobs:
       uses: azure/powershell@v2
       with:
         inlineScript: |
-          test/!RunAllTests.ps1 -folder '${{ github.workspace }}/' -TestFilenameFilter "Get*" -InstallModules:$false
+          test/!RunAllTests.ps1 -folder '${{ github.workspace }}/' -TestFilenameFilter "Get*" -InstallModules:$false -ResultOutputFormat "JUnitXml"
         azPSVersion: "latest"
 
     - name: Publish Pester Test Results
@@ -40,6 +40,6 @@ jobs:
       if: ${{ !cancelled() }}           # run this step even if previous step failed
       with:
         name: Pester Tests
-        path: 'TEST-*.xml,**/TEST-*.xml'
-        reporter: java-junit   # NUnit XML is compatible with this reporter
+        path: '**/TEST-*.xml'
+        reporter: java-junit
         collapsed: 'auto'

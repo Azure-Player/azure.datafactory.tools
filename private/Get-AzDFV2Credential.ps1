@@ -21,7 +21,7 @@ function Get-AzDFV2Credential {
         return $null
     }
 
-    [System.Collections.ArrayList] $items = @{}
+    [System.Collections.ArrayList] $items = @()
     ($r.Content | ConvertFrom-Json).value | ForEach-Object { $i = [AdfPSCredential]::New($_); $items.Add($i) | Out-Null; }
 
     Write-Debug "END: Get-AzDFV2Credential()"

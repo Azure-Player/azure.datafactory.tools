@@ -23,8 +23,8 @@ InModuleScope azure.datafactory.tools {
                 Mock Get-AzAccessToken {
                     return [PSCustomObject]@{ Token = 'fake-token-abc' }
                 }
-                Mock Invoke-RestMethod {
-                    return [PSCustomObject]@{ value = @() }
+                Mock Invoke-AzRestMethod {
+                    return [PSCustomObject]@{ StatusCode = 200; Content = '{"value":[]}' }
                 }
             }
 
@@ -38,23 +38,21 @@ InModuleScope azure.datafactory.tools {
                 Assert-MockCalled Get-AzAccessToken -Times 1 -Exactly
             }
 
-            It 'Should call Invoke-RestMethod with Bearer token in Authorization header' {
+            It 'Should call Invoke-AzRestMethod once' {
                 Get-AzDFV2Credential -adfi $script:adfi
-                Assert-MockCalled Invoke-RestMethod -Times 1 -Exactly -ParameterFilter {
-                    $Headers['Authorization'] -eq 'Bearer fake-token-abc'
-                }
+                Assert-MockCalled Invoke-AzRestMethod -Times 1 -Exactly
             }
 
-            It 'Should call Invoke-RestMethod with correct credentials URL' {
+            It 'Should call Invoke-AzRestMethod with correct credentials URL' {
                 Get-AzDFV2Credential -adfi $script:adfi
-                Assert-MockCalled Invoke-RestMethod -Times 1 -Exactly -ParameterFilter {
+                Assert-MockCalled Invoke-AzRestMethod -Times 1 -Exactly -ParameterFilter {
                     $Uri -eq "https://management.azure.com$($script:adfi.DataFactoryId)/credentials?api-version=2018-06-01"
                 }
             }
 
-            It 'Should call Invoke-RestMethod using GET method' {
+            It 'Should call Invoke-AzRestMethod using GET method' {
                 Get-AzDFV2Credential -adfi $script:adfi
-                Assert-MockCalled Invoke-RestMethod -Times 1 -Exactly -ParameterFilter {
+                Assert-MockCalled Invoke-AzRestMethod -Times 1 -Exactly -ParameterFilter {
                     $Method -eq 'GET'
                 }
             }
@@ -66,12 +64,13 @@ InModuleScope azure.datafactory.tools {
 
                 $cred1 = [PSCustomObject]@{ name = 'cred1'; type = 'Microsoft.DataFactory/factories/credentials'; properties = @{} }
                 $cred2 = [PSCustomObject]@{ name = 'cred2'; type = 'Microsoft.DataFactory/factories/credentials'; properties = @{} }
+                $script:credJson = @{ value = @($cred1, $cred2) } | ConvertTo-Json -Depth 5
 
                 Mock Get-AzAccessToken {
                     return [PSCustomObject]@{ Token = 'fake-token-abc' }
                 }
-                Mock Invoke-RestMethod {
-                    return [PSCustomObject]@{ value = @($cred1, $cred2) }
+                Mock Invoke-AzRestMethod {
+                    return [PSCustomObject]@{ StatusCode = 200; Content = $script:credJson }
                 }
             }
 
@@ -94,14 +93,14 @@ InModuleScope azure.datafactory.tools {
             }
         }
 
-        Context 'When Invoke-RestMethod throws' {
+        Context 'When Invoke-AzRestMethod throws' {
             BeforeEach {
                 $script:adfi = [PSCustomObject]@{ DataFactoryId = '/subscriptions/sub-123/resourceGroups/rg/providers/Microsoft.DataFactory/factories/adf1' }
 
                 Mock Get-AzAccessToken {
                     return [PSCustomObject]@{ Token = 'fake-token-abc' }
                 }
-                Mock Invoke-RestMethod { throw 'Unauthorized' }
+                Mock Invoke-AzRestMethod { throw 'Unauthorized' }
             }
 
             It 'Should propagate the error' {
