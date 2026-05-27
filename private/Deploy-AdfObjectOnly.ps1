@@ -123,8 +123,16 @@ function Deploy-AdfObjectOnly {
         }
         'credential'
         {
-            Write-Warning "Credentials are not yet supported. The deployment for the object is skipped."
-            Write-Warning "Any reference to the object causes error, unless to deploy it before."
+            $resType = Get-AzureResourceType $obj.Type
+            $resName = $obj.AzureResourceName()
+
+            New-AzResource `
+            -ResourceType $resType `
+            -ResourceGroupName $ResourceGroupName `
+            -ResourceName "$resName" `
+            -ApiVersion "2018-06-01" `
+            -Properties $json `
+            -IsFullObject -Force | Out-Null
         }
         'AzResource'
         {

@@ -23,15 +23,34 @@ function Start-Trigger {
             break
         }
         catch {
+            $errMsg = $_.Exception.Message
             if ($i -lt $attempts)
             {
-                Write-Verbose "Attempt #$i of starting trigger failed. Retry in 2 seconds."
-                Start-Sleep -Seconds 2 
-            } 
-            else 
+                if ($errMsg -like "*cannot be updated during provisioning*") {
+                    Write-Verbose "Attempt #${i}: Trigger '$Name' is still provisioning. Waiting for provisioning to complete..."
+                    $provisioningTimeout = 300
+                    $pollInterval = 10
+                    $elapsed = 0
+                    while ($elapsed -lt $provisioningTimeout) {
+                        Start-Sleep -Seconds $pollInterval
+                        $elapsed += $pollInterval
+                        $trigger = Get-AzDataFactoryV2Trigger `
+                            -ResourceGroupName $ResourceGroupName `
+                            -DataFactoryName $DataFactoryName `
+                            -Name $Name
+                        $provState = $trigger.Properties.ProvisioningState
+                        Write-Verbose "Trigger provisioning state: $provState ($elapsed sec elapsed)"
+                        if ($provState -ne 'Provisioning') { break }
+                    }
+                } else {
+                    Write-Verbose "Attempt #$i of starting trigger failed. Retry in 2 seconds."
+                    Start-Sleep -Seconds 2
+                }
+            }
+            else
             {
                 Write-Host "Failed starting trigger after $attempts attempts."
-                Write-Warning -Message $_.Exception.Message
+                Write-Warning -Message $errMsg
             }
         }
     }
