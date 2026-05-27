@@ -32,7 +32,7 @@ jobs:
       uses: azure/powershell@v3
       with:
         inlineScript: |
-          test/!RunAllTests.ps1 -folder '${{ github.workspace }}/' -TestFilenameFilter "Get*" -InstallModules:$false -ResultOutputFormat "JUnitXml"
+          test/!RunAllTests.ps1 -folder '${{ github.workspace }}/' -TestFilenameFilter "*" -InstallModules:$false -ResultOutputFormat "JUnitXml"
         azPSVersion: "latest"
 
     - name: Publish Pester Test Results
