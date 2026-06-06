@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.16.0] - 2026-06-06
+
+### Fixed
+
+* Fixed ClientAssertionCredential authentication failure for federated identity (OIDC) credentials by removing redundant `Get-AzAccessToken` calls in `Get-AzDFV2Credential` and `Remove-AdfObjectRestAPI` #492
+
 ## [1.15.0] - 2026-05-26
 ### Added
 * Credential type of ADF objects is now supported for deployment via REST API
