@@ -22,10 +22,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Login via Az module
+        uses: azure/login@v3
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          enable-AzPSSession: true
+
       - name: Run Unit Tests
-        shell: pwsh
-        run: |
-          test/!RunAllTests.ps1 -folder '${{ github.workspace }}/' -TestFilenameFilter "*" -InstallModules:$false -ResultOutputFormat "JUnitXml"
+        uses: azure/powershell@v3
+        with:
+          inlineScript: |
+            test/!RunAllTests.ps1 -folder '${{ github.workspace }}/' -TestFilenameFilter "*" -InstallModules:$false -ResultOutputFormat "JUnitXml"
+          azPSVersion: "latest"
 
       - name: Publish Test Results
         uses: dorny/test-reporter@v3
