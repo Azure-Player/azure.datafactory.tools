@@ -48,7 +48,7 @@ jobs:
     name: Publish to PS Gallery
     runs-on: windows-latest
     needs: test
-    if: ${{ github.event_name != 'pull_request' }}
+    if: ${{ github.event_name != 'pull_request' && (github.ref_name == 'master' || github.ref_name == 'develop') }}
 
     steps:
       - uses: actions/checkout@v4
