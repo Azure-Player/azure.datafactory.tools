@@ -20,9 +20,6 @@ InModuleScope azure.datafactory.tools {
             BeforeEach {
                 $script:adfi = [PSCustomObject]@{ DataFactoryId = '/subscriptions/sub-123/resourceGroups/rg/providers/Microsoft.DataFactory/factories/adf1' }
 
-                Mock Get-AzAccessToken {
-                    return [PSCustomObject]@{ Token = 'fake-token-abc' }
-                }
                 Mock Invoke-AzRestMethod {
                     return [PSCustomObject]@{ StatusCode = 200; Content = '{"value":[]}' }
                 }
@@ -31,11 +28,6 @@ InModuleScope azure.datafactory.tools {
             It 'Should return an empty list' {
                 $result = Get-AzDFV2Credential -adfi $script:adfi
                 @($result).Count | Should -Be 0
-            }
-
-            It 'Should call Get-AzAccessToken once' {
-                Get-AzDFV2Credential -adfi $script:adfi
-                Assert-MockCalled Get-AzAccessToken -Times 1 -Exactly
             }
 
             It 'Should call Invoke-AzRestMethod once' {
@@ -66,9 +58,6 @@ InModuleScope azure.datafactory.tools {
                 $cred2 = [PSCustomObject]@{ name = 'cred2'; type = 'Microsoft.DataFactory/factories/credentials'; properties = @{} }
                 $script:credJson = @{ value = @($cred1, $cred2) } | ConvertTo-Json -Depth 5
 
-                Mock Get-AzAccessToken {
-                    return [PSCustomObject]@{ Token = 'fake-token-abc' }
-                }
                 Mock Invoke-AzRestMethod {
                     return [PSCustomObject]@{ StatusCode = 200; Content = $script:credJson }
                 }
@@ -97,9 +86,6 @@ InModuleScope azure.datafactory.tools {
             BeforeEach {
                 $script:adfi = [PSCustomObject]@{ DataFactoryId = '/subscriptions/sub-123/resourceGroups/rg/providers/Microsoft.DataFactory/factories/adf1' }
 
-                Mock Get-AzAccessToken {
-                    return [PSCustomObject]@{ Token = 'fake-token-abc' }
-                }
                 Mock Invoke-AzRestMethod { throw 'Unauthorized' }
             }
 
