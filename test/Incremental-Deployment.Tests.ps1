@@ -12,6 +12,9 @@ InModuleScope azure.datafactory.tools {
     $testHelperPath = $PSScriptRoot | Join-Path -ChildPath 'TestHelper'
     Import-Module -Name $testHelperPath -Force
 
+    $m = Get-Module -Name 'azure.datafactory.tools'
+    $script:verStr = $m.Version.ToString(2) + "." + $m.Version.Build.ToString("000")
+
     # $VerbosePreference = 'Continue'
     # $DebugPreference = 'Continue'
 
