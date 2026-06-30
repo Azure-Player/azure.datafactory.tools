@@ -7,11 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [1.17.0] - 2026-07-01
 ### Fixed
 * Further fixes of `DeleteNotInSource` with deserialization issue #480 
+* `Publish-AdfV2FromJson` no longer silently continues after errors: config path errors (ADFT0010) and deployment failures (e.g. Azure Policy blocks) now propagate as terminating errors to the caller #472
 
 ## [1.16.0] - 2026-05-27
 ### Fixed
 * `DeleteNotInSource` no longer fails with "Unable to deserialize the response" when ADF contains object types unsupported by the installed Az.DataFactory module version - REST API fallback added to `Get-AdfFromService` #480 #473
-
 
 ## [1.15.0] - 2026-05-26
 ### Added
