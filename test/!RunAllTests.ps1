@@ -51,6 +51,7 @@ if ($InstallModules) {
         #Install-Module 'Az.DataFactory' -Force -MinimumVersion 1.16.0 -Repository 'PSGallery'
         #Install-Module 'PSScriptAnalyzer' -Force
         #Install-Module 'Pester' -Force -MinimumVersion 5.1.1
+        Install-Module 'Az.Storage' -Force -AllowClobber -Repository 'PSGallery'
         [Environment]::SetEnvironmentVariable("azure.datafactory.tools.unitTestInstalledModules", $true, 'Process');
     }
 } else {
@@ -58,6 +59,7 @@ if ($InstallModules) {
 }
 Import-Module 'Pester' -MinimumVersion 5.3.3
 Import-Module 'PSScriptAnalyzer'
+Import-Module 'Az.Storage'
 Import-Module "$folder\azure.datafactory.tools.psd1"
 
 Write-Host "=============== Modules ================"
@@ -96,4 +98,5 @@ try {
     Pop-Location
 }
 
-# . ".\test\!RunAllTests.ps1" -folder '.\test' -TestFilenameFilter '*' -MajorRelease:$true -InstallModules:$false 
+# Connect-AzAccount
+# . ".\test\!RunAllTests.ps1" -folder '.\test' -TestFilenameFilter 'Inc*' -MajorRelease:$true -InstallModules:$false 
