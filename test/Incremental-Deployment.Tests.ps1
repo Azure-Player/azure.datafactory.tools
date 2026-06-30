@@ -29,7 +29,7 @@ InModuleScope azure.datafactory.tools {
     $opt.IncrementalDeployment = $true
     $opt.StopStartTriggers = $false
     $script:gp = "" 
-    $script:dstate = [AdfDeploymentState]::new($verStr)
+    $script:dstate = [AdfDeploymentState]::new($script:verStr)
     $script:dstate.LastUpdate = [System.DateTime]::UtcNow
     $script:dstateJson = $script:dstate | ConvertTo-Json
     $script:StorageUri= "https://sqlplayer2020.blob.core.windows.net"
