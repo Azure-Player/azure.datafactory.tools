@@ -88,6 +88,49 @@ InModuleScope azure.datafactory.tools {
             }
         }
 
+        # This context specifically tests the real-world failure mode from issue #480:
+        # The Az.DataFactory SDK writes a *non-terminating* Write-Error (not a throw) when
+        # it cannot deserialize an unsupported object type such as ServiceNow V2.
+        # Without -ErrorAction Stop on the cmdlet call the try-catch never fires; with it,
+        # the non-terminating error is promoted to terminating and the catch fires correctly.
+        Context 'When Get-AzDataFactoryV2Dataset emits a non-terminating deserialization error (real Az.DataFactory behaviour)' {
+            BeforeEach {
+                Mock Get-AzDataFactoryV2           { $script:fakeAdfi }
+                # Simulate the actual Az.DataFactory SDK behaviour: Write-Error (non-terminating),
+                # NOT throw. The cmdlet call in Get-AdfFromService uses -ErrorAction Stop which
+                # must promote this to a terminating error so the catch block fires.
+                Mock Get-AzDataFactoryV2Dataset           { Write-Error 'Unable to deserialize the response.' }
+                Mock Get-AzDataFactoryV2IntegrationRuntime { @() }
+                Mock Get-AzDataFactoryV2LinkedService     { @() }
+                Mock Get-AzDataFactoryV2Pipeline          { @() }
+                Mock Get-AzDataFactoryV2DataFlow          { @() }
+                Mock Get-AzDataFactoryV2Trigger           { @() }
+                Mock Get-AzDFV2Credential                 { @() }
+                Mock Invoke-AzRestMethod {
+                    return [PSCustomObject]@{
+                        StatusCode = 200
+                        Content    = '{"value":[{"name":"ds_adls_csv","properties":{}},{"name":"ds_servicenow_v2","properties":{}}]}'
+                    }
+                }
+            }
+
+            It 'Should not throw even when the cmdlet only writes a non-terminating error' {
+                { Get-AdfFromService -FactoryName 'adf-test' -ResourceGroupName 'rg-test' } | Should -Not -Throw
+            }
+
+            It 'Should activate the REST API fallback and return all datasets' {
+                $result = Get-AdfFromService -FactoryName 'adf-test' -ResourceGroupName 'rg-test'
+                $result.DataSets.Count | Should -Be 2
+                $result.DataSets.Name | Should -Contain 'ds_adls_csv'
+                $result.DataSets.Name | Should -Contain 'ds_servicenow_v2'
+            }
+
+            It 'Should return AdfPSDataset wrapper objects from the REST fallback' {
+                $result = Get-AdfFromService -FactoryName 'adf-test' -ResourceGroupName 'rg-test'
+                $result.DataSets | ForEach-Object { $_.GetType().Name | Should -Be 'AdfPSDataset' }
+            }
+        }
+
         Context 'When Get-AzDataFactoryV2LinkedService throws a deserialization error' {
             BeforeEach {
                 Mock Get-AzDataFactoryV2           { $script:fakeAdfi }
