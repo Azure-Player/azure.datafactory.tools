@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.17.0] - 2026-07-01
+### Fixed
+* Further fixes of `DeleteNotInSource` with deserialization issue #480 
+
+## [1.16.0] - 2026-05-27
+### Fixed
+* `DeleteNotInSource` no longer fails with "Unable to deserialize the response" when ADF contains object types unsupported by the installed Az.DataFactory module version - REST API fallback added to `Get-AdfFromService` #480 #473
+
+
 ## [1.15.0] - 2026-05-26
 ### Added
 * Credential type of ADF objects is now supported for deployment via REST API
