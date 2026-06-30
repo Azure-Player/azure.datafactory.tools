@@ -12,6 +12,9 @@ InModuleScope azure.datafactory.tools {
     $testHelperPath = $PSScriptRoot | Join-Path -ChildPath 'TestHelper'
     Import-Module -Name $testHelperPath -Force
 
+    $m = Get-Module -Name 'azure.datafactory.tools'
+    $script:verStr = $m.Version.ToString(2) + "." + $m.Version.Build.ToString("000")
+
     # $VerbosePreference = 'Continue'
     # $DebugPreference = 'Continue'
 
@@ -29,7 +32,7 @@ InModuleScope azure.datafactory.tools {
     $opt.IncrementalDeployment = $true
     $opt.StopStartTriggers = $false
     $script:gp = "" 
-    $script:dstate = [AdfDeploymentState]::new($verStr)
+    $script:dstate = [AdfDeploymentState]::new($script:verStr)
     $script:dstate.LastUpdate = [System.DateTime]::UtcNow
     $script:dstateJson = $script:dstate | ConvertTo-Json
     $script:StorageUri= "https://sqlplayer2020.blob.core.windows.net"
