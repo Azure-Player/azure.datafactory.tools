@@ -20,7 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 * Starting blob event trigger fails with 'Resource cannot be updated during provisioning' - now waits for provisioning to complete before retrying #484, #474, #463
 * Fixed REST API calls failing with 401 Unauthorized due to Az.Accounts 5.x returning SecureString from Get-AzAccessToken
-* Fixed DryRun not loading deployment state from storage for hash comparison #476
+* Fixed DryRun not loading deployment state from storage for hash comparison #475
 * README.md updated and new Structured Documentation created
 
 ## [1.14.0] - 2025-10-24
