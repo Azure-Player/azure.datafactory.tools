@@ -1,18 +1,18 @@
 name: CI
 
 on:
-  push:
-    branches: [ develop ]
-    paths:
-      - 'private/**'
-      - 'public/**'
-      - 'test/**'
-  pull_request:
-    branches: [ develop ]
-    paths:
-      - 'private/**'
-      - 'public/**'
-      - 'test/**'
+  # push:
+  #   branches: [ develop ]
+  #   paths:
+  #     - 'private/**'
+  #     - 'public/**'
+  #     - 'test/**'
+  # pull_request:
+  #   branches: [ develop ]
+  #   paths:
+  #     - 'private/**'
+  #     - 'public/**'
+  #     - 'test/**'
   workflow_dispatch:
 
 permissions:

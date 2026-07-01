@@ -2,8 +2,17 @@ name: CI/CD
 
 on:
   push:
-    branches: ['**']
+    branches: [ develop ]
+    paths:
+      - 'private/**'
+      - 'public/**'
+      - 'test/**'
   pull_request:
+    branches: [ develop ]
+    paths:
+      - 'private/**'
+      - 'public/**'
+      - 'test/**'
   workflow_dispatch:
 
 permissions:
