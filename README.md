@@ -221,6 +221,7 @@ $opt = New-AdfPublishOption
 * [Boolean] **DeployGlobalParams** - indicates whether deploy Global Parameters of ADF. Nothing happens when parameters are not defined. (default: *true*)
 * [Boolean] **FailsWhenConfigItemNotFound** - indicates whether configuration items not found fails the script. (default: *true*)
 * [Boolean] **FailsWhenPathNotFound** - indicates whether missing paths fails the script. (default: *true*)
+* [Boolean] **IgnoreLackOfReferencedObject** - indicates whether missing referenced objects should only raise warnings. (default: *false*)
 * [Boolean] **DoNotStopStartExcludedTriggers** - specifies whether excluded triggers will be stopped before deployment (default: *false*)
 * [Boolean] **DoNotDeleteExcludedObjects** - specifies whether excluded objects can be removed. Applies when `DeleteNotInSource` is set to *True* only. (default: *true*) 
 * [Boolean] **IncrementalDeployment** - specifies whether Incremental Deployment mode is enabled (default: *false*) 
@@ -265,7 +266,11 @@ $opt.FailsWhenConfigItemNotFound = $false
 $opt = New-AdfPublishOption
 $opt.FailsWhenPathNotFound = $false
 
-# Example 7: Exclude Infrastructure-type of objects from deployment
+# Example 7: Ignore missing referenced objects (will just write warning to standard output instead)
+$opt = New-AdfPublishOption
+$opt.IgnoreLackOfReferencedObject = $true
+
+# Example 8: Exclude Infrastructure-type of objects from deployment
 $opt = New-AdfPublishOption
 $opt.CreateNewInstance = $false
 $opt.Excludes.Add("integrationruntime.*", "")
