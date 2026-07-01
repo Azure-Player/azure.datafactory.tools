@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.18.0] - 2026-07-01
+### Added
+* `Publish-AdfV2FromJson` now supports terraform-like planning via `-DryRun`/`-Plan`, including structured `DryRunPlan` output (Create/Update/Delete/Unchanged) #360
+
 ## [1.17.1] - 2026-07-01
 ### Fixed
 * Further fixes of `DeleteNotInSource` with deserialization issue #480 
