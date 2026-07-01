@@ -25,9 +25,14 @@ function Update-ObjectProperty {
         $exp = "`$obj.$path = `$$value"
     } elseif ($fieldType -eq [DateTime]) {
         Write-Debug "Setting as DateTime value"
-        $datevalue = [DateTime]$value
-        $utcvalue = Get-Date $datevalue -Format "yyyy-MM-ddTHH:mm:ss.fffZ"
-        $exp = "`$obj.$path = `"$utcvalue`""
+        # Keep explicit timezone suffixes unchanged to avoid timezone shifts (Issue #402).
+        if ($value -match '(?i)(Z|[+-][0-9]{2}:[0-9]{2})$') {
+            $exp = "`$obj.$path = `"$value`""
+        } else {
+            $date_value = [DateTime]$value
+            $utc_value = Get-Date $date_value -Format "yyyy-MM-ddTHH:mm:ss.fffZ"
+            $exp = "`$obj.$path = `"$utc_value`""
+        }
     } elseif ($fieldType -eq [System.Management.Automation.PSCustomObject]) {
         Write-Debug "Setting as json value"
         $jvalue = ConvertFrom-Json $value
