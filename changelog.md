@@ -4,10 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [1.17.0] - 2026-07-01
+## [1.17.1] - 2026-07-01
 ### Fixed
 * Further fixes of `DeleteNotInSource` with deserialization issue #480 
 * `Publish-AdfV2FromJson` no longer silently continues after errors: config path errors (ADFT0010) and deployment failures (e.g. Azure Policy blocks) now propagate as terminating errors to the caller #472
+* Scheduled trigger recurrence times now preserve explicit timezone offsets during config-driven updates, preventing shifted deployment times #402
 
 ## [1.16.0] - 2026-06-06
 ### Fixed

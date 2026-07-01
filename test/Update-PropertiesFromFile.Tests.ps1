@@ -375,6 +375,33 @@ InModuleScope azure.datafactory.tools {
 
     }
 
+    Describe 'Update-PropertiesFromFile - Issue #402' -Tag 'Unit','private','issue402' {
+        Context 'When trigger recurrence timestamps contain explicit timezone offsets' {
+            BeforeAll {
+                $script:adf = Import-AdfFromFolder -FactoryName "xyz" -RootFolder "$RootFolder"
+                $script:adf.PublishOptions = New-AdfPublishOption
+
+                $script:configFilePath = Join-Path -Path $script:DeploymentFolder -ChildPath "config-issue-402-timezone.csv"
+                @(
+                    'type,name,path,value'
+                    'trigger,TR_RunEveryDay,"$.properties.typeProperties.recurrence.startTime","2020-06-01T23:22:11.000+10:00"'
+                    'trigger,TR_RunEveryDay,"$.properties.typeProperties.recurrence.endTime","2020-06-05T23:22:11.000+10:00"'
+                ) | Set-Content -Path $script:configFilePath -Encoding UTF8
+
+                Update-PropertiesFromFile -adf $script:adf -stage $script:configFilePath
+                $script:trigger = Get-AdfObjectByName -adf $script:adf -name "TR_RunEveryDay" -type "trigger"
+            }
+
+            It 'Should keep recurrence.startTime offset unchanged' {
+                $script:trigger.Body.properties.typeProperties.recurrence.startTime | Should -Be "2020-06-01T23:22:11.000+10:00"
+            }
+
+            It 'Should keep recurrence.endTime offset unchanged' {
+                $script:trigger.Body.properties.typeProperties.recurrence.endTime | Should -Be "2020-06-05T23:22:11.000+10:00"
+            }
+        }
+    }
+
     Describe 'Publish-AdfV2FromJson with DryRun' -Tag 'Unit','private' {
 
         $cases =  @( @{ configFile = 'config-endpoint.csv' }, @{ configFile = 'config-endpoint2.json' } )
