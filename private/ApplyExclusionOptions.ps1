@@ -127,10 +127,10 @@ function Get-DryRunPlan {
         [parameter(Mandatory = $false)] $targetAdfInstance
     )
 
-    $create = @()
-    $update = @()
-    $delete = @()
-    $unchanged = @()
+    $create = [System.Collections.Generic.List[string]]::new()
+    $update = [System.Collections.Generic.List[string]]::new()
+    $delete = [System.Collections.Generic.List[string]]::new()
+    $unchanged = [System.Collections.Generic.List[string]]::new()
 
     $sourceByName = @{}
     $adf.AllObjects() | ForEach-Object {
@@ -149,13 +149,13 @@ function Get-DryRunPlan {
     $adf.AllObjects() | ForEach-Object {
         $fullName = Get-AdfObjectFullName -Object $_
         if ($_.ToBeDeployed -eq $false) {
-            $unchanged += $fullName
+            $unchanged.Add($fullName) | Out-Null
         }
         elseif ($targetByName.ContainsKey($fullName)) {
-            $update += $fullName
+            $update.Add($fullName) | Out-Null
         }
         else {
-            $create += $fullName
+            $create.Add($fullName) | Out-Null
         }
     }
 
@@ -169,7 +169,7 @@ function Get-DryRunPlan {
                     $canDelete = !($oname.IsNameExcluded($adf.PublishOptions))
                 }
                 if ($canDelete) {
-                    $delete += $fullName
+                    $delete.Add($fullName) | Out-Null
                 }
             }
         }
