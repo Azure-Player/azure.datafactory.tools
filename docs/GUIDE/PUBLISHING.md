@@ -33,8 +33,11 @@ Publish-AdfV2FromJson `
    [-Stage] <String> `
    [-Option] <AdfPublishOption> `
    [-Method] <String> `
-   [-DryRun]
+   [-DryRun] `
+   [-Plan]
 ```
+
+`-Plan` is an alias behavior of `-DryRun` and prints a terraform-like plan without deploying.
 
 ### Complete Example
 

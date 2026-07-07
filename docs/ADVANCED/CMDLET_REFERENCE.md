@@ -18,7 +18,8 @@ Publish-AdfV2FromJson `
     [-Stage <String>] `
     [-Option <AdfPublishOption>] `
     [-Method <String>] `
-    [-DryRun]
+    [-DryRun] `
+    [-Plan]
 ```
 
 **Parameters:**
@@ -33,6 +34,7 @@ Publish-AdfV2FromJson `
 | Option | AdfPublishOption | No | Publish options object (filtering, triggers, etc.) |
 | Method | String | No | Publishing method: 'AzDataFactory' or 'AzResource' (default) |
 | DryRun | Switch | No | Validate without deploying |
+| Plan | Switch | No | Alias behavior of DryRun with terraform-like naming |
 
 **Returns:** AdfPublishOption (deployment result)
 
