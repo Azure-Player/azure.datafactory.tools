@@ -67,6 +67,11 @@ $opt = New-AdfPublishOption
 - **Default:** true
 - **Purpose:** Fail deployment if config path doesn't exist (vs. warning only)
 
+#### IgnoreLackOfReferencedObject
+- **Type:** Boolean
+- **Default:** false
+- **Purpose:** Continue deployment when a referenced object is missing and emit a warning instead of failing
+
 ### Trigger Control Options
 
 #### StopStartTriggers (see also: TriggerStopMethod, TriggerStartMethod)
@@ -155,7 +160,15 @@ $opt.FailsWhenConfigItemNotFound = $false
 # Warnings will be printed instead of failing
 ```
 
-### Example 6: Incremental Deployment
+### Example 6: Ignore Missing Referenced Objects
+
+```powershell
+$opt = New-AdfPublishOption
+$opt.IgnoreLackOfReferencedObject = $true
+# Referenced objects that are not present will warn instead of failing
+```
+
+### Example 7: Incremental Deployment
 
 ```powershell
 $opt = New-AdfPublishOption
@@ -163,7 +176,7 @@ $opt.IncrementalDeployment = $true
 $opt.IncrementalDeploymentStorageUri = 'https://storageaccount.file.core.windows.net/adftools'
 ```
 
-### Example 7: Selective Deployment with Smart Triggers
+### Example 8: Selective Deployment with Smart Triggers
 
 ```powershell
 $opt = New-AdfPublishOption

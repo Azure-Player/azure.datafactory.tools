@@ -4,10 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [1.16.0] - 2026-06-06
+## [1.18.0] - 2026-07-01
+### Added
+* `Publish-AdfV2FromJson` now supports terraform-like planning via `-DryRun`/`-Plan`, including structured `DryRunPlan` output (Create/Update/Delete/Unchanged) #360
 
+## [1.17.1] - 2026-07-01
 ### Fixed
+* Further fixes of `DeleteNotInSource` with deserialization issue #480 
+* `Publish-AdfV2FromJson` no longer silently continues after errors: config path errors (ADFT0010) and deployment failures (e.g. Azure Policy blocks) now propagate as terminating errors to the caller #472
+* Scheduled trigger recurrence times now preserve explicit timezone offsets during config-driven updates, preventing shifted deployment times #402
 
+## [1.16.0] - 2026-06-06
+### Fixed
+* `DeleteNotInSource` no longer fails with "Unable to deserialize the response" when ADF contains object types unsupported by the installed Az.DataFactory module version - REST API fallback added to `Get-AdfFromService` #480 #473
 * Fixed ClientAssertionCredential authentication failure for federated identity (OIDC) credentials by removing redundant `Get-AzAccessToken` calls in `Get-AzDFV2Credential` and `Remove-AdfObjectRestAPI` #492
 
 ## [1.15.0] - 2026-05-26
@@ -16,7 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 * Starting blob event trigger fails with 'Resource cannot be updated during provisioning' - now waits for provisioning to complete before retrying #484, #474, #463
 * Fixed REST API calls failing with 401 Unauthorized due to Az.Accounts 5.x returning SecureString from Get-AzAccessToken
-* Fixed DryRun not loading deployment state from storage for hash comparison #476
+* Fixed DryRun not loading deployment state from storage for hash comparison #475
 * README.md updated and new Structured Documentation created
 
 ## [1.14.0] - 2025-10-24

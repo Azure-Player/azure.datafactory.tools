@@ -49,7 +49,9 @@ function ApplyExclusionOptions {
 
 function ToBeDeployedStat {
     param(
-        [Parameter(Mandatory=$True)] [Adf] $adf
+        [Parameter(Mandatory=$True)] [Adf] $adf,
+        [Parameter(Mandatory=$False)] $targetAdfInstance,
+        [switch] $TerraformStyle
     )
 
     $ToBeDeployedList = ($adf.AllObjects() | Where-Object { $_.ToBeDeployed -eq $true } | ToArray)
@@ -57,6 +59,168 @@ function ToBeDeployedStat {
     Write-Host "# Number of objects marked as to be deployed: $i/$($adf.AllObjects().Count)"
     $ToBeDeployedList | ForEach-Object {
         Write-Host "- $($_.FullName($true))"
+    }
+
+    if (!$TerraformStyle) {
+        return $null
+    }
+
+    $plan = Get-DryRunPlan -adf $adf -targetAdfInstance $targetAdfInstance
+    Write-DryRunPlan -plan $plan
+    return $plan
+
+}
+
+function ConvertTo-CanonicalAdfType {
+    [CmdletBinding()]
+    param (
+        [parameter(Mandatory = $true)]
+        [String] $Type
+    )
+
+    $t = $Type.ToLowerInvariant()
+    switch ($t)
+    {
+        'pipeline' { return 'pipeline' }
+        'dataset' { return 'dataset' }
+        'dataflow' { return 'dataflow' }
+        'linkedservice' { return 'linkedService' }
+        'integrationruntime' { return 'integrationRuntime' }
+        'trigger' { return 'trigger' }
+        'factory' { return 'factory' }
+        'managedvirtualnetwork' { return 'managedVirtualNetwork' }
+        'managedprivateendpoint' { return 'managedPrivateEndpoint' }
+        'credential' { return 'credential' }
+        default { return $Type }
+    }
+}
+
+function Get-AdfObjectFullName {
+    [CmdletBinding()]
+    param (
+        [parameter(Mandatory = $true)]
+        $Object
+    )
+
+    $name = $Object.Name
+    $simtype = ''
+
+    if ($Object -is [AdfObject]) {
+        $simtype = Get-SimplifiedType -Type $Object.Type
+        if ($Object.Type -like 'Microsoft.DataFactory/factories*') {
+            $simtype = ConvertTo-AdfType -AzType $Object.Type
+            $simtype = Get-SimplifiedType -Type $simtype
+        }
+    }
+    else {
+        $simtype = Get-SimplifiedType -Type $Object.GetType().Name
+    }
+
+    $simtype = ConvertTo-CanonicalAdfType -Type $simtype
+    return "$simtype.$name"
+}
+
+function Get-DryRunPlan {
+    [CmdletBinding()]
+    param (
+        [parameter(Mandatory = $true)] [Adf] $adf,
+        [parameter(Mandatory = $false)] $targetAdfInstance
+    )
+
+    $create = [System.Collections.Generic.List[string]]::new()
+    $update = [System.Collections.Generic.List[string]]::new()
+    $delete = [System.Collections.Generic.List[string]]::new()
+    $unchanged = [System.Collections.Generic.List[string]]::new()
+
+    $sourceByName = @{}
+    $adf.AllObjects() | ForEach-Object {
+        $fullName = Get-AdfObjectFullName -Object $_
+        $sourceByName[$fullName] = $_
+    }
+
+    $targetByName = @{}
+    if ($null -ne $targetAdfInstance) {
+        $targetAdfInstance.AllObjects() | ForEach-Object {
+            $fullName = Get-AdfObjectFullName -Object $_
+            $targetByName[$fullName] = $_
+        }
+    }
+
+    $adf.AllObjects() | ForEach-Object {
+        $fullName = Get-AdfObjectFullName -Object $_
+        if ($_.ToBeDeployed -eq $false) {
+            $unchanged.Add($fullName) | Out-Null
+        }
+        elseif ($targetByName.ContainsKey($fullName)) {
+            $update.Add($fullName) | Out-Null
+        }
+        else {
+            $create.Add($fullName) | Out-Null
+        }
+    }
+
+    if ($null -ne $targetAdfInstance -and $adf.PublishOptions.DeleteNotInSource) {
+        $targetByName.Keys | ForEach-Object {
+            $fullName = $_
+            if (!$sourceByName.ContainsKey($fullName)) {
+                $oname = [AdfObjectName]::new($fullName)
+                $canDelete = $true
+                if ($adf.PublishOptions.DoNotDeleteExcludedObjects) {
+                    $canDelete = !($oname.IsNameExcluded($adf.PublishOptions))
+                }
+                if ($canDelete) {
+                    $delete.Add($fullName) | Out-Null
+                }
+            }
+        }
+    }
+
+    $create = @($create | Sort-Object)
+    $update = @($update | Sort-Object)
+    $delete = @($delete | Sort-Object)
+    $unchanged = @($unchanged | Sort-Object)
+
+    return [PSCustomObject]@{
+        Create = @($create)
+        Update = @($update)
+        Delete = @($delete)
+        Unchanged = @($unchanged)
+    }
+}
+
+function Write-DryRunPlan {
+    [CmdletBinding()]
+    param (
+        [parameter(Mandatory = $true)]
+        $plan
+    )
+
+    Write-Host "==================================================================================="
+    Write-Host "Terraform-like plan (DryRun):"
+    Write-Host "Plan: $($plan.Create.Count) to add, $($plan.Update.Count) to change, $($plan.Delete.Count) to destroy."
+
+    if ($plan.Create.Count -gt 0) {
+        Write-Host ""
+        Write-Host "  + Create"
+        $plan.Create | ForEach-Object { Write-Host "    + $_" }
+    }
+
+    if ($plan.Update.Count -gt 0) {
+        Write-Host ""
+        Write-Host "  ~ Update"
+        $plan.Update | ForEach-Object { Write-Host "    ~ $_" }
+    }
+
+    if ($plan.Delete.Count -gt 0) {
+        Write-Host ""
+        Write-Host "  - Delete"
+        $plan.Delete | ForEach-Object { Write-Host "    - $_" }
+    }
+
+    if ($plan.Unchanged.Count -gt 0) {
+        Write-Host ""
+        Write-Host "  = Unchanged / skipped"
+        $plan.Unchanged | ForEach-Object { Write-Host "    = $_" }
     }
 
 }

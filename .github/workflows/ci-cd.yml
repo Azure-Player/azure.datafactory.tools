@@ -1,0 +1,72 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ develop ]
+    paths:
+      - 'private/**'
+      - 'public/**'
+      - 'test/**'
+  pull_request:
+    branches: [ develop ]
+    paths:
+      - 'private/**'
+      - 'public/**'
+      - 'test/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write        # required by dorny/test-reporter
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Run Unit Tests
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login via Az module
+        uses: azure/login@v3
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          enable-AzPSSession: true
+
+      - name: Run Unit Tests
+        uses: azure/powershell@v3
+        with:
+          inlineScript: |
+            test/!RunAllTests.ps1 -folder '${{ github.workspace }}/' -TestFilenameFilter "*" -InstallModules:$false -ResultOutputFormat "JUnitXml"
+          azPSVersion: "latest"
+
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v3
+        if: ${{ !cancelled() }}
+        with:
+          name: Pester Tests
+          path: '**/TEST-*.xml'
+          reporter: java-junit
+          collapsed: 'auto'
+
+  publish:
+    name: Publish to PS Gallery
+    runs-on: windows-latest
+    needs: test
+    if: ${{ github.event_name != 'pull_request' && (github.ref_name == 'master' || github.ref_name == 'develop') }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish module to PowerShell Gallery
+        shell: pwsh
+        env:
+          PSGALLERY_API_KEY: ${{ secrets.PSGALLERY_API_KEY }}
+        run: |
+          $isPreview = '${{ github.ref_name }}' -ne 'master'
+          Write-Host "Branch: ${{ github.ref_name }} | Preview: $isPreview"
+          ./tools/Publish-ToGallery.ps1 -IsPreview:$isPreview -NuGetApiKey $env:PSGALLERY_API_KEY

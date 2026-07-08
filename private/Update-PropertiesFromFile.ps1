@@ -72,7 +72,7 @@ function Update-PropertiesFromFile {
             if ($option.FailsWhenConfigItemNotFound -eq $false) {
                 Write-Warning "Could not find object: $type.$name, skipping..."
             } else {
-                Write-Error -Message "ADFT0007: Could not find object: $type.$name"
+                throw "ADFT0007: Could not find object: $type.$name"
             }
         } else {
             Write-Verbose "- Performing: $action for object(path): $type.$name(properties.$path)"
@@ -131,7 +131,7 @@ function Update-PropertiesForObject {
             Write-Warning "Wrong path defined in config for object(path): $type.$name(properties.$path), skipping..."
         } else {
             $exc = ([System.Data.DataException]::new("ADFT0010: Wrong path defined in config for object(path): $type.$name(properties.$path)"))
-            Write-Error -Exception $exc
+            throw $exc
         }
     }
 

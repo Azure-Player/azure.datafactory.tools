@@ -35,6 +35,9 @@ AzResource method has been introduced due to bugs in Az.DataFactory PS module.
 Optional switch parameter. When provided, process will not make any changes to target data factory but instead return the ADF object
 that would be used in deployment.
 
+.PARAMETER Plan
+Optional switch parameter. Alias for DryRun with terraform-style intent. Behaves the same as DryRun.
+
 .EXAMPLE
 # Publish entire ADF
 $ResourceGroupName = 'rg-devops-factory'
@@ -74,6 +77,10 @@ Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGro
 # Execute dry run of intended publishing changes
 Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName" -Location "$Location" -Stage "UAT" -DryRun
 
+.EXAMPLE
+# Execute plan (alias of DryRun) to preview intended changes
+Publish-AdfV2FromJson -RootFolder "$RootFolder" -ResourceGroupName "$ResourceGroupName" -DataFactoryName "$DataFactoryName" -Location "$Location" -Stage "UAT" -Plan
+
 .LINK
 Online version: https://github.com/SQLPlayer/azure.datafactory.tools/
 #>
@@ -104,8 +111,15 @@ function Publish-AdfV2FromJson {
         [String]$Method = 'AzResource',
 
         [parameter(Mandatory = $false)]
-        [switch]$DryRun
+        [switch]$DryRun,
+
+        [parameter(Mandatory = $false)]
+        [switch]$Plan
     )
+
+    if ($Plan.IsPresent) {
+        $DryRun = $true
+    }
 
     $m = Get-Module -Name "azure.datafactory.tools"
     $verStr = $m.Version.ToString(2) + "." + $m.Version.Build.ToString("000");
@@ -123,6 +137,7 @@ function Publish-AdfV2FromJson {
     Write-Host "Options provided:   $($null -ne $Option)";
     Write-Host "Publishing method:  $Method";
     Write-Host "Is Dry Run?:        $($DryRun.IsPresent)";
+    Write-Host "Is Plan Mode?:      $($Plan.IsPresent)";
     Write-Host "======================================================================================";
     if ($null -ne $Option) {
         Write-Host "Options:"
@@ -248,10 +263,29 @@ function Publish-AdfV2FromJson {
         }
         Write-Host "Found $unchanged_count unchanged object(s)."
     }
-    ToBeDeployedStat -adf $adf
+
+    $dryRunPlan = $null
+    if ($DryRun.IsPresent) {
+        $targetAdfInstance = $null
+        try {
+            Write-Host "DRY RUN: Loading target ADF objects to classify plan changes..."
+            $targetAdfInstance = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
+        }
+        catch {
+            Write-Warning "DRY RUN: Unable to load target ADF state for full plan classification. Falling back to local-only plan. Details: $_"
+        }
+
+        $dryRunPlan = ToBeDeployedStat -adf $adf -targetAdfInstance $targetAdfInstance -TerraformStyle
+    }
+    else {
+        ToBeDeployedStat -adf $adf
+    }
 
     if ($DryRun.IsPresent) {
         Write-Host "DRY RUN: Terminating script pre-deployment - inspect returned object to review planned changes."
+        if ($null -ne $dryRunPlan) {
+            $adf | Add-Member -MemberType NoteProperty -Name DryRunPlan -Value $dryRunPlan -Force
+        }
         Write-Host "===================================================================================";
         return $adf
     }
@@ -272,16 +306,16 @@ function Publish-AdfV2FromJson {
             $adf.Factories[0].ToBeDeployed = $false
         }
     }
-    $adf.AllObjects() | ForEach-Object {
-        Deploy-AdfObject -obj $_
+    foreach ($obj in $adf.AllObjects()) {
+        Deploy-AdfObject -obj $obj
     }
 
     Write-Host "===================================================================================";
     Write-Host "STEP: Deleting objects not in source ..."
     if ($opt.DeleteNotInSource -eq $true) {
         $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
-        $adfIns.AllObjects() | ForEach-Object {
-            Remove-AdfObjectIfNotInSource -adfSource $adf -adfTargetObj $_ -adfInstance $adfIns
+        foreach ($targetObj in $adfIns.AllObjects()) {
+            Remove-AdfObjectIfNotInSource -adfSource $adf -adfTargetObj $targetObj -adfInstance $adfIns
         }
         Write-Host "Deleted $($adf.DeletedObjectNames.Count) objects from ADF service."
     } else {

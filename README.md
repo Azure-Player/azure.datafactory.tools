@@ -75,7 +75,8 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
     - [Stage value as full path to CSV config file](#stage-value-as-full-path-to-csv-config-file)
     - [JSON format of Config file](#json-format-of-config-file)
   - [Step: Deployment Plan](#step-deployment-plan)
-  - [Step: Stoping triggers](#step-stoping-triggers)
+    - [DryRun / Plan output and CI usage](#dryrun--plan-output-and-ci-usage)
+  - [Step: Stopping triggers](#step-stopping-triggers)
   - [Step: Deployment of ADF objects](#step-deployment-of-adf-objects)
   - [Step: Save deployment state](#step-save-deployment-state)
   - [Step: Deleting objects not in source](#step-deleting-objects-not-in-source)
@@ -185,6 +186,7 @@ Publish-AdfV2FromJson
    [-Option]              <AdfPublishOption>
    [-Method]              <String>
    [-DryRun]              <Switch>
+   [-Plan]                <Switch>
 ```
 
 Assuming your ADF is named ```SQLPlayerDemo``` and the code is located in ```c:\GitHub\AdfName\```, replace the values for *SubscriptionName*, *ResourceGroupName*, *DataFactoryName* and run the following command using PowerShell CLI:
@@ -221,6 +223,7 @@ $opt = New-AdfPublishOption
 * [Boolean] **DeployGlobalParams** - indicates whether deploy Global Parameters of ADF. Nothing happens when parameters are not defined. (default: *true*)
 * [Boolean] **FailsWhenConfigItemNotFound** - indicates whether configuration items not found fails the script. (default: *true*)
 * [Boolean] **FailsWhenPathNotFound** - indicates whether missing paths fails the script. (default: *true*)
+* [Boolean] **IgnoreLackOfReferencedObject** - indicates whether missing referenced objects should only raise warnings. (default: *false*)
 * [Boolean] **DoNotStopStartExcludedTriggers** - specifies whether excluded triggers will be stopped before deployment (default: *false*)
 * [Boolean] **DoNotDeleteExcludedObjects** - specifies whether excluded objects can be removed. Applies when `DeleteNotInSource` is set to *True* only. (default: *true*) 
 * [Boolean] **IncrementalDeployment** - specifies whether Incremental Deployment mode is enabled (default: *false*) 
@@ -265,7 +268,11 @@ $opt.FailsWhenConfigItemNotFound = $false
 $opt = New-AdfPublishOption
 $opt.FailsWhenPathNotFound = $false
 
-# Example 7: Exclude Infrastructure-type of objects from deployment
+# Example 7: Ignore missing referenced objects (will just write warning to standard output instead)
+$opt = New-AdfPublishOption
+$opt.IgnoreLackOfReferencedObject = $true
+
+# Example 8: Exclude Infrastructure-type of objects from deployment
 $opt = New-AdfPublishOption
 $opt.CreateNewInstance = $false
 $opt.Excludes.Add("integrationruntime.*", "")
@@ -617,8 +624,45 @@ If you prefer using JSON rather than CSV for setting up configuration - JSON fil
 This step identifies objects to be deployed using `Includes` and `Excludes` list provided in *Publish Options*.  
 Afterwards, if `IncrementalDeployment = true`, it excludes objects by comparing hashes from **Deployment State** to hashed of awaiting objects.
 
+### DryRun / Plan output and CI usage
 
-## Step: Stoping triggers
+Use `-DryRun` or `-Plan` to preview intended changes without deploying. The process prints a terraform-like summary:
+
+```text
+Terraform-like plan (DryRun):
+Plan: 0 to add, 1 to change, 1 to destroy.
+
+  ~ Update
+    ~ pipeline.PL_ExecSparkJob
+
+  - Delete
+    - pipeline.PL_Obsolete
+
+  = Unchanged / skipped
+    = dataset.DS_Json
+```
+
+The returned object contains a `DryRunPlan` property, so CI can enforce policy checks before deployment:
+
+```powershell
+$result = Publish-AdfV2FromJson `
+  -RootFolder $RootFolder `
+  -ResourceGroupName $ResourceGroupName `
+  -DataFactoryName $DataFactoryName `
+  -Location $Location `
+  -Option $opt `
+  -Plan
+
+if ($result.DryRunPlan.Delete.Count -gt 0) {
+    Write-Error "Plan contains destroy actions. Review required before deployment."
+    exit 1
+}
+
+Write-Host "Plan accepted. Add=$($result.DryRunPlan.Create.Count); Change=$($result.DryRunPlan.Update.Count); Destroy=$($result.DryRunPlan.Delete.Count)"
+```
+
+
+## Step: Stopping triggers
 
 💬 In log you'll see line: `STEP: Stopping triggers...`
 
