@@ -67,6 +67,12 @@ $opt = New-AdfPublishOption
 - **Default:** true
 - **Purpose:** Fail deployment if config path doesn't exist (vs. warning only)
 
+#### MaxRetries
+- **Type:** Int
+- **Default:** 3
+- **Purpose:** How many times deployment of an object is retried after a temporary API error: time-out, throttling (HTTP 429), server error (HTTP 5xx) or concurrent operation. The wait doubles before each retry (2, 4, 8... seconds).
+- **Note:** Permanent errors (e.g. invalid definition, not found, policy or authorization errors) are not retried. When all retries fail, the deployment stops with the error. Set to `0` to disable retries.
+
 #### IgnoreLackOfReferencedObject
 - **Type:** Boolean
 - **Default:** false

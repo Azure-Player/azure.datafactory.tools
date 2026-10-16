@@ -235,6 +235,7 @@ $opt = New-AdfPublishOption
 * [Enum] **TriggerStartMethod** - determines which triggers should be started.  
   Available values: `BasedOnSourceCode` (default) | `KeepPreviousState`  
   Find more about the above option in section [Step: Restarting triggers](#step-restarting-triggers)
+* [Int] **MaxRetries** - how many times deployment of an object is retried after a temporary API error (time-out, throttling, server error), waiting 2, 4, 8... seconds in between. Set to *0* to disable retries. (default: *3*)
 
 
 Subsequently, you can define the needed options:

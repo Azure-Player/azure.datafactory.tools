@@ -26,4 +26,5 @@ class AdfPublishOption {
     [String] $IncrementalDeploymentStorageUri = ''
     [TriggerStopTypes] $TriggerStopMethod = [TriggerStopTypes]::AllEnabled
     [TriggerStartTypes] $TriggerStartMethod = [TriggerStartTypes]::BasedOnSourceCode
+    [Int32] $MaxRetries = 3
 }

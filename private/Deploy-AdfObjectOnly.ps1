@@ -19,6 +19,10 @@ function Deploy-AdfObjectOnly {
     Write-Debug -Message $body
     $json = $body | ConvertFrom-Json
 
+    # Retry temporary API errors (e.g. time-outs) #295
+    $maxRetries = if ($null -ne $adf.PublishOptions) { $adf.PublishOptions.MaxRetries } else { 3 }
+    $activity = "Deployment of $($obj.FullName($true))"
+
     $type = $obj.Type
     if ($script:PublishMethod -eq "AzResource") { $type = "AzResource" }
     # Global parameters is being deployed with different method:
@@ -35,42 +39,48 @@ function Deploy-AdfObjectOnly {
 
                 if ($null -eq $linkedIR) {
                     Write-Verbose -Message "Integration Runtime type detected: Self-Hosted"
-                    Set-AzDataFactoryV2IntegrationRuntime `
-                    -ResourceGroupName $ResourceGroupName `
-                    -DataFactoryName $DataFactoryName `
-                    -Name $json.name `
-                    -Type $json.properties.type `
-                    -Description $desc `
-                    -Force | Out-Null
+                    Invoke-AdfWithRetry -Activity $activity -MaxRetries $maxRetries -ScriptBlock {
+                        Set-AzDataFactoryV2IntegrationRuntime `
+                        -ResourceGroupName $ResourceGroupName `
+                        -DataFactoryName $DataFactoryName `
+                        -Name $json.name `
+                        -Type $json.properties.type `
+                        -Description $desc `
+                        -Force -ErrorAction Stop | Out-Null
+                    }
                 } 
                 else 
                 {
                     Write-Verbose -Message "Integration Runtime type detected: Linked Self-Hosted"
-                    Set-AzDataFactoryV2IntegrationRuntime `
-                    -ResourceGroupName $ResourceGroupName `
-                    -DataFactoryName $DataFactoryName `
-                    -Name $json.name `
-                    -Type $json.properties.type `
-                    -Description $desc `
-                    -SharedIntegrationRuntimeResourceId $linkedIR.resourceId `
-                    -Force | Out-Null
+                    Invoke-AdfWithRetry -Activity $activity -MaxRetries $maxRetries -ScriptBlock {
+                        Set-AzDataFactoryV2IntegrationRuntime `
+                        -ResourceGroupName $ResourceGroupName `
+                        -DataFactoryName $DataFactoryName `
+                        -Name $json.name `
+                        -Type $json.properties.type `
+                        -Description $desc `
+                        -SharedIntegrationRuntimeResourceId $linkedIR.resourceId `
+                        -Force -ErrorAction Stop | Out-Null
+                    }
                 }
             }
             elseif ($json.properties.type -eq "Managed") {
                 Write-Verbose -Message "Integration Runtime type detected: Azure Managed"
                 $computeIR = $json.properties.typeProperties.computeProperties
                 $dfp = $computeIR.dataFlowProperties
-                Set-AzDataFactoryV2IntegrationRuntime `
-                -ResourceGroupName $ResourceGroupName `
-                -DataFactoryName $DataFactoryName `
-                -Name $json.name `
-                -Type $json.properties.type `
-                -Description $desc `
-                -DataFlowComputeType $dfp.computeType `
-                -DataFlowTimeToLive $dfp.timeToLive `
-                -DataFlowCoreCount $dfp.coreCount `
-                -Location $computeIR.location `
-                -Force | Out-Null
+                Invoke-AdfWithRetry -Activity $activity -MaxRetries $maxRetries -ScriptBlock {
+                    Set-AzDataFactoryV2IntegrationRuntime `
+                    -ResourceGroupName $ResourceGroupName `
+                    -DataFactoryName $DataFactoryName `
+                    -Name $json.name `
+                    -Type $json.properties.type `
+                    -Description $desc `
+                    -DataFlowComputeType $dfp.computeType `
+                    -DataFlowTimeToLive $dfp.timeToLive `
+                    -DataFlowCoreCount $dfp.coreCount `
+                    -Location $computeIR.location `
+                    -Force -ErrorAction Stop | Out-Null
+                }
             }
             else {
                 throw "ADFT0012: Deployment for this kind of Integration Runtime is not supported yet."
@@ -78,74 +88,88 @@ function Deploy-AdfObjectOnly {
         }
         'linkedService'
         {
-            Set-AzDataFactoryV2LinkedService `
-            -ResourceGroupName $ResourceGroupName `
-            -DataFactoryName $DataFactoryName `
-            -Name $obj.Name `
-            -DefinitionFile $obj.FileName `
-            -Force | Out-Null
+            Invoke-AdfWithRetry -Activity $activity -MaxRetries $maxRetries -ScriptBlock {
+                Set-AzDataFactoryV2LinkedService `
+                -ResourceGroupName $ResourceGroupName `
+                -DataFactoryName $DataFactoryName `
+                -Name $obj.Name `
+                -DefinitionFile $obj.FileName `
+                -Force -ErrorAction Stop | Out-Null
+            }
         }
         'pipeline'
         {
-            Set-AzDataFactoryV2Pipeline `
-            -ResourceGroupName $ResourceGroupName `
-            -DataFactoryName $DataFactoryName `
-            -Name $obj.Name `
-            -DefinitionFile $obj.FileName `
-            -Force | Out-Null
+            Invoke-AdfWithRetry -Activity $activity -MaxRetries $maxRetries -ScriptBlock {
+                Set-AzDataFactoryV2Pipeline `
+                -ResourceGroupName $ResourceGroupName `
+                -DataFactoryName $DataFactoryName `
+                -Name $obj.Name `
+                -DefinitionFile $obj.FileName `
+                -Force -ErrorAction Stop | Out-Null
+            }
         }
         'dataset'
         {
-            Set-AzDataFactoryV2Dataset `
-            -ResourceGroupName $ResourceGroupName `
-            -DataFactoryName $DataFactoryName `
-            -Name $obj.Name `
-            -DefinitionFile $obj.FileName `
-            -Force | Out-Null
+            Invoke-AdfWithRetry -Activity $activity -MaxRetries $maxRetries -ScriptBlock {
+                Set-AzDataFactoryV2Dataset `
+                -ResourceGroupName $ResourceGroupName `
+                -DataFactoryName $DataFactoryName `
+                -Name $obj.Name `
+                -DefinitionFile $obj.FileName `
+                -Force -ErrorAction Stop | Out-Null
+            }
         }
         'dataflow'
         {
-            Set-AzDataFactoryV2DataFlow `
-            -ResourceGroupName $ResourceGroupName `
-            -DataFactoryName $DataFactoryName `
-            -Name $obj.Name `
-            -DefinitionFile $obj.FileName `
-            -Force | Out-Null
+            Invoke-AdfWithRetry -Activity $activity -MaxRetries $maxRetries -ScriptBlock {
+                Set-AzDataFactoryV2DataFlow `
+                -ResourceGroupName $ResourceGroupName `
+                -DataFactoryName $DataFactoryName `
+                -Name $obj.Name `
+                -DefinitionFile $obj.FileName `
+                -Force -ErrorAction Stop | Out-Null
+            }
         }
         'trigger'
         {
-            Set-AzDataFactoryV2Trigger `
-            -ResourceGroupName $ResourceGroupName `
-            -DataFactoryName $DataFactoryName `
-            -Name $obj.Name `
-            -DefinitionFile $obj.FileName `
-            -Force | Out-Null
+            Invoke-AdfWithRetry -Activity $activity -MaxRetries $maxRetries -ScriptBlock {
+                Set-AzDataFactoryV2Trigger `
+                -ResourceGroupName $ResourceGroupName `
+                -DataFactoryName $DataFactoryName `
+                -Name $obj.Name `
+                -DefinitionFile $obj.FileName `
+                -Force -ErrorAction Stop | Out-Null
+            }
         }
         'credential'
         {
             $resType = Get-AzureResourceType $obj.Type
             $resName = $obj.AzureResourceName()
 
-            New-AzResource `
-            -ResourceType $resType `
-            -ResourceGroupName $ResourceGroupName `
-            -ResourceName "$resName" `
-            -ApiVersion "2018-06-01" `
-            -Properties $json `
-            -IsFullObject -Force | Out-Null
+            Invoke-AdfWithRetry -Activity $activity -MaxRetries $maxRetries -ScriptBlock {
+                New-AzResource `
+                -ResourceType $resType `
+                -ResourceGroupName $ResourceGroupName `
+                -ResourceName "$resName" `
+                -ApiVersion "2018-06-01" `
+                -Properties $json `
+                -IsFullObject -Force -ErrorAction Stop | Out-Null
+            }
         }
         'AzResource'
         {
             $resType = Get-AzureResourceType $obj.Type
             $resName = $obj.AzureResourceName()
 
-            New-AzResource `
-            -ResourceType $resType `
-            -ResourceGroupName $resourceGroupName `
-            -ResourceName "$resName" `
-            -ApiVersion "2018-06-01" `
-            -Properties $json `
-            -IsFullObject -Force | Out-Null
+            Invoke-AdfWithRetry -Activity $activity -MaxRetries $maxRetries -ScriptBlock {
+                New-AzResource `
+                -ResourceType $resType `
+                -ResourceGroupName $resourceGroupName `
+                -ResourceName "$resName" `
+                -ApiVersion "2018-06-01" `
+                -Properties $json `
+                -IsFullObject -Force -ErrorAction Stop | Out-Null
+            }
         }
         'GlobalParameters'
         {
