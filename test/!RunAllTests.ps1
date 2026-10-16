@@ -53,9 +53,14 @@ if ($InstallModules) {
 } else {
     Write-Host "Installation skipped."
 }
-# Unload legacy Pester (e.g. built-in 3.4.0) so its Should doesn't shadow the newer one
-Get-Module Pester | Where-Object Version -lt '5.3.3' | Remove-Module -Force
-Import-Module 'Pester' -MinimumVersion 5.3.3
+# Tests require Pester 6+ (e.g. CI runners ship only Pester 5.x)
+if (-not (Get-Module Pester -ListAvailable | Where-Object Version -ge '6.0.0')) {
+    Write-Host "Installing Pester 6+..."
+    Install-Module 'Pester' -MinimumVersion 6.0.0 -Force -SkipPublisherCheck -Scope CurrentUser -Repository 'PSGallery'
+}
+# Unload older Pester (e.g. built-in 3.4.0) so its Should doesn't shadow the newer one
+Get-Module Pester | Where-Object Version -lt '6.0.0' | Remove-Module -Force
+Import-Module 'Pester' -MinimumVersion 6.0.0
 Import-Module 'PSScriptAnalyzer'
 Import-Module 'Az.Storage'
 Import-Module "$folder\azure.datafactory.tools.psd1"

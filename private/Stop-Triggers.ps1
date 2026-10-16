@@ -52,15 +52,24 @@ function Stop-Triggers {
         if ($toBeStopped.Count -gt 0)
         {
             Write-Host "Stopping deployed triggers:"
-            $toBeStopped | ForEach-Object { 
-                Stop-Trigger `
+            [System.Collections.ArrayList] $failedToStop = @{}
+            $toBeStopped | ForEach-Object {
+                $TrName = $_
+                $isStopped = Stop-Trigger `
                 -ResourceGroupName $adf.ResourceGroupName `
                 -DataFactoryName $adf.Name `
-                -Name $_ `
-                | Out-Null
-                
-                $TrName = $_
-                $adf.TargetTriggerNames | Where-Object { $_.Name -eq $TrName } | ForEach-Object { $_.RuntimeState = "Stopped" }
+                -Name $TrName
+
+                if ($isStopped) {
+                    $adf.TargetTriggerNames | Where-Object { $_.Name -eq $TrName } | ForEach-Object { $_.RuntimeState = "Stopped" }
+                } else {
+                    $failedToStop.Add($TrName) | Out-Null
+                }
+            }
+            # Keep only triggers that have actually been stopped
+            $failedToStop | ForEach-Object { $toBeStopped.Remove($_) }
+            if ($failedToStop.Count -gt 0) {
+                Write-Warning "The number of triggers that failed to stop: $($failedToStop.Count) ($($failedToStop -join ', '))"
             }
             Write-Host "Complete stopping deployed triggers."
         }
