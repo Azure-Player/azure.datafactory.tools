@@ -32,19 +32,19 @@ InModuleScope azure.datafactory.tools {
 
             It 'Should call Invoke-AzRestMethod once' {
                 Get-AzDFV2Credential -adfi $script:adfi
-                Assert-MockCalled Invoke-AzRestMethod -Times 1 -Exactly
+                Should -Invoke Invoke-AzRestMethod -Times 1 -Exactly
             }
 
             It 'Should call Invoke-AzRestMethod with correct credentials URL' {
                 Get-AzDFV2Credential -adfi $script:adfi
-                Assert-MockCalled Invoke-AzRestMethod -Times 1 -Exactly -ParameterFilter {
+                Should -Invoke Invoke-AzRestMethod -Times 1 -Exactly -ParameterFilter {
                     $Uri -eq "https://management.azure.com$($script:adfi.DataFactoryId)/credentials?api-version=2018-06-01"
                 }
             }
 
             It 'Should call Invoke-AzRestMethod using GET method' {
                 Get-AzDFV2Credential -adfi $script:adfi
-                Assert-MockCalled Invoke-AzRestMethod -Times 1 -Exactly -ParameterFilter {
+                Should -Invoke Invoke-AzRestMethod -Times 1 -Exactly -ParameterFilter {
                     $Method -eq 'GET'
                 }
             }

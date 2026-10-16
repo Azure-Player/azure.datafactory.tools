@@ -48,7 +48,7 @@ if ($ShouldThrow) {
     } | Should -Not -Throw
 }
 
-Assert-MockCalled Stop-Trigger -Times ([int]$ExpectDisableTrigger)
+Should -Invoke Stop-Trigger -Times ([int]$ExpectDisableTrigger)
 
 $script:TriggersOnDiskCount = (Get-ChildItem -Path "$RootFolder\trigger" -Filter "$triggerName.json" -Recurse:$true | Measure-Object).Count
 $tr = Get-AzDataFactoryV2Trigger @script:CommonParam

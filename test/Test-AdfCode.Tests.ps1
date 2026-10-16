@@ -86,6 +86,8 @@ InModuleScope azure.datafactory.tools {
                 param($Path)
                 throw 'Cannot process argument because the value of argument "path" is not valid. Change the value of the "path" argument and run the operation again.'
             } -ParameterFilter {$Path -eq $null}
+            # Pester 6 no longer falls through to the real command when no filter matches
+            Mock Get-ChildItem { & (Get-Command Get-ChildItem -CommandType Cmdlet) @PesterBoundParameters }
             
             { 
                 $script:res = Test-AdfCode -RootFolder $RootFolder -ConfigPath $null
