@@ -99,6 +99,21 @@ function Test-AdfCode {
         }
     }
 
+    Write-Host "Checking enabled triggers have pipeline references..."
+    $adf.Triggers | ForEach-Object {
+        $props = $_.Body.properties
+        $propNames = $props.PSObject.Properties.Name
+        if ('runtimeState' -in $propNames -and $props.runtimeState -eq 'Started') {
+            # TumblingWindowTrigger uses a single 'pipeline', other trigger types use a 'pipelines' array
+            $pipelines = @(if ('pipelines' -in $propNames) { $props.pipelines | Where-Object { $_ } })
+            $hasPipeline = $pipelines.Count -gt 0 -or ('pipeline' -in $propNames -and $null -ne $props.pipeline)
+            if (-not $hasPipeline) {
+                Write-Warning "Trigger '$($_.Name)' is enabled (runtimeState: Started) but has no pipeline references. Azure Data Factory will fail to start it."
+                $result.WarningCount += 1
+            }
+        }
+    }
+
     Write-Host "Checking: Global parameter names..."
     if ($adf.Factories.Count -gt 0) {
         $gparams = $adf.GlobalFactory.GlobalParameters

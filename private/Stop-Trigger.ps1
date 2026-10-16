@@ -16,11 +16,12 @@ function Stop-Trigger {
     {
         $i++
         try {
+            # Az cmdlets write non-terminating errors, so -ErrorAction Stop is required to catch them
             Stop-AzDataFactoryV2Trigger `
                 -ResourceGroupName $ResourceGroupName `
                 -DataFactoryName $DataFactoryName `
                 -Name $Name `
-                -Force | Out-Null
+                -Force -ErrorAction Stop | Out-Null
             # If successful, break out of the loop
             $stopped = $true
             break

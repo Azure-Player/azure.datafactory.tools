@@ -76,6 +76,51 @@ InModuleScope azure.datafactory.tools {
         }
     }
 
+    Describe 'Test-AdfCode trigger without pipeline references #507' -Tag 'Unit' {
+        BeforeEach {
+            Mock Write-Warning {}
+        }
+
+        It 'Should warn about enabled trigger TR_without_pipeline in adf2' {
+            $RootFolder = Join-Path -Path $PSScriptRoot -ChildPath 'adf2'
+            $script:res = Test-AdfCode -RootFolder $RootFolder
+            Should -Invoke Write-Warning -Times 1 -Exactly -ParameterFilter { $Message -like '*TR_without_pipeline*' }
+        }
+
+        It 'Should return 0 errors and 1 warning for adf2' {
+            $script:res.ErrorCount | Should -Be 0
+            $script:res.WarningCount | Should -Be 1
+        }
+
+        It 'Should <expected> for <type> with runtimeState <state> (<case>)' -ForEach @(
+            @{ case = 'empty pipelines';       type = 'ScheduleTrigger';       state = 'Started'; prop = 'pipelines'; refs = $false; expected = 'warn' }
+            @{ case = 'no pipelines property'; type = 'ScheduleTrigger';       state = 'Started'; prop = $null;       refs = $false; expected = 'warn' }
+            @{ case = 'empty pipelines';       type = 'BlobEventsTrigger';     state = 'Started'; prop = 'pipelines'; refs = $false; expected = 'warn' }
+            @{ case = 'no pipeline property';  type = 'TumblingWindowTrigger'; state = 'Started'; prop = $null;       refs = $false; expected = 'warn' }
+            @{ case = 'with pipeline';         type = 'ScheduleTrigger';       state = 'Started'; prop = 'pipelines'; refs = $true;  expected = 'not warn' }
+            @{ case = 'with pipeline';         type = 'TumblingWindowTrigger'; state = 'Started'; prop = 'pipeline';  refs = $true;  expected = 'not warn' }
+            @{ case = 'empty pipelines';       type = 'ScheduleTrigger';       state = 'Stopped'; prop = 'pipelines'; refs = $false; expected = 'not warn' }
+            @{ case = 'no pipeline property';  type = 'TumblingWindowTrigger'; state = 'Stopped'; prop = $null;       refs = $false; expected = 'not warn' }
+        ) {
+            $RootFolder = Join-Path -Path $TestDrive -ChildPath "adf435-$([guid]::NewGuid().ToString('N').Substring(0,8))"
+            New-Item -ItemType Directory -Path "$RootFolder/trigger", "$RootFolder/pipeline" -Force | Out-Null
+            '{ "name": "PL_Wait", "properties": { "activities": [] } }' | Set-Content "$RootFolder/pipeline/PL_Wait.json"
+
+            $pipelineRef = @{ pipelineReference = @{ referenceName = 'PL_Wait'; type = 'PipelineReference' } }
+            $properties = [ordered]@{ runtimeState = $state; type = $type; typeProperties = @{} }
+            switch ($prop) {
+                'pipelines' { $properties.pipelines = if ($refs) { @($pipelineRef) } else { @() } }
+                'pipeline'  { $properties.pipeline = $pipelineRef }
+            }
+            @{ name = 'TR_Test'; properties = $properties } | ConvertTo-Json -Depth 10 | Set-Content "$RootFolder/trigger/TR_Test.json"
+
+            Test-AdfCode -RootFolder $RootFolder | Out-Null
+
+            $times = if ($expected -eq 'warn') { 1 } else { 0 }
+            Should -Invoke Write-Warning -Times $times -Exactly -ParameterFilter { $Message -like '*TR_Test*' }
+        }
+    }
+
     Describe 'Test-AdfCode' -Tag 'Unit' {
         It 'Should not throw an error when Get-ChildItem Path parameter is null' {
             $DataFactoryName = "adf2"
