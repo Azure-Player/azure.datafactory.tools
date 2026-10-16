@@ -166,6 +166,9 @@ function Get-DryRunPlan {
                 $oname = [AdfObjectName]::new($fullName)
                 $canDelete = $true
                 if ($adf.PublishOptions.DoNotDeleteExcludedObjects) {
+                    if ($adf.PublishOptions.HasFolderRules()) {
+                        $oname.Folder = Get-AdfObjectFolderFromService -adfInstance $targetAdfInstance -type $oname.Type -name $oname.Name
+                    }
                     $canDelete = !($oname.IsNameExcluded($adf.PublishOptions))
                 }
                 if ($canDelete) {

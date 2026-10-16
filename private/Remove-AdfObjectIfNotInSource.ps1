@@ -15,11 +15,15 @@ function Remove-AdfObjectIfNotInSource {
         $simtype = ConvertTo-AdfType -AzType $adfTargetObj.Type
     }
     $src = Get-AdfObjectByName -adf $adfSource -name $name -type $simtype
-    if (!$src) 
+    if ($adfSource.IsObjectDeleted("$simtype.$name"))
+    {
+        Write-Verbose "Object [$simtype].[$name] has already been deleted (it referenced another deleted object)."
+    }
+    elseif (!$src)
     {
         Write-Verbose "Object [$simtype].[$name] hasn't been found in the source - to be deleted."
+        # Remove-AdfObject adds the object to DeletedObjectNames only when it has really been deleted
         Remove-AdfObject -adfSource $adfSource -obj $adfTargetObj -adfInstance $adfInstance
-        $adfSource.DeletedObjectNames.Add("$simtype.$name")
     }
     else {
         Write-Verbose "Object [$simtype].[$name] is in the source - won't be delete."

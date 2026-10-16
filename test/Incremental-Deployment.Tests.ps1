@@ -127,10 +127,10 @@ InModuleScope azure.datafactory.tools {
                 return $script:TargetAdf
             }
             Mock Set-AzDataFactoryV2 {
-                param ($ResourceGroupName, $DataFactoryName, $Location)
+                param ($ResourceGroupName, $Name, $Location)
                 if ($null -eq $script:TargetAdf) {
                     $script:TargetAdf = CreateTargetAdf
-                    $script:TargetAdf.Name = $DataFactoryName
+                    $script:TargetAdf.Name = $Name
                     $script:TargetAdf.ResourceGroupName = $ResourceGroupName
                     $script:TargetAdf.Location = $Location
                 }

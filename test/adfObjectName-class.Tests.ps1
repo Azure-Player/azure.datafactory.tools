@@ -74,7 +74,7 @@ InModuleScope azure.datafactory.tools {
         @{ pattern = '*.*@fold'; expected = $false},
         @{ pattern = 'tri*.*@*'; expected = $false},
         @{ pattern = '*.*'; expected = $true},
-        @{ pattern = 'pipeline.PL_Wait_Dynamic'; expected = $false},
+        @{ pattern = 'pipeline.PL_Wait_Dynamic'; expected = $true},     # rule without folder matches any folder (#513)
         @{ pattern = 'pipeline.PL_Wait_Dynamic@*'; expected = $true},
         @{ pattern = 'pipeline.PL_Wait_Dynamic@ExternalError'; expected = $true},
         @{ pattern = 'pipeline.PL_*@ExternalError'; expected = $true},

@@ -9,21 +9,28 @@ function Remove-AdfObject {
     Write-Debug "BEGIN: Remove-AdfObject()"
 
     $name = $obj.Name
+    $ResourceGroupName = $adfInstance.ResourceGroupName
+    $DataFactoryName = $adfInstance.Name
     $err = $null
     $ErrorMessage = $null
     $simtype = Get-SimplifiedType -Type $obj.GetType().Name
     if ($simtype -eq 'AdfObject') {
-        $simtype = ConvertTo-AdfType -AzType $adfTargetObj.Type
+        $simtype = ConvertTo-AdfType -AzType $obj.Type
     }
 
-    [AdfObjectName] $oname = [AdfObjectName]::new("$simType.$name")
+    # The folder is only needed (and read from the service) when any filter rule uses '@folder'
+    $folder = ''
+    if ($adfSource.PublishOptions.HasFolderRules()) {
+        $folder = Get-AdfObjectFolderFromService -adfInstance $adfInstance -type $simtype -name $name
+    }
+    [AdfObjectName] $oname = [AdfObjectName]::new($name, $simtype, $folder)
     $IsExcluded = $oname.IsNameExcluded($adfSource.PublishOptions)
     if (-not $IsExcluded) {
         Write-Host "Removing object: [$simtype].[$name]"
         $action = $simtype
     } else {
         if ($adfSource.PublishOptions.DoNotDeleteExcludedObjects) {
-            Write-Verbose "Object [$simtype].[$name] won't be deleted as publish option 'DoNotDeleteExcludedObjects' = true."
+            Write-Host "Skipping excluded object: [$simtype].[$name] as publish option 'DoNotDeleteExcludedObjects' = true."
             $action = "DoNothing"
         } else {
             Write-Host "Removing excluded object: [$simtype].[$name] as publish option 'DoNotDeleteExcludedObjects' = false."
@@ -99,6 +106,7 @@ function Remove-AdfObject {
             default
             {
                 Write-Error "ADFT0018: Type $($obj.GetType().Name) is not supported."
+                return
             }
         }
     }
@@ -135,6 +143,8 @@ function Remove-AdfObject {
     } elseif ($null -ne $ErrorMessage) {
         #Rethrow exception
         throw $ErrorMessage
+    } elseif ($action -ne 'DoNothing') {
+        $adfSource.DeletedObjectNames.Add("$simtype.$name") | Out-Null
     }
 
     Write-Debug "END: Remove-AdfObject()"

@@ -27,4 +27,12 @@ class AdfPublishOption {
     [TriggerStopTypes] $TriggerStopMethod = [TriggerStopTypes]::AllEnabled
     [TriggerStartTypes] $TriggerStartMethod = [TriggerStartTypes]::BasedOnSourceCode
     [Int32] $MaxRetries = 3
+
+    [Boolean] HasFolderRules()
+    {
+        foreach ($rule in @($this.Includes.Keys) + @($this.Excludes.Keys)) {
+            if ($rule -like '*@*') { return $true }
+        }
+        return $false
+    }
 }

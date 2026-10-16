@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 * A failed object deployment now stops `Publish-AdfV2FromJson` whatever `$ErrorActionPreference` is, instead of being skipped and the object marked as deployed #295
 * Starting and stopping triggers now catches Az errors whatever `$ErrorActionPreference` is, so retries and warnings work; a failed start is a warning and the deployment carries on #508
+* `DeleteNotInSource`: objects skipped as excluded are no longer counted as deleted, and each skipped object is logged #512
+* `DeleteNotInSource` and `-DryRun`: `@folder` filter rules now match objects that exist only in ADF (folder read via REST API), and a rule without `@folder` matches any folder #513
 
 ## [1.19.0] - 2026-10-16
 ### Added
