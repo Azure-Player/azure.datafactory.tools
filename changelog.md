@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 * A failed object deployment now stops `Publish-AdfV2FromJson` whatever `$ErrorActionPreference` is, instead of being skipped and the object marked as deployed #295
 * Starting and stopping triggers now catches Az errors whatever `$ErrorActionPreference` is, so retries and warnings work; a failed start is a warning and the deployment carries on #508
+* `Export-AdfToArmTemplate` calls `npm.cmd` on Windows (avoids npm.ps1 failing on Windows PowerShell 5.1) and stops when an npm command fails #462
 
 ## [1.19.0] - 2026-10-16
 ### Added
