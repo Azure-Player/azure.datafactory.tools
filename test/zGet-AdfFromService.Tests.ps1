@@ -82,7 +82,7 @@ InModuleScope azure.datafactory.tools {
 
             It 'Should call Invoke-AzRestMethod with the correct datasets URL' {
                 Get-AdfFromService -FactoryName 'adf-test' -ResourceGroupName 'rg-test'
-                Assert-MockCalled Invoke-AzRestMethod -Times 1 -Exactly -ParameterFilter {
+                Should -Invoke Invoke-AzRestMethod -Times 1 -Exactly -ParameterFilter {
                     $Uri -like '*/datasets?api-version=2018-06-01'
                 }
             }
@@ -213,7 +213,7 @@ InModuleScope azure.datafactory.tools {
 
             It 'Should call Invoke-AzRestMethod exactly once' {
                 Get-AdfObjectsFromServiceRestAPI -adfi $script:fakeAdfi -typePlural 'datasets' -simpleType 'Dataset'
-                Assert-MockCalled Invoke-AzRestMethod -Times 1 -Exactly
+                Should -Invoke Invoke-AzRestMethod -Times 1 -Exactly
             }
         }
 
@@ -246,7 +246,7 @@ InModuleScope azure.datafactory.tools {
 
             It 'Should call Invoke-AzRestMethod exactly once (no extra pages)' {
                 Get-AdfObjectsFromServiceRestAPI -adfi $script:fakeAdfi -typePlural 'datasets' -simpleType 'Dataset'
-                Assert-MockCalled Invoke-AzRestMethod -Times 1 -Exactly
+                Should -Invoke Invoke-AzRestMethod -Times 1 -Exactly
             }
         }
 
@@ -280,12 +280,12 @@ InModuleScope azure.datafactory.tools {
 
             It 'Should call Invoke-AzRestMethod twice (once per page)' {
                 Get-AdfObjectsFromServiceRestAPI -adfi $script:fakeAdfi -typePlural 'datasets' -simpleType 'Dataset'
-                Assert-MockCalled Invoke-AzRestMethod -Times 2 -Exactly
+                Should -Invoke Invoke-AzRestMethod -Times 2 -Exactly
             }
 
             It 'Should use the nextLink URL for the second request' {
                 Get-AdfObjectsFromServiceRestAPI -adfi $script:fakeAdfi -typePlural 'datasets' -simpleType 'Dataset'
-                Assert-MockCalled Invoke-AzRestMethod -Times 1 -Exactly -ParameterFilter {
+                Should -Invoke Invoke-AzRestMethod -Times 1 -Exactly -ParameterFilter {
                     $Uri -eq $script:page2Url
                 }
             }
