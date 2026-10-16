@@ -1,5 +1,6 @@
 function Start-Trigger {
     [CmdletBinding()]
+    [OutputType([bool])]
     param (
         [parameter(Mandatory = $true)] [string] $ResourceGroupName,
         [parameter(Mandatory = $true)] [string] $DataFactoryName,
@@ -10,20 +11,29 @@ function Start-Trigger {
     Write-Host "- Enabling trigger: $Name"
     $attempts = 5;
     $i = 0
+    $started = $false
     while ($i -lt $attempts)
     {
         $i++
         try {
+            # Az cmdlets write non-terminating errors, so -ErrorAction Stop is required to catch them
             Start-AzDataFactoryV2Trigger `
                 -ResourceGroupName $ResourceGroupName `
                 -DataFactoryName $DataFactoryName `
                 -Name $Name `
-                -Force | Out-Null
+                -Force -ErrorAction Stop | Out-Null
             # If successful, break out of the loop
+            $started = $true
             break
         }
         catch {
             $errMsg = $_.Exception.Message
+            if ($errMsg -like "*Missing or invalid pipeline references*") {
+                # Permanent error - retry won't help (see Test-AdfCode)
+                Write-Host "Failed starting trigger."
+                Write-Warning -Message $errMsg
+                break
+            }
             if ($i -lt $attempts)
             {
                 if ($errMsg -like "*cannot be updated during provisioning*") {
@@ -56,4 +66,5 @@ function Start-Trigger {
     }
 
     Write-Debug "END: Start-Trigger()"
+    return $started
 }

@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 ### Added
 * `Test-AdfCode` warns about enabled triggers without pipeline references, which ADF refuses to start #507
+### Fixed
+* Starting and stopping triggers now catches Az errors whatever `$ErrorActionPreference` is, so retries and warnings work; a failed start is a warning and the deployment carries on #508
 
 ## [1.19.0] - 2026-10-16
 ### Added

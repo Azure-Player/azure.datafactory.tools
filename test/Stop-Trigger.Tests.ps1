@@ -67,6 +67,36 @@ InModuleScope azure.datafactory.tools {
         }
     }
 
+    # Az cmdlets report failures as non-terminating errors (they do not throw) #508
+    Describe 'Stop-Trigger when Az cmdlet writes a non-terminating error #508' -Tag 'Unit' {
+
+        BeforeEach {
+            $ErrorActionPreference = 'Continue'     # default preference, as in most pipelines
+            Mock Start-Sleep {}
+            Mock Write-Warning {}
+        }
+
+        It 'Should retry a transient error, then warn and return false' {
+            Mock Stop-AzDataFactoryV2Trigger { Write-Error 'Conflict: There are concurrent operations on the trigger' }
+            Stop-Trigger -ResourceGroupName 'rg' -DataFactoryName 'adf' -Name 'tr1' | Should -BeFalse
+            Should -Invoke Stop-AzDataFactoryV2Trigger -Times 5 -Exactly
+            Should -Invoke Write-Warning -Times 1 -Exactly -ParameterFilter { $Message -like '*concurrent operations*' }
+        }
+
+        It 'Should succeed when a retry works' {
+            $script:stopAttempt = 0
+            Mock Stop-AzDataFactoryV2Trigger { $script:stopAttempt++; if ($script:stopAttempt -eq 1) { Write-Error 'Conflict: concurrent operations' } }
+            Stop-Trigger -ResourceGroupName 'rg' -DataFactoryName 'adf' -Name 'tr1' | Should -BeTrue
+            Should -Invoke Stop-AzDataFactoryV2Trigger -Times 2 -Exactly
+        }
+
+        It 'Should not write the error to the error stream' {
+            Mock Stop-AzDataFactoryV2Trigger { Write-Error 'Conflict: concurrent operations' }
+            $out = Stop-Trigger -ResourceGroupName 'rg' -DataFactoryName 'adf' -Name 'tr1' 2>&1
+            @($out | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }) | Should -BeNullOrEmpty
+        }
+    }
+
     Describe 'Stop-Triggers when a trigger fails to stop' -Tag 'Unit' {
 
         BeforeAll {

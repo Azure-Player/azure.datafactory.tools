@@ -46,6 +46,7 @@ InModuleScope azure.datafactory.tools {
             $o = $script:TargetAdf.GetObjectByFullName("*triggers.$Name")
             $o.RuntimeState = 'Started'
             $o.Body.properties.RuntimeState = $o.RuntimeState
+            return $true
         }
         Mock Stop-TargetTrigger {
             param ($Name, $ResourceGroupName, $DataFactoryName)

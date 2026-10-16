@@ -50,12 +50,21 @@ function Start-Triggers {
     if ($toBeStarted.Count -gt 0)
     {
         Write-Host "Starting triggers:"
-        $toBeStarted | ForEach-Object { 
-            Start-Trigger `
+        [System.Collections.ArrayList] $failedToStart = @{}
+        $toBeStarted | ForEach-Object {
+            $TrName = $_
+            $isStarted = Start-Trigger `
             -ResourceGroupName $adf.ResourceGroupName `
             -DataFactoryName $adf.Name `
-            -Name $_ `
-            | Out-Null
+            -Name $TrName
+
+            if (-not $isStarted) {
+                $failedToStart.Add($TrName) | Out-Null
+            }
+        }
+        # Deployment carries on: a failed start is reported as a warning only
+        if ($failedToStart.Count -gt 0) {
+            Write-Warning "The number of triggers that failed to start: $($failedToStart.Count) ($($failedToStart -join ', '))"
         }
         Write-Host "Complete starting triggers."
     }
