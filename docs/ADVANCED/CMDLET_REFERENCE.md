@@ -152,6 +152,7 @@ Configuration object for deployment behavior.
 | IncrementalDeploymentStorageUri | String | (empty) | Storage path for deployment state |
 | TriggerStopMethod | Enum | AllEnabled | Which triggers to stop: AllEnabled, DeployableOnly |
 | TriggerStartMethod | Enum | BasedOnSourceCode | How to start: BasedOnSourceCode, KeepPreviousState |
+| MaxRetries | Int | 3 | Retries of object deployment after a temporary API error (0 = no retry) |
 
 ---
 
