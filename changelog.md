@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [1.19.0] - 2026-10-16
 ### Added
 * Stopping a trigger now retries up to 5 times (and waits while the trigger is provisioning), like starting a trigger #404
+### Fixed
+* `New-AdfPublishOption` now throws (ADFT0026) when `FilterFilePath` does not exist, instead of a non-terminating error #501
 
 ## [1.18.0] - 2026-07-01
 ### Added
