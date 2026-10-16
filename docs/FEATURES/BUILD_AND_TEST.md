@@ -63,7 +63,16 @@ ERROR: Pipeline 'PL_CopyData' references dataset 'DS_Missing' which does not exi
 ERROR: File 'pipeline\PL_Copy.json' contains object named 'PL_CopyData' (name mismatch)
 ```
 
-### 4. Additional Checks
+### 4. Trigger Validation
+- Warns about enabled triggers (`runtimeState: Started`) without pipeline references
+- Azure Data Factory refuses to start such triggers, so the deployment would only report the API error `Missing or invalid pipeline references`
+
+**Warning Example:**
+```
+WARNING: Trigger 'TR_Daily' is enabled (runtimeState: Started) but has no pipeline references. Azure Data Factory will fail to start it.
+```
+
+### 5. Additional Checks
 - More validations coming soon...
 
 ## Using Test-AdfCode in CI/CD

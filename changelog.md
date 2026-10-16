@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+* `Test-AdfCode` warns about enabled triggers without pipeline references, which ADF refuses to start #507
+
 ## [1.19.0] - 2026-10-16
 ### Added
 * Stopping a trigger now retries up to 5 times (and waits while the trigger is provisioning), like starting a trigger #404
