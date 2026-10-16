@@ -203,12 +203,8 @@ function Restore-File {
 }
 
 function Get-RootPath {
-    $rootPath = Switch ($Host.name) {
-        'Visual Studio Code Host' { Split-Path $psEditor.GetEditorContext().CurrentFile.Path }
-        'Windows PowerShell ISE Host' { Split-Path -Path $psISE.CurrentFile.FullPath }
-        'ConsoleHost' { $PSScriptRoot }
-    }
-    #$rootPath = Split-Path $rootPath -Parent
+    # 'test' folder (parent of TestHelper), independent of the host/active editor
+    $rootPath = Split-Path $PSScriptRoot -Parent
     return $rootPath;
 }
 

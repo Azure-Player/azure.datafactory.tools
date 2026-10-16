@@ -19,11 +19,7 @@ Write-Host " ========= ENVIRONMENT =========="
 Write-Host "Host Name: $($Host.name)"
 Write-Host "PowerShell Version: $($PSVersionTable.PSVersion)"
 
-$rootPath = Switch ($Host.name) {
-	'Visual Studio Code Host' { split-path $psEditor.GetEditorContext().CurrentFile.Path }
-	'Windows PowerShell ISE Host' { Split-Path -Path $psISE.CurrentFile.FullPath }
-	'ConsoleHost' { $PSScriptRoot }
-}
+$rootPath = $PSScriptRoot
 $folder = Split-Path $rootPath -Parent
 # $MajorRelease = $false
 # $TestFilenameFilter = "*"
@@ -57,6 +53,8 @@ if ($InstallModules) {
 } else {
     Write-Host "Installation skipped."
 }
+# Unload legacy Pester (e.g. built-in 3.4.0) so its Should doesn't shadow the newer one
+Get-Module Pester | Where-Object Version -lt '5.3.3' | Remove-Module -Force
 Import-Module 'Pester' -MinimumVersion 5.3.3
 Import-Module 'PSScriptAnalyzer'
 Import-Module 'Az.Storage'
