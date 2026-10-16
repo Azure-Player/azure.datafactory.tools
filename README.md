@@ -102,6 +102,7 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
 - [Publish from Azure DevOps](#publish-from-azure-devops)
   - [Using Publish Azure Data factory (task)](#using-publish-azure-data-factory-task)
   - [Using Azure PowerShell (task)](#using-azure-powershell-task)
+- [Running tests locally](#running-tests-locally)
 - [Release Notes](#release-notes)
 - [Misc](#misc)
   - [New feature requests](#new-feature-requests)
@@ -947,6 +948,8 @@ Cmdlet: `Export-AdfToArmTemplate`
 This cmdlet uses [**ADFUtilities** NPM package](https://www.npmjs.com/package/@microsoft/azure-data-factory-utilities) provided by Microsoft. 
 It does exactly the same actions as you can do with ADF UI by clicking **Validate all** and then **Export ARM Template**.
 
+> **Prerequisite:** [Node.js](https://nodejs.org/) (LTS) with `npm` must be installed and available in `PATH`.
+
 ### Parameters:  
 - `RootFolder` - Source folder where all ADF objects are kept. The folder should contain subfolders like pipeline, linkedservice, etc.
 - `SubscriptionId` - Optional.
@@ -1022,6 +1025,28 @@ steps:
     FailOnStandardError: true
     azurePowerShellVersion: LatestVersion```
 ```
+
+# Running tests locally
+
+### Prerequisites
+- [PowerShell 7+](https://learn.microsoft.com/powershell/scripting/install/installing-powershell)
+- PowerShell modules: `Pester` (5.3.3 or later), `PSScriptAnalyzer`, `Az.DataFactory`, `Az.Resources`, `Az.Storage`
+- [Node.js](https://nodejs.org/) (LTS) with `npm` in `PATH` - required by `Export-AdfToArmTemplate` tests
+
+```powershell
+Install-Module Pester -MinimumVersion 5.3.3 -Scope CurrentUser -Force -SkipPublisherCheck
+Install-Module PSScriptAnalyzer, Az.DataFactory, Az.Resources, Az.Storage -Scope CurrentUser
+winget install OpenJS.NodeJS.LTS
+```
+
+Some tests deploy to a real Azure Data Factory, so sign in with `Connect-AzAccount` to a subscription containing the test resource group.
+
+### Run
+From the repository root:
+```powershell
+& '.\test\!RunAllTests.ps1' -folder '.\' -TestFilenameFilter '*' -InstallModules:$false
+```
+Use `-TestFilenameFilter` to run selected files only (e.g. `'Start-Trigger'`), and `-MajorRelease` to include tests tagged `Integration`.
 
 # Release Notes
 

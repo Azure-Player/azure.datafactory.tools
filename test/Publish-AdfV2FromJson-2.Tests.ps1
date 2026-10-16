@@ -137,8 +137,8 @@ InModuleScope azure.datafactory.tools {
                 -ResourceGroupName "$ResourceGroupName" `
                 -DataFactoryName "$DataFactoryName" `
                 -Location "$Location" -Option $opt
-            Assert-MockCalled Stop-AzDataFactoryV2Trigger -Times 1
-            Assert-MockCalled Remove-AzDataFactoryV2Trigger -Times 1
+            Should -Invoke Stop-AzDataFactoryV2Trigger -Times 1
+            Should -Invoke Remove-AzDataFactoryV2Trigger -Times 1
         }
 
 

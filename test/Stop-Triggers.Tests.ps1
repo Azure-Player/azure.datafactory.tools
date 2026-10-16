@@ -41,7 +41,7 @@ InModuleScope azure.datafactory.tools {
         #         Stop-Triggers -adf $adf
         #         $allTriggers = Get-AzDataFactoryV2Trigger -DataFactoryName $DataFactoryName -ResourceGroupName $ResourceGroupName
         #         $activeTriggers = $allTriggers | Where-Object { $_.RuntimeState -ne "Stopped" } | ToArray
-        #         Assert-MockCalled Stop-AzDataFactoryV2Trigger -Times $activeTriggers.Count
+        #         Should -Invoke Stop-AzDataFactoryV2Trigger -Times $activeTriggers.Count
         #     }
         # }
         

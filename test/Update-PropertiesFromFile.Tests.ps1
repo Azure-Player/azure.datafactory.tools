@@ -193,7 +193,7 @@ InModuleScope azure.datafactory.tools {
             }
             It 'Should execute Update-PropertiesForObject 3 times' {
                 Update-PropertiesFromFile -adf $script:adf -stage "multiple"
-                Assert-MockCalled Update-PropertiesForObject -Times 3
+                Should -Invoke Update-PropertiesForObject -Times 3
             }
         }
 
@@ -215,7 +215,7 @@ InModuleScope azure.datafactory.tools {
             }
             It 'Should execute Update-PropertiesForObject 4 times' {
                 Update-PropertiesFromFile -adf $script:adf -stage "array"
-                Assert-MockCalled Update-PropertiesForObject -Times 4
+                Should -Invoke Update-PropertiesForObject -Times 4
             }
         }
         Context 'When called and CSV has array indexers in object name column' {
@@ -320,7 +320,7 @@ InModuleScope azure.datafactory.tools {
         #     }
         #     It 'Should execute Update-PropertiesForObject 3 times' {
         #         Update-PropertiesFromFile -adf $script:adf -stage "multiple"
-        #         Assert-MockCalled Update-PropertiesForObject -Times 3
+        #         Should -Invoke Update-PropertiesForObject -Times 3
         #     }
         # }
 
