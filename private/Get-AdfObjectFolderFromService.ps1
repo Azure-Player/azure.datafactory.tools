@@ -24,7 +24,7 @@ function Get-AdfObjectFolderFromService {
     $r = Invoke-AdfWithRetry -Activity "Reading folder of [$type].[$name]" -ScriptBlock {
         $resp = Invoke-AzRestMethod -Method 'GET' -Uri $url -ErrorAction Stop
         if ($resp.StatusCode -ne 200) {
-            throw "ADFT0034: Unable to read folder of [$type].[$name] from ADF service. Status Code: $($resp.StatusCode)"
+            throw "ADFT0036: Unable to read folder of [$type].[$name] from ADF service. Status Code: $($resp.StatusCode)"
         }
         $resp
     }

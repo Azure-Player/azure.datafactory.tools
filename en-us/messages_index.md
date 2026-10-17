@@ -39,4 +39,6 @@ ADFT0030 | AzType '$AzType' is not supported.
 ADFT0031 | Empty value in config file. Path: [*path*]. Check previous warnings.
 ADFT0032 | The process is exiting the function. Do fix the issue and run again.
 ADFT0033 | Incremental Deployment Option DISABLED as Storage Uri is not provided.
-ADFT0034 | Unable to read folder of *[type].[name]* from ADF service. Status Code: *code*
+ADFT0034 | *[type].[name]* cannot be deleted since it is referenced by *name*, which is not selected for deletion.
+ADFT0035 | Unexpected response code: *code* from REST API when listing *types*.
+ADFT0036 | Unable to read folder of *[type].[name]* from ADF service. Status Code: *code*

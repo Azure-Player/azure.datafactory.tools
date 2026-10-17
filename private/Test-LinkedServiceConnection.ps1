@@ -82,84 +82,121 @@ function Get-LinkedServiceBodyAzRestMethod(
 
 
 function Test-LinkedServiceConnection(
-  [string] $LinkedServiceName, 
-  [string] $DataFactoryName, 
-  [string] $ResourceGroupName, 
-  [string] $BearerToken, 
+  [string] $LinkedServiceName,
+  [string] $DataFactoryName,
+  [string] $ResourceGroupName,
+  [string] $BearerToken,
   [string] $SubscriptionID,
   $Params
 )
 {
   Write-Debug "BEGIN: Test-LinkedServiceConnection()"
 
-  $body = Get-LinkedServiceBody -LinkedServiceName $LinkedServiceName -DataFactoryName $DataFactoryName -ResourceGroupName $ResourceGroupName -BearerToken $bearerToken -SubscriptionID $SubscriptionID
-
-  $AzureEndpoint = "$BaseApiUrl/subscriptions/$SubscriptionID/resourcegroups/$ResourceGroupName/providers/Microsoft.DataFactory/factories/$DataFactoryName/testConnectivity?api-version=2018-06-01"
-  Write-Debug "Test-LinkedServiceConnection:Request preparing to URL: $AzureEndpoint"
-
-  if ($Params) {
-    Write-Verbose "Found input parameters for this Linked Service, adding to the API request..."
-    $j = ConvertFrom-Json $body 
-    $j.linkedService.properties.parameters = $Params
-    $body = ConvertTo-Json -InputObject $j -Depth 50
-  }
-
-  Write-Verbose '============== Linked Service to being connection tested ============='
-  Write-Verbose $body
-  Write-Verbose '======================================================================'
-  
-  $request = @{
-      ContentType = 'application/json'
-      Headers = @{'accept'='application/json';'Authorization'=$BearerToken}
-      Body = $Body
-      Method = 'POST'
-      Uri = $AzureEndpoint
-  }
-
   try {
-    $response = Invoke-RestMethod @request
+    $body = Get-LinkedServiceBody -LinkedServiceName $LinkedServiceName -DataFactoryName $DataFactoryName -ResourceGroupName $ResourceGroupName -BearerToken $bearerToken -SubscriptionID $SubscriptionID
+
+    $AzureEndpoint = "$BaseApiUrl/subscriptions/$SubscriptionID/resourcegroups/$ResourceGroupName/providers/Microsoft.DataFactory/factories/$DataFactoryName/testConnectivity?api-version=2018-06-01"
+    Write-Debug "Test-LinkedServiceConnection:Request preparing to URL: $AzureEndpoint"
+
+    $body = Add-LinkedServiceTestParams -Body $body -Params $Params
+
+    Write-Verbose '============== Linked Service to being connection tested ============='
+    Write-Verbose $body
+    Write-Verbose '======================================================================'
+
+    $request = @{
+        ContentType = 'application/json'
+        Headers = @{'accept'='application/json';'Authorization'=$BearerToken}
+        Body = $Body
+        Method = 'POST'
+        Uri = $AzureEndpoint
+    }
+
+    $response = Invoke-RestMethod @request -ErrorAction Stop
   }
   catch {
-    Write-Error -Exception $_.Exception
+    # A failed call (e.g. linked service not found) is a failed test of this linked service, not an error stopping the other tests
+    $response = New-LinkedServiceTestFailure -Message $_.Exception.Message
   }
   Write-Debug "END: Test-LinkedServiceConnection()"
   return $response
 }
 
 function Test-LinkedServiceConnectionAzRestMethod(
-  [string] $LinkedServiceName, 
-  [string] $DataFactoryName, 
-  [string] $ResourceGroupName, 
+  [string] $LinkedServiceName,
+  [string] $DataFactoryName,
+  [string] $ResourceGroupName,
   [string] $SubscriptionID,
   $Params
 )
 {
   Write-Debug "BEGIN: Test-LinkedServiceConnectionAzRestMethod()"
 
-  $body = Get-LinkedServiceBodyAzRestMethod -LinkedServiceName $LinkedServiceName -DataFactoryName $DataFactoryName -ResourceGroupName $ResourceGroupName -SubscriptionID $SubscriptionID
-
-  $AzureEndpoint = "/subscriptions/$SubscriptionID/resourcegroups/$ResourceGroupName/providers/Microsoft.DataFactory/factories/$DataFactoryName/testConnectivity?api-version=2018-06-01"
-
-  if ($Params) {
-    Write-Verbose "Found input parameters for this Linked Service, adding to the API request..."
-    $j = ConvertFrom-Json $body 
-    $j.linkedService.properties.parameters = $Params
-    $body = ConvertTo-Json -InputObject $j -Depth 50
-  }
-
-  $request = @{
-      Path = $AzureEndpoint
-      Payload = $Body
-      Method = 'POST'
-  }
-
   try {
-    $response = Invoke-AzRestMethod @request
+    $body = Get-LinkedServiceBodyAzRestMethod -LinkedServiceName $LinkedServiceName -DataFactoryName $DataFactoryName -ResourceGroupName $ResourceGroupName -SubscriptionID $SubscriptionID
+    $ls = ($body | ConvertFrom-Json).linkedService
+    if ($null -ne $ls -and $ls.PSObject.Properties['error']) {
+      # Linked service could not be read (e.g. not found): return the API error
+      Write-Debug "END: Test-LinkedServiceConnectionAzRestMethod()"
+      return $ls
+    }
+
+    $AzureEndpoint = "/subscriptions/$SubscriptionID/resourcegroups/$ResourceGroupName/providers/Microsoft.DataFactory/factories/$DataFactoryName/testConnectivity?api-version=2018-06-01"
+
+    $body = Add-LinkedServiceTestParams -Body $body -Params $Params
+
+    $request = @{
+        Path = $AzureEndpoint
+        Payload = $Body
+        Method = 'POST'
+    }
+
+    # Invoke-AzRestMethod does not throw on HTTP errors: the error response (e.g. {"error":{...}}) is returned as content
+    $response = Invoke-AzRestMethod @request -ErrorAction Stop
+    $result = $response.Content | ConvertFrom-Json
   }
   catch {
-    # Note: Invoke-AzRestMethod fails when payload indicates failure and error will be printed. Not fully feature parity with LinkedServiceConnection
-    Write-Error -Exception $_.Exception
+    # A failed call is a failed test of this linked service, not an error stopping the other tests
+    $result = New-LinkedServiceTestFailure -Message $_.Exception.Message
   }
   Write-Debug "END: Test-LinkedServiceConnectionAzRestMethod()"
-  return ($response.Content | ConvertFrom-Json)
+  return $result
+}
+
+function Add-LinkedServiceTestParams(
+  [string] $Body,
+  $Params
+)
+{
+  if (-not $Params) { return $Body }
+  Write-Verbose "Found input parameters for this Linked Service, adding to the API request..."
+  $j = ConvertFrom-Json $Body
+  # Linked service may have no 'parameters' property yet (strict mode)
+  $j.linkedService.properties | Add-Member -NotePropertyName 'parameters' -NotePropertyValue $Params -Force
+  return (ConvertTo-Json -InputObject $j -Depth 50)
+}
+
+
+function New-LinkedServiceTestFailure(
+  [string] $Message
+)
+{
+  return [PSCustomObject]@{ succeeded = $false; error = [PSCustomObject]@{ code = ''; message = $Message } }
+}
+
+function Get-LinkedServiceTestError(
+  $Response
+)
+{
+  # Failed connection test: {"succeeded":false,"errors":[{"code":..,"message":..}]}; API error: {"error":{"code":..,"message":..}}
+  if ($null -eq $Response) { return 'No response from the API.' }
+  $items = @()
+  if ($Response.PSObject.Properties['errors']) { $items = @($Response.errors) }
+  elseif ($Response.PSObject.Properties['error']) { $items = @($Response.error) }
+  $messages = @($items | Where-Object { $null -ne $_ } | ForEach-Object {
+    $code = if ($_.PSObject.Properties['code']) { "$($_.code)" } else { '' }
+    $message = if ($_.PSObject.Properties['message']) { "$($_.message)" } else { ($_ | ConvertTo-Json -Depth 5 -Compress) }
+    if ($code -ne '') { "$($code): $message" } else { $message }
+  })
+  return ($messages -join ' | ')
 }

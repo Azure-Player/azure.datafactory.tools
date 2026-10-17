@@ -8,11 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 * `Test-AdfCode` warns about enabled triggers without pipeline references, which ADF refuses to start #507
 * Deployment of an object is retried after a temporary API error (time-out, throttling, server error); new publish option `MaxRetries` (default 3, 0 = off) #295
+* New cmdlet `Remove-AdfObjects` deletes chosen objects from ADF service by name/folder pattern or by publish option #30
+* `Test-AdfLinkedService` accepts an array of linked service names, and its result has `Errors` with the API message of each failed test #382
 ### Fixed
+* `Test-AdfLinkedService` counts an error response, a missing linked service or a failed API call as a failed test instead of stopping, and trims names in a comma-separated list #382
+* Deleting objects not in source retries temporary API errors and stops on an unsupported object type whatever `$ErrorActionPreference` is #30
 * A failed object deployment now stops `Publish-AdfV2FromJson` whatever `$ErrorActionPreference` is, instead of being skipped and the object marked as deployed #295
 * Starting and stopping triggers now catches Az errors whatever `$ErrorActionPreference` is, so retries and warnings work; a failed start is a warning and the deployment carries on #508
 * `DeleteNotInSource`: objects skipped as excluded are no longer counted as deleted, and each skipped object is logged #512
 * `DeleteNotInSource` and `-DryRun`: `@folder` filter rules now match objects that exist only in ADF (folder read via REST API), and a rule without `@folder` matches any folder #513
+* `Export-AdfToArmTemplate` calls `npm.cmd` on Windows (avoids npm.ps1 failing on Windows PowerShell 5.1) and stops when an npm command fails #462
 
 ## [1.19.0] - 2026-10-16
 ### Added
