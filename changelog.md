@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [1.19.1] - 2026-10-18
 ### Fixed
 * The PowerShell Gallery package contains only the module files (`public`, `private`, `*.psd1`, `*.psm1`) instead of the whole repository #518
 
