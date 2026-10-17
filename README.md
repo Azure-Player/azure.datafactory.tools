@@ -869,13 +869,14 @@ $r = Test-AdfLinkedService @params -LinkedServiceName $LinkedServiceName
 $r | Format-Table
 
 # Example 2
-$LinkedServiceNames = 'AzureSqlDatabase1,LS_ADLS'   # Comma-separated list   
+$LinkedServiceNames = 'AzureSqlDatabase1', 'LS_ADLS'   # Array or comma-separated list: 'AzureSqlDatabase1, LS_ADLS'
 $r = Test-AdfLinkedService @params -LinkedServiceName $LinkedServiceNames
 $r.Report
+$r.Errors    # Error message of each failed test
 ```
 
 Parameters:  
-- `LinkedServiceName` - ADF Linked Service to be tested
+- `LinkedServiceName` - ADF Linked Service(s) to be tested: name(s) as an array or comma-separated list, or path to a json definition file
 - `DataFactoryName`   - ADF you want to test
 - `ResourceGroupName` - Azure Resource Group which ADF belongs to
 - `SubscriptionID`    - Subscription (Guid)
@@ -901,13 +902,14 @@ $r = Test-AdfLinkedService @params -LinkedServiceName $LinkedServiceName
 $r | Format-Table
 
 # Example 2
-$LinkedServiceNames = 'AzureSqlDatabase1,LS_ADLS'   # Comma-separated list   
+$LinkedServiceNames = 'AzureSqlDatabase1', 'LS_ADLS'   # Array or comma-separated list: 'AzureSqlDatabase1, LS_ADLS'
 $r = Test-AdfLinkedService @params -LinkedServiceName $LinkedServiceNames
 $r.Report
+$r.Errors    # Error message of each failed test
 ```
 
 Parameters:  
-- `LinkedServiceName`   - ADF Linked Service to be tested
+- `LinkedServiceName`   - ADF Linked Service(s) to be tested: name(s) as an array or comma-separated list, or path to a json definition file
 - `DataFactoryName`     - ADF you want to test
 - `ResourceGroupName`   - Azure Resource Group which ADF belongs to
 - `SubscriptionID`      - Subscription (Guid)
