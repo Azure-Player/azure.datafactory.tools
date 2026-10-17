@@ -90,6 +90,7 @@ The main advantage of the module is the ability to publish all the Azure Data Fa
     - [DoNotStopStartExcludedTriggers](#donotstopstartexcludedtriggers)
     - [Excluded (collection)](#excluded-collection)
     - [DoNotDeleteExcludedObjects](#donotdeleteexcludedobjects)
+- [Delete selected objects from ADF](#delete-selected-objects-from-adf)
 - [Build/Test Azure Data Factory code](#buildtest-azure-data-factory-code)
 - [Test connection of Linked Service (preview)](#test-connection-of-linked-service-preview)
   - [Test connection with Service Principal (SPN)](#test-connection-with-service-principal-spn)
@@ -706,6 +707,8 @@ Furthermore, you can better control which objects you want to omit from removing
 
 > The step might be skipped when `DeleteNotInSource = false` in *Publish Options*
 
+> Objects that are still in the source (also the excluded ones) are never deleted by this step. To delete chosen objects explicitly, use [Remove-AdfObjects](#delete-selected-objects-from-adf).
+
 ## Step: Restarting triggers
 
 💬 In log you'll see line: `STEP: Starting triggers...`
@@ -795,6 +798,29 @@ This situation could cause error when trigger has not been deleted prior.
 Otherwise, nothing will happen.  
 This option gives you a flexibility of deleting objects in the target, but still not touching objects from 'other' group.
 
+
+# Delete selected objects from ADF
+
+`Remove-AdfObjects` deletes chosen objects from ADF service, regardless of what is in the source code.  
+Select objects with name patterns in the same format as `Includes`/`Excludes` (`type.name[@folder]`, see [Pattern (WildCard)](#pattern-wildcard)), or pass a *Publish Option* to delete the objects which a deployment with this option would deploy ("reverse deployment").  
+
+```powershell
+# Delete selected pipelines and all datasets
+Remove-AdfObjects -ResourceGroupName 'rg-devops-factory' -DataFactoryName 'SQLPlayerDemo' -Pattern 'pipeline.PL_Old*', 'dataset.*'
+
+# Delete all pipelines from folder 'Archive' and its subfolders - show only what would be deleted
+Remove-AdfObjects -ResourceGroupName 'rg-devops-factory' -DataFactoryName 'SQLPlayerDemo' -Pattern 'pipeline.*@Archive*' -WhatIf
+
+# Reverse deployment: delete objects selected by rules file
+$opt = New-AdfPublishOption -FilePath ".\deployment\rules.csv"
+Remove-AdfObjects -ResourceGroupName 'rg-devops-factory' -DataFactoryName 'SQLPlayerDemo' -Option $opt
+```
+
+* Objects are deleted in order: triggers (started ones are stopped first), pipelines, data flows, datasets, linked services, credentials, integration runtimes.
+* When a selected object is referenced by another object, the referencing object is deleted first only if it is selected too. Otherwise the cmdlet stops with an error and nothing else is deleted.
+* Only pipelines, datasets and data flows have folders.
+* When the *Publish Option* has no `Includes`, all objects except those in `Excludes` are deleted. Use `-WhatIf` to check first.
+* Any failed deletion stops the cmdlet. It returns names (`type.name`) of deleted objects.
 
 # Build/Test Azure Data Factory code
 

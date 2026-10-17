@@ -185,6 +185,9 @@ InModuleScope azure.datafactory.tools {
             
             Mock Get-AdfFromService {
                 param ($FactoryName, $ResourceGroupName)
+                # Like the real function: Remove-AdfObject takes the factory from the instance
+                $script:TargetAdf.Name = $FactoryName
+                $script:TargetAdf.ResourceGroupName = $ResourceGroupName
                 return $script:TargetAdf
             }
         }
