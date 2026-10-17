@@ -348,10 +348,12 @@ InModuleScope azure.datafactory.tools {
 
     # ---------------------------------------------------------------------------
     Describe 'Get-AdfFromService' -Tag 'Integration' {
-        # Variables for use in integration tests
-        $t = Get-TargetEnv 'adf2'
-        $script:adfName = $t.DataFactoryName
-        $script:rg      = $t.ResourceGroupName
+        BeforeAll {
+            # Variables for use in integration tests
+            $t = Get-TargetEnv 'adf2'
+            $script:adfName = $t.DataFactoryName
+            $script:rg      = $t.ResourceGroupName
+        }
 
         It 'Should execute' {
             Get-AdfFromService -FactoryName $adfName -ResourceGroupName $rg

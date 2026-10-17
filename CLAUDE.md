@@ -33,9 +33,11 @@
 
 ## Tests (Pester)
 
+- Set up a local environment with `./tools/Install-DevPrerequisites.ps1`: it installs the Az modules, Pester 6+ and PSScriptAnalyzer for the current user (only what is missing) and checks Node.js/npm.
 - Tests require **Pester 6.0 or newer** (enforced by `test/!RunAllTests.ps1`, which installs it on CI runners).
 - Do **not** use `Assert-MockCalled` or `Assert-VerifiableMock` (removed in Pester 6). Use `Should -Invoke <command> -Times N -Exactly` instead; add `-Scope Describe` when the mocked command was called in `BeforeAll`.
 - Reason: calling `Assert-MockCalled` makes PowerShell autoload the old built-in Pester 3.4.0 (`C:\Program Files\WindowsPowerShell\Modules`), which takes over `Mock`/`Should` and breaks the whole test run.
+- Every test that needs access to Azure (a real factory, storage or any Az call that is not mocked) must be in a `Describe` tagged `Integration`; all other tests must run without `Connect-AzAccount`. Put Azure calls in `BeforeAll`/`It`, never in the file or `Describe` body: that code runs at discovery, before tag filters apply.
 - **Bug fixes start with a test** that reproduces the bug; run it and see it fail before writing the fix.
 - Mocks of Az cmdlets must `Write-Error` (non-terminating, like the real cmdlets), not `throw`. Mocks that `throw` hid the bugs in #508 and #295.
 - CI runs with `$ErrorActionPreference = 'Stop'`. Run new or changed tests under both `Stop` and `Continue`; set `$ErrorActionPreference = 'Continue'` in `BeforeEach` to test the default behaviour.

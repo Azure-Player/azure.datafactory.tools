@@ -221,13 +221,18 @@ function Get-TargetEnv {
         Location = "UK South"
         SrcFolder = "$rootPath\$AdfOrigName"
     }
-    $c = Get-AzContext
-    if ($null -eq $c) {
-        throw "No active Azure context found. Run Connect-AzAccount before executing integration tests."
-    }
-    $guid = $c.Subscription.Id.Substring(0,8)
-    $target.DataFactoryName = $AdfOrigName + "-$guid"
+    $target.DataFactoryName = $AdfOrigName + "-" + (Get-TestSubscriptionPrefix)
     return $target
+}
+
+function Get-TestSubscriptionPrefix {
+    # Test files call it at discovery, also for unit tests: without Azure context return a dummy value.
+    # Integration tests then fail on their first Azure call (run Connect-AzAccount first).
+    $c = Get-AzContext
+    if ($null -eq $c -or $null -eq $c.Subscription) {
+        return '00000000'
+    }
+    return $c.Subscription.Id.Substring(0,8)
 }
 
 function IsPesterDebugMode {
@@ -253,4 +258,4 @@ Export-ModuleMember -Function `
     Get-AdfObjectFromFile, `
     Remove-ObjectPropertyFromFile, Edit-TextInFile, Edit-ObjectPropertyInFile, `
     Backup-File, Restore-File, `
-    Get-RootPath, Get-TargetEnv, IsPesterDebugMode, CreateTargetAdf
+    Get-RootPath, Get-TargetEnv, Get-TestSubscriptionPrefix, IsPesterDebugMode, CreateTargetAdf

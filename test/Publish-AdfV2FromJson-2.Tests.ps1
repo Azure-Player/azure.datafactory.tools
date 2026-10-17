@@ -16,7 +16,6 @@ InModuleScope azure.datafactory.tools {
     $script:DataFactoryOrigName = $t.DataFactoryOrigName
     $script:DataFactoryName = $t.DataFactoryName
     $script:Location = $t.Location
-    $script:adfi = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName"
     #$script:RootFolder = Join-Path $PSScriptRoot "BigFactorySample2"
 
     $script:opt = New-AdfPublishOption
@@ -35,12 +34,21 @@ InModuleScope azure.datafactory.tools {
         It 'Should exist' {
             { Get-Command -Name Get-AzDFV2Credential -ErrorAction Stop } | Should -Not -Throw
         }
+    }
+
+    Describe 'Get-AzDFV2Credential' -Tag 'Integration' {
+        BeforeAll {
+            $script:adfi = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName"
+        }
         It 'Should run successfully' {
             { Get-AzDFV2Credential -adfi $adfi | ToArray } | Should -Not -Throw
         }
-    } 
+    }
 
-    Describe 'Publish-AdfV2FromJson' {
+    Describe 'Publish-AdfV2FromJson' -Tag 'Integration' {
+        BeforeAll {
+            $script:adfi = Get-AzDataFactoryV2 -ResourceGroupName "$ResourceGroupName" -Name "$DataFactoryName"
+        }
         It 'BigFactorySample2 should deploy credential object successfully' {
             $o = New-AdfPublishOption
             $o.StopStartTriggers = $false
