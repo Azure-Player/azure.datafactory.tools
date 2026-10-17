@@ -11,12 +11,11 @@ InModuleScope azure.datafactory.tools {
     Import-Module -Name $testHelperPath -Force
 
     # Variables for use in tests
-    $azContext = Get-AzContext
     $script:params = @{
         DataFactoryName   = 'adf-example-uat'
         ResourceGroupName = 'rg-example-uat' 
         #SubscriptionID    = "{Your-subscriptionId-here}"
-        SubscriptionID = $azContext.Subscription.Id
+        SubscriptionID = "00000000-0000-0000-0000-000000000000"
     }
 
     $script:success = @{

@@ -31,13 +31,18 @@ function Remove-AdfObject {
     if ($null -eq $adfSource) {
         Write-Host "Removing object: [$simtype].[$name]"
     } else {
-        [AdfObjectName] $oname = [AdfObjectName]::new("$simType.$name")
+        # The folder is only needed (and read from the service) when any filter rule uses '@folder'
+        $folder = ''
+        if ($adfSource.PublishOptions.HasFolderRules()) {
+            $folder = Get-AdfObjectFolderFromService -adfInstance $adfInstance -type $simtype -name $name
+        }
+        [AdfObjectName] $oname = [AdfObjectName]::new($name, $simtype, $folder)
         $IsExcluded = $oname.IsNameExcluded($adfSource.PublishOptions)
         if (-not $IsExcluded) {
             Write-Host "Removing object: [$simtype].[$name]"
         } else {
             if ($adfSource.PublishOptions.DoNotDeleteExcludedObjects) {
-                Write-Verbose "Object [$simtype].[$name] won't be deleted as publish option 'DoNotDeleteExcludedObjects' = true."
+                Write-Host "Skipping excluded object: [$simtype].[$name] as publish option 'DoNotDeleteExcludedObjects' = true."
                 $action = "DoNothing"
             } else {
                 Write-Host "Removing excluded object: [$simtype].[$name] as publish option 'DoNotDeleteExcludedObjects' = false."
@@ -141,8 +146,9 @@ function Remove-AdfObject {
     } elseif ($null -ne $ErrorMessage) {
         #Rethrow exception
         throw $ErrorMessage
-    } elseif ($null -ne $Deleted -and $action -ne 'DoNothing') {
-        $Deleted.Add($obj) | Out-Null
+    } elseif ($action -ne 'DoNothing') {
+        if ($null -ne $Deleted) { $Deleted.Add($obj) | Out-Null }
+        if ($null -ne $adfSource) { $adfSource.DeletedObjectNames.Add("$simtype.$name") | Out-Null }
     }
 
     Write-Debug "END: Remove-AdfObject()"

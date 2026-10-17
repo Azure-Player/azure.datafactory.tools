@@ -18,21 +18,24 @@ InModuleScope azure.datafactory.tools {
     $script:ResourceGroupName = $t.ResourceGroupName
     $script:Stage = 'UAT'
     $script:RootFolder = Join-Path $PSScriptRoot $t.DataFactoryOrigName
-    $script:adf = Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder $script:RootFolder
-    $adf.ResourceGroupName = $t.ResourceGroupName
-    $adf.Region = $t.Location
-    $o = New-AdfPublishOption
-    $o.StopStartTriggers = $false
-    $adf.PublishOptions = $o
-    Publish-AdfV2FromJson -RootFolder $RootFolder -DataFactoryName $DataFactoryName -ResourceGroupName $ResourceGroupName -Option $o -Location $Location
-    $script:adfIns = Get-AdfFromService -FactoryName $DataFactoryName -ResourceGroupName $ResourceGroupName
 
-
-    Describe 'Remove-AdfObject' {
+    Describe 'Remove-AdfObject' -Tag 'Unit' {
         It 'Should exist' {
             { Get-Command -Name 'Remove-AdfObject' -ErrorAction Stop } | Should -Not -Throw
         }
+    }
 
+    Describe 'Remove-AdfObject' -Tag 'Integration' {
+        BeforeAll {
+            $script:adf = Import-AdfFromFolder -FactoryName $script:DataFactoryName -RootFolder $script:RootFolder
+            $adf.ResourceGroupName = $script:ResourceGroupName
+            $adf.Region = $script:Location
+            $o = New-AdfPublishOption
+            $o.StopStartTriggers = $false
+            $adf.PublishOptions = $o
+            Publish-AdfV2FromJson -RootFolder $RootFolder -DataFactoryName $DataFactoryName -ResourceGroupName $ResourceGroupName -Option $o -Location $Location
+            $script:adfIns = Get-AdfFromService -FactoryName $DataFactoryName -ResourceGroupName $ResourceGroupName
+        }
 
         Context 'When called for dep object but it is excluded' {
             It 'Should not delete any object' {

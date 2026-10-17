@@ -65,29 +65,36 @@ class AdfObjectName {
         return $null -ne $r
     }
 
+    # Same rule semantics as AdfObject.IsNameMatch: 'type.name[@folder]', folder is checked only when the rule has one
+    [Boolean] IsRuleMatch ([string] $rule)
+    {
+        $arr = $rule.Split('@')
+        $r = $this.FullName() -like $arr[0]
+        if ($arr.Count -gt 1) {
+            $r = $r -and ($this.Folder -like $arr[1])
+        }
+        return $r
+    }
+
     [Boolean] IsNameExcluded ([AdfPublishOption] $opt)
     {
-        $fullname = $this.FullNameWithFolder()
-
         # One can exclude objects by listing them explicitly in Excludes collection, ...
-        $excPatterns = $opt.Excludes.Keys
-        $r = $excPatterns | Where-Object { $fullname -like $_ }
-        if ($null -ne $r) 
-        { 
+        foreach ($rule in $opt.Excludes.Keys) {
             # Means: object is excluded if matches any item in (Excludes) collection
-            return $true    
+            if ($this.IsRuleMatch($rule)) { return $true }
         }
 
         # ... or by listing them implicitly in Includes collection:
-        $incPatterns = $opt.Includes.Keys
-        if ($incPatterns.Count -eq 0) 
-        { 
+        if ($opt.Includes.Keys.Count -eq 0)
+        {
             # If no items = all objects match => object is not excluded
-            return $false 
+            return $false
         }
-        $r = $incPatterns | Where-Object { $fullname -like $_ }
+        foreach ($rule in $opt.Includes.Keys) {
+            if ($this.IsRuleMatch($rule)) { return $false }
+        }
         # Means: object is excluded if not match any item in (Includes) collection
-        return ($null -eq $r)   
+        return $true
     }
 
 }

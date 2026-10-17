@@ -23,7 +23,7 @@ InModuleScope azure.datafactory.tools {
         }
     } 
 
-    Describe 'Publish-AdfV2FromJson' {
+    Describe 'Publish-AdfV2FromJson' -Tag 'Integration' {
         It 'adf2 Should skip referenced Synapse notebook in a pipeline' {
             $script:RootFolder = Join-Path $PSScriptRoot "adf2"
             $o = New-AdfPublishOption
