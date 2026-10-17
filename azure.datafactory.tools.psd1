@@ -12,7 +12,7 @@
     RootModule = 'azure.datafactory.tools.psm1'
     
     # Version number of this module.
-    ModuleVersion = '1.19.0'
+    ModuleVersion = '1.19.1'
     
     # Supported PSEditions
     # CompatiblePSEditions = @()
