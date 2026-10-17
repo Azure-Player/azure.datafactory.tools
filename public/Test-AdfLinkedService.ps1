@@ -3,7 +3,7 @@ function Test-AdfLinkedService {
     param (
         [Parameter(Mandatory = $true, ParameterSetName = 'AzRestMethod')]
         [Parameter(Mandatory = $true, ParameterSetName = 'ClientDetails')]
-        [String] $LinkedServiceName,
+        [String[]] $LinkedServiceName,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'AzRestMethod')]
         [Parameter(Mandatory = $true, ParameterSetName = 'ClientDetails')]
@@ -31,36 +31,38 @@ function Test-AdfLinkedService {
     if ($PSCmdlet.ParameterSetName -eq "ClientDetails") {
         $bearerToken = Get-Bearer -TenantID $TenantID -ClientID $ClientID -ClientSecret $ClientSecret
     }
-    $defFile = $false
-    if ($LinkedServiceName.EndsWith('.json'))
-    {
-        Write-Host "Definition of Linked Services in json file: $LinkedServiceName"
-        $definitionFile = Get-Content -Path $LinkedServiceName -Encoding utf8 -Raw
-        $j = $definitionFile | ConvertFrom-Json
-        $list = $j.linkedServices
-        Write-Host "Found $($list.Count) name(s) in definition file."
-        $defFile = $true
-    }
-    else {
-        $list = $LinkedServiceName.Split(',')
-        Write-Host "Found $($list.Count) name(s) in comma-separated list."
-    }
+    # Each item is a json definition file or a (comma-separated list of) linked service name(s)
+    $list = @(foreach ($item in $LinkedServiceName) {
+        if ($item.EndsWith('.json'))
+        {
+            Write-Host "Definition of Linked Services in json file: $item"
+            $definitionFile = Get-Content -Path $item -Encoding utf8 -Raw
+            $j = $definitionFile | ConvertFrom-Json
+            $defs = @($j.linkedServices)
+            Write-Host "Found $($defs.Count) name(s) in definition file."
+            foreach ($d in $defs) {
+                $params = if ($d.PSObject.Properties['parameters']) { $d.parameters } else { $null }
+                [PSCustomObject]@{ Name = ([String]$d.name).Trim(); Params = $params }
+            }
+        }
+        else {
+            $names = @($item.Split(',') | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' })
+            Write-Host "Found $($names.Count) name(s) in comma-separated list."
+            foreach ($n in $names) {
+                [PSCustomObject]@{ Name = $n; Params = $null }
+            }
+        }
+    })
 
     $report = @{}
+    $errors = @{}
     $all = 0
     $ok = 0
-    $list | ForEach-Object { 
+    $list | ForEach-Object {
         $all += 1
-        if ($defFile) { 
-            $ls = $_.name 
-            $params = $_.parameters
-        } 
-        else 
-        { 
-            $ls = $_ 
-            $params = $null
-        }
-        Write-Host "Testing ADF Linked Service connection: [$ls] ..." 
+        $ls = $_.Name
+        $params = $_.Params
+        Write-Host "Testing ADF Linked Service connection: [$ls] ..."
         if ($PSCmdlet.ParameterSetName -eq "ClientDetails") {
             $r = Test-LinkedServiceConnection -LinkedServiceName $ls `
                 -DataFactoryName $DataFactoryName `
@@ -76,24 +78,30 @@ function Test-AdfLinkedService {
                 -Params $params
         }
         $id = [String]::Format("{0:000}) {1}", $all, $ls)
-        if ($null -ne $r -and $r.succeeded) {
+        # An error response (e.g. linked service not found) has no 'succeeded' property
+        $succeeded = $false
+        if ($r -is [System.Collections.IDictionary]) { $succeeded = ($r['succeeded'] -eq $true) }
+        elseif ($null -ne $r -and $r.PSObject.Properties['succeeded']) { $succeeded = ($r.succeeded -eq $true) }
+        if ($succeeded) {
             Write-Host "$all) [$ls] : Connection successful."
             $report.Add($id, $true)
             $ok += 1
         } else {
-            Write-Host "$all) [$ls] : Connection failed."
+            $msg = Get-LinkedServiceTestError -Response $r
+            Write-Host "$all) [$ls] : Connection failed. $msg"
             $report.Add($id, $false)
-            Write-Verbose ($r | ConvertTo-Json)
+            $errors.Add($id, $msg)
+            Write-Verbose ($r | ConvertTo-Json -Depth 10)
         }
     }
-    
+
     Write-Host "Test connection result:"
     Write-Host "Passed: $ok"
     Write-Host "Failed: $($all-$ok)"
     Write-Host "Total : $all"
 
     Write-Debug "END: Test-AdfLinkedService()"
-    $result = [ordered]@{Passed = $ok; Failed = ($all-$ok); Total = $all; Report = $report}
+    $result = [ordered]@{Passed = $ok; Failed = ($all-$ok); Total = $all; Report = $report; Errors = $errors}
     return $result
 }
 
